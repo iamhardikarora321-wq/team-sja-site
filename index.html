@@ -880,7 +880,7 @@
   <section id="features-page">
     <!-- Universal Discovery Console -->
     <div class="search-console">
-      <button class="btn btn-outline" onclick="returnToGateway()">
+      <button id="gateway-btn" class="btn btn-outline gateway-btn">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         GATEWAY
       </button>
@@ -1604,6 +1604,14 @@
     function initializeArvoraApp() {
       window.map = typeof getOrCreateMap === "function" ? getOrCreateMap('arvora-spatial-map') : (typeof initArvoraMap === "function" ? initArvoraMap() : null);
 
+      const gatewayBtn = document.getElementById("gateway-btn") || document.querySelector(".gateway-btn, button[onclick*='returnToGateway']");
+      if (gatewayBtn) {
+        gatewayBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          window.returnToGateway();
+        });
+      }
+
       const searchForm = document.querySelector('#search-form, .search-container form, input[type="search"], #query-input');
       if (searchForm) {
         const searchInput = document.querySelector('input[type="search"], #search-input, .search-input, #query-input');
@@ -2034,22 +2042,37 @@
     window.selectAutocompleteSuggestion = selectAutocompleteSuggestion;
 
     window.returnToGateway = function() {
-      // Reset search inputs
-      const searchInput = document.querySelector('input[type="search"], #search-input, .search-input, #query-input');
-      if (searchInput) searchInput.value = '';
+      console.log("Returning to Gateway...");
 
-      // Smoothly scroll back to the gateway/hero section or top of the page
-      const gatewaySection = document.getElementById('main-page') || document.getElementById('gateway') || document.querySelector('.portal-container, .gateway-section, header, hero');
-      if (gatewaySection) {
-        gatewaySection.scrollIntoView({ behavior: 'smooth' });
+      const mainPage = document.getElementById("main-page") || document.getElementById("gateway") || document.getElementById("gateway-view") || document.querySelector(".portal-container, .gateway-container, .hero-section");
+      const featuresPage = document.getElementById("features-page") || document.getElementById("dashboard-page") || document.getElementById("explorer-view") || document.querySelector(".explorer-container, .map-section-wrapper");
+
+      // 1. Restore Gateway screen visibility & hide explorer dashboard
+      if (mainPage) {
+        mainPage.style.display = "";
+        mainPage.classList.remove("page-exit", "hidden", "d-none", "is-hidden");
+      }
+
+      if (featuresPage && mainPage && mainPage !== featuresPage) {
+        featuresPage.classList.remove("active");
+        featuresPage.style.display = "none";
+      }
+
+      // 2. Smoothly scroll to the top / gateway section
+      if (mainPage) {
+        mainPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      // Reset URL params without reloading
+      // 3. Clear search inputs
+      const searchInput = document.querySelector('input[type="search"], #search-input, .search-input, #query-input');
+      if (searchInput) searchInput.value = '';
+
+      // 4. Reset URL query parameters without reloading
       if (window.history && window.history.pushState) {
-        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.pushState({}, '', cleanUrl);
       }
     };
 
