@@ -514,6 +514,15 @@
     }
 
     /* 3-Section Structured Layout for Explore Places */
+    .heritage-explorer-container,
+    .heritage-section-container,
+    #explore-places-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+    }
+
     .sights-category-nav,
     .places-category-bar,
     .category-filter-container {
@@ -549,20 +558,28 @@
     .heritage-primary-sights-grid,
     .places-bento-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      min-height: 120px;
       width: 100%;
     }
 
     .specialized-heritage-footer,
     .specialized-guild-adventure-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      grid-template-columns: 1fr 1fr;
       gap: 20px;
       width: 100%;
-      margin-top: 32px;
+      margin-top: 16px;
       padding-top: 24px;
       border-top: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .specialized-heritage-footer,
+      .specialized-guild-adventure-row {
+        grid-template-columns: 1fr;
+      }
     }
 
     .specialized-block {
@@ -1337,7 +1354,7 @@
     <!-- =======================================================
        EXPLORE PLACES & HERITAGE COORDINATES (3-SECTION LAYOUT)
     ======================================================= -->
-    <section id="explore-places-section" class="heritage-section-container" style="margin-top: 50px;">
+    <section id="explore-places-section" class="heritage-explorer-container heritage-section-container" style="margin-top: 50px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 18px; margin-bottom: 24px;">
         <div>
           <span class="telemetry"><span class="telemetry-dot"></span> SECTOR RECONNAISSANCE // ALL INDIA REGISTRY</span>
