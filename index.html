@@ -5818,6 +5818,9 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
         const lon = parseFloat(state.lon ?? state.lng);
 
         if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          if (typeof fetchLiveWeather === "function") {
+            fetchLiveWeather(lat, lon);
+          }
           if (typeof updatePhotographicSpectrum === "function") {
             updatePhotographicSpectrum(lat, lon, name);
           }
