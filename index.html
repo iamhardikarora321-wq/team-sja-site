@@ -5437,12 +5437,12 @@
 
     let activeSpectrumTarget = '';
 
-    async function updatePhotographicSpectrum(lat, lon, rawName) {
+    async function updatePhotographicSpectrum(lat, lon, rawPlaceName) {
       const pLat = parseFloat(lat);
       const pLon = parseFloat(lon);
       if (!Number.isFinite(pLat) || !Number.isFinite(pLon)) return;
 
-      const targetId = `${pLat.toFixed(3)}_${pLon.toFixed(3)}_${rawName}`;
+      const targetId = `${pLat.toFixed(3)}_${pLon.toFixed(3)}_${rawPlaceName}`;
       if (activeSpectrumTarget === targetId) return;
       activeSpectrumTarget = targetId;
 
@@ -5451,49 +5451,55 @@
       if (!container) return;
 
       container.innerHTML = '';
-      const cleanName = typeof sanitizePlaceName === 'function' ? sanitizePlaceName(rawName) : (rawName || '').split(',')[0].trim();
-
+      const cleanName = (rawPlaceName || '').split(',')[0].trim();
       let photos = [];
+
+      // Source A: Wikipedia GeoSearch
       try {
-        const geoUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${encodeURIComponent(lat + '|' + lon)}&ggsradius=20000&ggslimit=8&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+        const geoUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=25000&ggslimit=15&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
         const res = await fetch(geoUrl);
         if (res.ok) {
           const data = await res.json();
           const pages = data.query?.pages ? Object.values(data.query.pages) : [];
-          const seen = new Set();
           for (const p of pages) {
-            const src = p.thumbnail?.source;
-            if (src && !seen.has(src)) {
-              seen.add(src);
-              photos.push({ title: p.title, src });
+            if (p.thumbnail?.source && !photos.some(x => x.src === p.thumbnail.source)) {
+              photos.push({ title: p.title, src: p.thumbnail.source });
             }
-            if (photos.length >= 4) break;
           }
         }
-      } catch (err) {
-        console.warn("Spectrum GeoSearch failed:", err);
+      } catch (e) {}
+
+      // Source B: Wikimedia Commons Fallback to ensure 4 distinct photos
+      if (photos.length < 4) {
+        try {
+          const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanName + ' monument architecture')}&gsrlimit=8&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+          const res = await fetch(commonsUrl);
+          if (res.ok) {
+            const data = await res.json();
+            const pages = data.query?.pages ? Object.values(data.query.pages) : [];
+            for (const p of pages) {
+              if (p.thumbnail?.source && !photos.some(x => x.src === p.thumbnail.source)) {
+                photos.push({ title: p.title, src: p.thumbnail.source });
+              }
+              if (photos.length >= 4) break;
+            }
+          }
+        } catch (e) {}
       }
 
-      // Fallback: If GeoSearch found fewer than 4 photos, fetch primary place thumbnail safely
-      if (photos.length < 4 && cleanName) {
-        const mainWiki = await fetchWikiDataSafe(cleanName);
-        if (mainWiki && mainWiki.imageUrl && !photos.some(p => p.src === mainWiki.imageUrl)) {
-          photos.unshift({ title: mainWiki.title, src: mainWiki.imageUrl });
-        }
-      }
-
-      // Render up to 4 tiles; if fewer, leave clean dark blueprint tiles (NO dummy text)
+      // Render exactly 4 slots
       for (let i = 0; i < 4; i++) {
         const tile = document.createElement('div');
         tile.className = 'spectrum-photo-tile';
-        const photo = photos[i];
+        tile.style.cssText = 'flex: 1 1 0; min-width: 0; height: 52px; border-radius: 6px; overflow: hidden; background: #080c12; border: 1px solid rgba(16,185,129,0.3);';
 
+        const photo = photos[i];
         if (photo && photo.src) {
           const safeTitle = (photo.title || '').replace(/"/g, '&quot;');
           const safeClick = (photo.title || '').replace(/'/g, "\\'");
-          tile.innerHTML = `<img src="${photo.src}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${photo.src}', '${safeClick}');}" onerror="this.parentElement.style.opacity='0.3'" />`;
+          tile.innerHTML = `<img src="${photo.src}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${photo.src}', '${safeClick}');}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:9px;color:#10b981;font-family:monospace;\\'>NODE</span>'" />`;
         } else {
-          tile.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#1e293b;font-size:9px;font-family:monospace;">—</div>`;
+          tile.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#334155;font-size:9px;font-family:monospace;">NODE 0${i+1}</div>`;
         }
         container.appendChild(tile);
       }
