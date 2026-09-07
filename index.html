@@ -5134,20 +5134,20 @@
     /* ====================================================================
        DYNAMIC PHOTOGRAPHIC SPECTRUM ENGINE (DEDUPLICATED 4-TILE STRIP)
     ==================================================================== */
-    async function updatePhotographicSpectrum(lat, lon, placeName) {
+    async function updatePhotographicSpectrum(lat, lon, rawName) {
       const container = document.getElementById('photographic-spectrum') || 
                         document.querySelector('.photographic-spectrum-grid, .photographic-spectrum');
       if (!container) return;
 
-      // 1. Clear previous content immediately
+      // 1. Instantly flush prior elements
       container.innerHTML = '';
 
-      const cleanName = (placeName || '').split(',')[0].trim();
-      let photoList = [];
+      const cleanName = (rawName || '').replace(/Central Vector|North Perimeter|East Watershed|South Ridge/gi, '').split(',')[0].trim();
 
-      // 2. Fetch nearby photos within 25km
+      // 2. Fetch real photos from Wikipedia GeoSearch within 20km
+      let photos = [];
       try {
-        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=25000&ggslimit=12&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=20000&ggslimit=10&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
@@ -5157,40 +5157,42 @@
             const src = p.thumbnail?.source;
             if (src && !seen.has(src)) {
               seen.add(src);
-              photoList.push({ title: p.title, url: src });
+              photos.push({ title: p.title, src });
             }
-            if (photoList.length >= 4) break;
+            if (photos.length >= 4) break;
           }
         }
       } catch (err) {
-        console.warn("Spectrum GeoSearch failed:", err);
+        console.warn("Spectrum fetch failed:", err);
       }
 
-      // 3. Fallback: If fewer than 4 images, pull the place's main summary image
-      if (photoList.length < 4 && cleanName) {
+      // Fallback: If fewer than 4, get the primary place summary photo
+      if (photos.length < 4 && cleanName) {
         try {
           const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
           if (res.ok) {
             const data = await res.json();
             const mainImg = data.thumbnail?.source || data.originalimage?.source;
-            if (mainImg && !photoList.some(p => p.url === mainImg)) {
-              photoList.unshift({ title: data.title, url: mainImg });
+            if (mainImg && !photos.some(p => p.src === mainImg)) {
+              photos.unshift({ title: data.title, src: mainImg });
             }
           }
         } catch (e) {}
       }
 
-      // 4. Render ONLY valid photo tiles horizontally (max 4)
-      const displayList = photoList.slice(0, 4);
-      displayList.forEach(item => {
-        if (item && item.url) {
-          const slot = document.createElement('div');
-          slot.className = 'spectrum-photo-tile';
-          const safeTitle = (item.title || '').replace(/"/g, '&quot;');
-          const safeClick = (item.title || '').replace(/'/g, "\\'");
-          slot.innerHTML = `<img src="${item.url}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.url}', '${safeClick}');}" onerror="this.parentElement.remove()" />`;
-          container.appendChild(slot);
-        }
+      // 3. Render only the photos that exist (max 4). Do not render empty dummy boxes!
+      if (photos.length === 0) {
+        container.innerHTML = '<div style="color:#64748b;font-size:10px;font-family:monospace;padding:8px;">AWAITING SPATIAL SPECTRUM...</div>';
+        return;
+      }
+
+      photos.slice(0, 4).forEach(item => {
+        const tile = document.createElement('div');
+        tile.className = 'spectrum-photo-tile';
+        const safeTitle = (item.title || '').replace(/"/g, '&quot;');
+        const safeClick = (item.title || '').replace(/'/g, "\\'");
+        tile.innerHTML = `<img src="${item.src}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.src}', '${safeClick}');}" onerror="this.parentElement.remove()" />`;
+        container.appendChild(tile);
       });
     }
     window.updatePhotographicSpectrum = updatePhotographicSpectrum;
