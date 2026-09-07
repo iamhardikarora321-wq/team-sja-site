@@ -3529,10 +3529,20 @@
       }
     });
 
-    // Initialize Autocomplete, State from URL, & Recalibrate Map on DOM Ready
+    // Initialize Autocomplete, State from URL, Gateway Buttons, & Recalibrate Map on DOM Ready
     document.addEventListener("DOMContentLoaded", () => {
       setupSearchAutocomplete();
       ArvoraState.initFromURL();
+
+      const gatewayButtons = document.querySelectorAll('[onclick*="returnToGateway"], .gateway-btn, #return-to-gateway, [data-action="gateway"]');
+      gatewayButtons.forEach(btn => {
+        btn.removeAttribute('onclick'); // prevent reference errors
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.returnToGateway();
+        });
+      });
+
       setTimeout(() => {
         const targetMap = window.map || window.arvoraMap;
         if (targetMap && typeof targetMap.invalidateSize === 'function') {
