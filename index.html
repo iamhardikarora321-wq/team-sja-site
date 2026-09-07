@@ -38,6 +38,53 @@
     }
 
     /* Custom Scrollbars */
+
+    /* Photographic Spectrum Strip */
+    .photographic-spectrum-wrapper {
+      margin-top: 14px;
+      width: 100%;
+    }
+
+    .photographic-spectrum-label {
+      font-family: monospace;
+      font-size: 10px;
+      color: #64748b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    #photographic-spectrum, .photographic-spectrum-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 8px !important;
+      width: 100% !important;
+      height: 60px !important; /* Fixed compact strip height */
+    }
+
+    .spectrum-photo-tile {
+      width: 100%;
+      height: 60px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #090d14;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      position: relative;
+    }
+
+    .spectrum-photo-tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .spectrum-photo-tile:hover img {
+      transform: scale(1.08);
+    }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #040608; }
     ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.3); border-radius: 999px; }
@@ -1159,11 +1206,9 @@
           </div>
         </div>
         
-        <div>
-          <div style="font-family:'JetBrains Mono', monospace; font-size: 0.68rem; color: #94a3b8; margin-bottom: 10px;">PHOTOGRAPHIC SPECTRUM</div>
-          <div id="photographic-spectrum" class="photographic-spectrum" data-photo-spectrum style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-            <!-- Dynamic Photo Gallery Thumbnails -->
-          </div>
+        <div class="photographic-spectrum-wrapper">
+          <span class="photographic-spectrum-label">PHOTOGRAPHIC SPECTRUM</span>
+          <div id="photographic-spectrum" class="photographic-spectrum-grid"></div>
         </div>
       </div>
 
@@ -4992,65 +5037,87 @@
     window.updateHeritageAndBackdrop = updateHeritageAndBackdrop;
 
     /* ====================================================================
-       DYNAMIC PHOTOGRAPHIC SPECTRUM ENGINE (15KM GEOSEARCH REAL PHOTOS)
+       DYNAMIC PHOTOGRAPHIC SPECTRUM ENGINE (DEDUPLICATED 4-TILE STRIP)
     ==================================================================== */
     async function updatePhotographicSpectrum(lat, lon, placeName) {
-      const container = document.querySelector('#photographic-spectrum, #location-photo-gallery, .photographic-spectrum, [data-photo-spectrum]');
+      const container = document.getElementById('photographic-spectrum') || 
+                        document.querySelector('.photographic-spectrum-grid, .photographic-spectrum');
       if (!container) return;
 
-      container.innerHTML = '<div style="color:#64748b; font-size:11px; font-family:monospace; padding:8px; grid-column:1/-1;">FETCHING SPATIAL SPECTRUM...</div>';
+      // 1. Immediately wipe all previous children to prevent stacking
+      container.innerHTML = '';
 
-      const endpoint = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=15000&ggslimit=10&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+      const cleanName = (placeName || '').split(',')[0].trim();
+      const radius = 25000; // 25 km radius around coordinates
+
+      // 2. Fetch up to 12 nearby POIs to collect 4 distinct, valid image URLs
+      const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=${radius}&ggslimit=12&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+
+      let photos = [];
 
       try {
-        const res = await fetch(endpoint);
-        const data = await res.json();
-        const pages = data.query?.pages ? Object.values(data.query.pages) : [];
-        const validPhotos = pages
-          .filter(p => p.thumbnail && p.thumbnail.source)
-          .map(p => ({ title: p.title, url: p.thumbnail.source }));
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          const pages = data.query?.pages ? Object.values(data.query.pages) : [];
 
-        container.innerHTML = '';
-
-        if (validPhotos.length === 0) {
-          // Fallback: Fetch the photo of the searched place or its district
-          const cleanName = (placeName || '').split(',')[0].trim();
-          if (cleanName) {
-            try {
-              const directUrl = typeof getVerifiedMonumentImage === 'function' ? await getVerifiedMonumentImage(cleanName) : null;
-              if (directUrl) {
-                validPhotos.push({ title: cleanName, url: directUrl });
-              } else {
-                const directRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
-                if (directRes.ok) {
-                  const directData = await directRes.json();
-                  if (directData.thumbnail?.source) {
-                    validPhotos.push({ title: directData.title || cleanName, url: directData.thumbnail.source });
-                  }
-                }
-              }
-            } catch (e) {
-              console.warn("Direct photo fallback failed:", e);
+          // Filter for unique, non-empty image URLs
+          const seenUrls = new Set();
+          for (const page of pages) {
+            const src = page.thumbnail?.source;
+            if (src && !seenUrls.has(src)) {
+              seenUrls.add(src);
+              photos.push({ title: page.title, src });
             }
+            if (photos.length >= 4) break;
           }
-        }
-
-        // Render up to 4 images
-        for (let i = 0; i < 4; i++) {
-          const item = validPhotos[i];
-          const slot = document.createElement('div');
-          slot.className = 'spectrum-photo-slot';
-          slot.style.cssText = 'width: 100%; height: 55px; border-radius: 6px; overflow: hidden; background: #0c1015; border: 1px solid rgba(16,185,129,0.3); position: relative; cursor: pointer;';
-
-          if (item) {
-            slot.innerHTML = `<img src="${item.url}" alt="${(item.title || '').replace(/"/g, '&quot;')}" title="${(item.title || '').replace(/"/g, '&quot;')}" style="width:100%; height:100%; object-fit:cover;" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.url}', '${(item.title || '').replace(/'/g, "\\'")}');}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:9px;color:#10b981;padding:4px;display:block;text-align:center;\\'>VEC</span>';" />`;
-          } else {
-            slot.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#334155;font-size:9px;font-family:monospace;">NODE ${i+1}</div>`;
-          }
-          container.appendChild(slot);
         }
       } catch (err) {
-        console.warn("Spectrum photo fetch failed:", err);
+        console.warn("Spectrum GeoSearch failed:", err);
+      }
+
+      // Fallback: If Wikipedia GeoSearch returned fewer than 4 photos, fetch the main place photo
+      if (photos.length < 4 && cleanName) {
+        try {
+          const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
+          if (summaryRes.ok) {
+            const summary = await summaryRes.json();
+            const mainImg = summary.thumbnail?.source || summary.originalimage?.source;
+            if (mainImg && !photos.some(p => p.src === mainImg)) {
+              photos.unshift({ title: summary.title, src: mainImg });
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. Render EXACTLY 4 tiles horizontally
+      for (let i = 0; i < 4; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'spectrum-photo-tile';
+
+        const item = photos[i];
+        if (item) {
+          const safeTitle = (item.title || '').replace(/"/g, '&quot;');
+          const safeClick = (item.title || '').replace(/'/g, "\\'");
+          tile.innerHTML = `
+            <img 
+              src="${item.src}" 
+              alt="${safeTitle}" 
+              title="${safeTitle}" 
+              loading="lazy" 
+              onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.src}', '${safeClick}');}" 
+              onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#10b981;font-size:9px;font-family:monospace;\\'>SPATIAL</div>'" 
+            />
+          `;
+        } else {
+          // Subtle architectural blueprint slot when no 4th image exists
+          tile.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:center; height:100%; background:rgba(10,14,20,0.6); color:#334155; font-size:10px; font-family:monospace;">
+              VECTOR
+            </div>
+          `;
+        }
+        container.appendChild(tile);
       }
     }
     window.updatePhotographicSpectrum = updatePhotographicSpectrum;
