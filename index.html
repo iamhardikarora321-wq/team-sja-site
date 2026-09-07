@@ -786,6 +786,57 @@
   <!-- Leaflet 1.9.4 Cartography Engine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    if (typeof L !== 'undefined') {
+      // 1. Guard LatLng against NaN
+      const originalLatLng = L.latLng;
+      L.latLng = function(a, b, c) {
+        if (Array.isArray(a)) {
+          const lat = parseFloat(a[0]);
+          const lng = parseFloat(a[1]);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return originalLatLng(0, 0);
+          return originalLatLng(lat, lng);
+        }
+        if (typeof a === 'object' && a !== null) {
+          const lat = parseFloat(a.lat ?? a.latitude);
+          const lng = parseFloat(a.lng ?? a.lon ?? a.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return originalLatLng(0, 0);
+          return originalLatLng(lat, lng);
+        }
+        const lat = parseFloat(a);
+        const lng = parseFloat(b);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return originalLatLng(0, 0);
+        return originalLatLng.apply(this, arguments);
+      };
+
+      // 2. Guard unproject against NaN pixel points
+      const origUnproject = L.Map.prototype.unproject;
+      L.Map.prototype.unproject = function(point, zoom) {
+        try {
+          if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+            return L.latLng(0, 0);
+          }
+          const targetZoom = Number.isFinite(Number(zoom)) ? Number(zoom) : (this.getZoom() || 12);
+          return origUnproject.call(this, point, targetZoom);
+        } catch (err) {
+          return L.latLng(0, 0);
+        }
+      };
+
+      // 3. Guard getBounds against premature calls
+      const origGetBounds = L.Map.prototype.getBounds;
+      L.Map.prototype.getBounds = function() {
+        try {
+          if (!this._loaded || typeof this._getMapPanePos !== 'function') {
+            return L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
+          }
+          return origGetBounds.call(this);
+        } catch (err) {
+          return L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
+        }
+      };
+    }
+  </script>
 </head>
 <body>
 
