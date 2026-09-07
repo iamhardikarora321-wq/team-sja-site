@@ -4897,41 +4897,25 @@
     const MonumentImageEngine = {
       cache: new Map(),
 
-      async getPhoto(title) {
-        if (!title) return null;
-        const clean = title.replace(/\(.*?\)/g, '').replace(/–|-/g, ' ').trim();
-        const key = clean.toLowerCase();
-        if (this.cache.has(key)) return this.cache.get(key);
+      async getPhoto(rawTitle) {
+        if (!rawTitle) return null;
+        const cleanTitle = rawTitle.replace(/\(.*?\)/g, '').trim();
+        const key = cleanTitle.toLowerCase();
+        if (this.cache && this.cache.has(key)) return this.cache.get(key);
 
-        // Try MediaWiki search first
+        const wikiSlug = cleanTitle.replace(/\s+/g, '_');
+
         try {
-          const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(clean + ' India')}&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=700&format=json&origin=*`;
-          const res = await fetch(searchUrl);
+          const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiSlug)}`);
           if (res.ok) {
             const data = await res.json();
-            const pages = data.query?.pages ? Object.values(data.query.pages) : [];
-            if (pages.length > 0 && pages[0].thumbnail?.source) {
-              const url = pages[0].thumbnail.source;
-              this.cache.set(key, url);
-              return url;
-            }
+            const photoUrl = data.thumbnail?.source || data.originalimage?.source || null;
+            if (photoUrl && this.cache) this.cache.set(key, photoUrl);
+            return photoUrl;
           }
-        } catch (e) {}
-
-        // Try REST summary endpoint
-        try {
-          const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${formatWikiTitle(clean)}`;
-          const res = await fetch(summaryUrl);
-          if (res.ok) {
-            const data = await res.json();
-            const url = data.thumbnail?.source || data.originalimage?.source;
-            if (url) {
-              this.cache.set(key, url);
-              return url;
-            }
-          }
-        } catch (e) {}
-
+        } catch (err) {
+          // Silent fallback to avoid console noise
+        }
         return null;
       }
     };
