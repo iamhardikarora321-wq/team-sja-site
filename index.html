@@ -1125,9 +1125,9 @@
         const gallery = document.getElementById("location-photo-gallery");
         if (gallery) {
           const categoryPool = ["nature", "historical", "spiritual", "craft"];
-          const galleryPhotos = categoryPool.map((cat, idx) => getThematicFallbackPhoto(cat, idx));
+          const galleryPhotos = categoryPool.map((cat, idx) => getValidImageUrl(getThematicFallbackPhoto(cat, idx), cat));
           gallery.innerHTML = galleryPhotos.map((url, i) => `
-            <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" style="width:100%; height:55px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.onerror=null; this.src=getThematicFallbackPhoto('nature', ${i});" />
+            <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" style="width:100%; height:55px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';" />
           `).join("");
         }
       }
@@ -1242,16 +1242,21 @@
             if (badgeEl) badgeEl.innerText = "WIKIPEDIA GEOSEARCH";
 
             if (summary.thumbnail && summary.thumbnail.source) {
+              const safeSource = getValidImageUrl(summary.thumbnail.source, 'nature');
               const wikiContainer = document.getElementById("wiki-poi-content");
+              const fallbackUrl = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';
               if (wikiContainer && !document.getElementById("wiki-poi-thumb")) {
                 const thumbImg = document.createElement("img");
                 thumbImg.id = "wiki-poi-thumb";
-                thumbImg.src = summary.thumbnail.source;
+                thumbImg.src = safeSource;
                 thumbImg.alt = summary.title || page.title;
+                thumbImg.onerror = function() { this.onerror = null; this.src = fallbackUrl; };
                 thumbImg.style.cssText = "width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.08);";
                 wikiContainer.appendChild(thumbImg);
               } else if (document.getElementById("wiki-poi-thumb")) {
-                document.getElementById("wiki-poi-thumb").src = summary.thumbnail.source;
+                const existingThumb = document.getElementById("wiki-poi-thumb");
+                existingThumb.src = safeSource;
+                existingThumb.onerror = function() { this.onerror = null; this.src = fallbackUrl; };
               }
             }
             return true;
@@ -1870,11 +1875,11 @@
 
       // Gallery Assets
       const categoryPool = ["nature", "historical", "spiritual", "craft"];
-      const galleryPhotos = categoryPool.map((cat, idx) => getThematicFallbackPhoto(cat, idx));
+      const galleryPhotos = categoryPool.map((cat, idx) => getValidImageUrl(getThematicFallbackPhoto(cat, idx), cat));
 
       if (gallery) {
         gallery.innerHTML = galleryPhotos.map((url, i) => `
-          <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.onerror=null; this.src=getThematicFallbackPhoto('nature', ${i});" />
+          <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';" />
         `).join("");
       }
 
@@ -2002,7 +2007,7 @@
           fee: "Public / Verified",
           duration: "1 - 2 Hours",
           desc: `Verified heritage landmark located ${(item.dist / 1000).toFixed(1)} km from ${name}. Coordinates: ${item.lat.toFixed(4)}° N, ${item.lon.toFixed(4)}° E.`,
-          image: getThematicFallbackPhoto(idx % 2 === 0 ? "historical" : "nature", idx % 4)
+          image: getValidImageUrl(item.image || item.thumbnail, idx % 2 === 0 ? "historical" : "nature")
         }));
       } else {
         // Fallback for remote village or uninhabited coordinate with zero Wikipedia records
@@ -2841,7 +2846,7 @@
           fee: "Public / Verified",
           duration: "1 - 2 Hours",
           desc: item.desc,
-          image: getThematicFallbackPhoto(idx % 2 === 0 ? "historical" : "nature", idx % 4)
+          image: getValidImageUrl(item.image || item.thumbnail, idx % 2 === 0 ? "historical" : "nature")
         }));
         if (typeof renderPlaces === "function") {
           renderPlaces(currentCategoryFilter || "all");
@@ -3722,6 +3727,35 @@
       return FALLBACK_IMAGES[cat] || FALLBACK_IMAGES.nature;
     }
 
+    function getValidImageUrl(url, fallbackQuery = 'nature') {
+      if (typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image'))) {
+        return url;
+      }
+      if (typeof getThematicFallbackPhoto === 'function') {
+        return getThematicFallbackPhoto(fallbackQuery, 0);
+      }
+      return 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';
+    }
+    window.getValidImageUrl = getValidImageUrl;
+
+    function openGalleryLightbox(url, title) {
+      const modal = document.getElementById("place-intel-modal");
+      const content = document.getElementById("modal-content-inject");
+      if (!modal || !content) return;
+      const safeUrl = getValidImageUrl(url, 'nature');
+      content.innerHTML = `
+        <img src="${safeUrl}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';" style="width:100%; height:320px; object-fit:cover; border-bottom:1px solid rgba(255,255,255,0.08);" />
+        <div style="padding: 24px;">
+          <span class="telemetry" style="color:var(--accent-emerald);">SPATIAL RECONNAISSANCE GALLERY</span>
+          <h2 style="font-size:1.4rem; font-weight:800; color:#fff; margin-top:8px; margin-bottom:12px;">${title || 'Heritage View'}</h2>
+          <p style="font-size:0.85rem; color:#94a3b8; line-height:1.5;">Verified photographic telemetry asset for ${title || 'Target Location'}.</p>
+        </div>
+      `;
+      modal.classList.add("open");
+      modal.classList.add("active");
+    }
+    window.openGalleryLightbox = openGalleryLightbox;
+
     /* ====================================================================
        CITY-MATCHED HERITAGE REGISTRY DYNAMIC ENGINE
     ==================================================================== */
@@ -3752,10 +3786,15 @@
       const counter = document.getElementById("places-counter");
       if (counter) counter.innerText = `${filtered.length} VERIFIED SIGHTS DISPLAYED`;
 
-      container.innerHTML = filtered.map(place => `
-        <article class="place-card" style="cursor:pointer;" onclick="if(typeof syncLocationData==='function'){syncLocationData('${(place.name || '').replace(/'/g, "\\'")}');}">
+      const safeStaticFallback = "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80";
+
+      container.innerHTML = filtered.map(place => {
+        const imageUrl = getValidImageUrl(place.image || place.thumbnail, place.category || 'nature');
+        const safeName = (place.name || '').replace(/'/g, "\\'");
+        return `
+        <article class="place-card" style="cursor:pointer;" onclick="if(typeof syncLocationData==='function'){syncLocationData('${safeName}');}">
           <div style="position:relative;">
-            <img src="${place.image || getThematicFallbackPhoto(place.category || 'nature', 0)}" onerror="this.onerror=null; this.src=getThematicFallbackPhoto('${place.category || 'nature'}', 0);" alt="${place.name}" class="place-card-img" loading="lazy" />
+            <img src="${imageUrl}" onerror="this.onerror=null; this.src='${safeStaticFallback}';" alt="${(place.name || '').replace(/"/g, '&quot;')}" class="place-card-img" loading="lazy" />
             <span style="position:absolute; top:12px; left:12px; background:rgba(3,5,7,0.85); border:1px solid rgba(16,185,129,0.4); color:#10b981; font-family:'JetBrains Mono'; font-size:0.65rem; padding:4px 10px; border-radius:6px; font-weight:600;">${(place.category || 'heritage').toUpperCase()}</span>
           </div>
           <div class="place-card-body">
@@ -3776,13 +3815,13 @@
               </div>
 
               <div class="card-actions">
-                <button class="btn-card-intel" onclick="event.stopPropagation(); if(typeof syncLocationData==='function'){syncLocationData('${(place.name || '').replace(/'/g, "\\'")}');}">MAP VECTOR LOCATE 📍</button>
-                <button class="btn-bookmark" onclick="event.stopPropagation(); bookmarkPlace('${(place.name || '').replace(/'/g, "\\'")}');" title="Bookmark to My Trip">🔖</button>
+                <button class="btn-card-intel" onclick="event.stopPropagation(); if(typeof syncLocationData==='function'){syncLocationData('${safeName}');}">MAP VECTOR LOCATE 📍</button>
+                <button class="btn-bookmark" onclick="event.stopPropagation(); bookmarkPlace('${safeName}');" title="Bookmark to My Trip">🔖</button>
               </div>
             </div>
           </div>
         </article>
-      `).join("");
+      `}).join("");
     }
 
     function filterPlaces(cat, btnElement) {
@@ -3802,8 +3841,11 @@
       const modal = document.getElementById("place-intel-modal");
       const content = document.getElementById("modal-content-inject");
 
+      const imageUrl = getValidImageUrl(item.image || item.thumbnail, item.category || 'nature');
+      const safeStaticFallback = "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80";
+
       content.innerHTML = `
-        <img src="${item.image || getThematicFallbackPhoto(item.category, 0)}" onerror="this.onerror=null; this.src=getThematicFallbackPhoto('${item.category}', 0);" style="width:100%; height:260px; object-fit:cover; border-bottom:1px solid rgba(255,255,255,0.08);" />
+        <img src="${imageUrl}" onerror="this.onerror=null; this.src='${safeStaticFallback}';" style="width:100%; height:260px; object-fit:cover; border-bottom:1px solid rgba(255,255,255,0.08);" />
         <div style="padding: 24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <span class="telemetry" style="color:var(--accent-emerald);">${item.tag}</span>
