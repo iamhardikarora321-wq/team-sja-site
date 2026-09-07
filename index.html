@@ -5136,15 +5136,23 @@
                                   document.getElementById('places-grid') ||
                                   document.querySelector('.heritage-coordinates-container, #explore-places-list');
 
+    async function updateAmbientBackdrop(placeName) {
+      const backdropEl = document.getElementById('arvora-ambient-backdrop');
+      if (!backdropEl) return;
+
+      const data = await fetchWikiDataSafe(placeName);
+      if (data && data.imageUrl) {
+        backdropEl.style.backgroundImage = `radial-gradient(circle at 50% 30%, rgba(4, 6, 8, 0.25) 0%, #040608 85%), url('${data.imageUrl}')`;
+        backdropEl.style.opacity = '0.28';
+      }
+    }
+    window.updateAmbientBackdrop = updateAmbientBackdrop;
+
         // A. Ambient Faded Backdrop from Primary Place Summary (REST API - 100% CORS-safe)
         try {
           const cleanName = (placeName || '').split(',')[0].trim();
           if (cleanName) {
-            const photoUrl = await getVerifiedMonumentImage(cleanName);
-            if (photoUrl && backdropEl) {
-              backdropEl.style.backgroundImage = `radial-gradient(circle at 50% 30%, rgba(4, 6, 8, 0.25) 0%, #040608 85%), url('${photoUrl}')`;
-              backdropEl.style.opacity = '0.28';
-            }
+            await updateAmbientBackdrop(cleanName);
           }
         } catch (e) {
           console.warn("Backdrop image bypassed:", e.message);
