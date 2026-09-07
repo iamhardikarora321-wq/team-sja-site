@@ -1637,7 +1637,7 @@
         const page = data.query?.geosearch?.[0];
 
         if (page?.title) {
-          const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page.title)}`);
+          const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${formatWikiTitle(page.title)}`);
           if (summaryRes.ok) {
             const summary = await summaryRes.json();
             const titleEl = document.getElementById("wiki-poi-title");
@@ -1740,6 +1740,16 @@
       return cleaned || 'delhi';
     }
     window.deriveCodexKey = deriveCodexKey;
+
+    function formatWikiTitle(title) {
+      return encodeURIComponent(
+        (title || '')
+          .replace(/\(.*?\)/g, '') // remove parentheticals
+          .trim()
+          .replace(/\s+/g, '_')    // replace spaces with underscores to avoid 301 redirects
+      );
+    }
+    window.formatWikiTitle = formatWikiTitle;
 
     /* ====================================================================
        CULTURAL INQUIRIES GENERATOR & RENDERER
@@ -2487,7 +2497,7 @@
 
       // 2. Query Wikipedia Page Summary for primary title or location name
       try {
-        const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(primaryTitle)}`;
+        const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${formatWikiTitle(primaryTitle)}`;
         const sumRes = await fetch(summaryUrl);
         if (sumRes.ok) {
           const wiki = await sumRes.json();
@@ -4910,7 +4920,7 @@
 
         // Try REST summary endpoint
         try {
-          const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`;
+          const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${formatWikiTitle(clean)}`;
           const res = await fetch(summaryUrl);
           if (res.ok) {
             const data = await res.json();
@@ -4960,7 +4970,7 @@
       const key = placeName.trim().toLowerCase();
       if (WIKI_DISAMBIGUATION_MAP[key]) {
         try {
-          const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${WIKI_DISAMBIGUATION_MAP[key]}`);
+          const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${formatWikiTitle(WIKI_DISAMBIGUATION_MAP[key])}`);
           if (res.ok) {
             const data = await res.json();
             const url = data.originalimage?.source || data.thumbnail?.source;
@@ -5272,7 +5282,7 @@
       // Fallback if GeoSearch found fewer than 4 photos
       if (photos.length < 4 && cleanName) {
         try {
-          const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
+          const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${formatWikiTitle(cleanName)}`);
           if (res.ok) {
             const data = await res.json();
             const mainSrc = data.thumbnail?.source || data.originalimage?.source;
@@ -5338,7 +5348,7 @@
           if (cleanName) {
             try {
               const directUrl = typeof getVerifiedMonumentImage === 'function' ? await getVerifiedMonumentImage(cleanName) : null;
-              const directRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
+              const directRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${formatWikiTitle(cleanName)}`);
               if (directRes.ok) {
                 const directData = await directRes.json();
                 if (titleEl) titleEl.textContent = directData.title || cleanName;
