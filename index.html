@@ -3395,18 +3395,16 @@
 
     const CITY_CODEX = CITY_CODEX_DATABASE;
 
-    // Centralized Data Resolver for searched cities
-    function getCityData(key, lat, lon) {
-      if (key) {
-        const cleanKey = key.trim().toLowerCase();
-        if (CITY_CODEX_DATABASE[cleanKey]) return CITY_CODEX_DATABASE[cleanKey];
-        for (const k in CITY_CODEX_DATABASE) {
-          if (k.toLowerCase() === cleanKey) return CITY_CODEX_DATABASE[k];
-        }
-      }
+    function getCityData(placeName, lat, lon) {
+      const targetLocation = typeof placeName !== 'undefined' && placeName ? placeName : (window.ArvoraState?.currentLocation?.name || window.ArvoraState?.displayName || 'delhi');
+      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(targetLocation) : 'delhi';
+
+      const codexData = (typeof CITY_CODEX_DATABASE !== 'undefined' && CITY_CODEX_DATABASE[key]) ? CITY_CODEX_DATABASE[key] : null;
+      if (codexData) return codexData;
+
       const activeLat = Number.isFinite(lat) ? lat : (window.ArvoraState ? window.ArvoraState.lat : 28.6139);
       const activeLon = Number.isFinite(lon) ? lon : (window.ArvoraState ? window.ArvoraState.lon : 77.2090);
-      return generateDynamicCodexForLocation(key || "Target Node", activeLat, activeLon);
+      return generateDynamicCodexForLocation(targetLocation, activeLat, activeLon);
     }
 
     function loadLocation(cityKey, customData) {
@@ -5028,9 +5026,12 @@
       const container = document.getElementById('craft-bazaars-grid') || document.querySelector('.craft-bazaars-list, #crafts-panel');
       if (!container) return;
 
-      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(placeName) : (resolveDossierKey(placeName) || 'delhi');
-      const items = CRAFT_BAZAAR_CATALOG[key] || [
-        { name: `${placeName || 'Regional'} Artisan Guild Bazaars`, guild: "Indigenous Handloom & Metalcraft Guild", focus: "Native vernacular artefacts, regional hand-embroidery, and marketplace traders", zone: "Central Old Quarter" }
+      const targetLocation = typeof placeName !== 'undefined' && placeName ? placeName : (window.ArvoraState?.currentLocation?.name || window.ArvoraState?.displayName || 'delhi');
+      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(targetLocation) : 'delhi';
+
+      const craftItems = (typeof CRAFT_BAZAAR_CATALOG !== 'undefined' && CRAFT_BAZAAR_CATALOG[key]) ? CRAFT_BAZAAR_CATALOG[key] : [];
+      const items = craftItems.length > 0 ? craftItems : [
+        { name: `${targetLocation || 'Regional'} Artisan Guild Bazaars`, guild: "Indigenous Handloom & Metalcraft Guild", focus: "Native vernacular artefacts, regional hand-embroidery, and marketplace traders", zone: "Central Old Quarter" }
       ];
 
       container.innerHTML = items.map(b => `
@@ -5068,9 +5069,12 @@
       const container = document.getElementById('adventure-passes-grid') || document.querySelector('.adventure-passes-list, #adventure-panel');
       if (!container) return;
 
-      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(placeName) : (resolveDossierKey(placeName) || 'delhi');
-      const items = ADVENTURE_PASS_CATALOG[key] || [
-        { name: `${placeName || 'Regional'} High Topo Vector`, type: "Regional Ridge & Trail Corridor", elevation: "Topographic Apex", trail: "Vernacular terrain traverses, gradient trails, and exploration vantage points" }
+      const targetLocation = typeof placeName !== 'undefined' && placeName ? placeName : (window.ArvoraState?.currentLocation?.name || window.ArvoraState?.displayName || 'delhi');
+      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(targetLocation) : 'delhi';
+
+      const adventureItems = (typeof ADVENTURE_PASS_CATALOG !== 'undefined' && ADVENTURE_PASS_CATALOG[key]) ? ADVENTURE_PASS_CATALOG[key] : [];
+      const items = adventureItems.length > 0 ? adventureItems : [
+        { name: `${targetLocation || 'Regional'} High Topo Trail`, type: "Regional Ridge & Trail Corridor", elevation: "Topographic Apex", trail: "Vernacular terrain traverses, gradient trails, and exploration vantage points" }
       ];
 
       container.innerHTML = items.map(a => `
