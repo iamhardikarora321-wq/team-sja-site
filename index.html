@@ -1778,6 +1778,32 @@
     }
     window.renderInquiryCards = renderInquiryCards;
 
+    function selectPoiTarget(poi) {
+      if (!poi) return;
+      const targetLat = parseFloat(poi.lat);
+      const targetLon = parseFloat(poi.lon ?? poi.lng);
+      const cleanTitle = sanitizePlaceName(poi.name || poi.title);
+
+      if (!Number.isFinite(targetLat) || !Number.isFinite(targetLon)) return;
+
+      // Update state without polluting with dummy suffixes
+      if (window.ArvoraState && typeof window.ArvoraState.setPlace === "function") {
+        window.ArvoraState.setPlace(targetLat, targetLon, cleanTitle);
+      }
+
+      // Re-center Leaflet Map directly on the landmark
+      const targetMap = window.arvoraMap || window.map;
+      if (targetMap) {
+        targetMap.flyTo([targetLat, targetLon], 15, { duration: 1.2 });
+        const marker = window.activeLocationMarker || window.activeMarker;
+        if (marker) {
+          marker.setLatLng([targetLat, targetLon]);
+          marker.bindPopup(`<b>${cleanTitle}</b>`).openPopup();
+        }
+      }
+    }
+    window.selectPoiTarget = selectPoiTarget;
+
     /* ====================================================================
        1. GLOBAL STATE DEFINITION (ATTACHED TO WINDOW AT TOP OF SCRIPT)
        ==================================================================== */
