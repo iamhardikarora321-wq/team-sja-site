@@ -4933,16 +4933,13 @@
 
       async getPhoto(rawTitle) {
         if (!rawTitle) return null;
-        const cleanTitle = rawTitle.replace(/\(.*?\)/g, '').trim();
-        const key = cleanTitle.toLowerCase();
+        const key = String(rawTitle).toLowerCase().trim();
         if (this.cache && this.cache.has(key)) return this.cache.get(key);
 
-        const wikiInfo = await fetchWikiDataSafe(cleanTitle);
-        if (wikiInfo && wikiInfo.imageUrl) {
-          if (this.cache) this.cache.set(key, wikiInfo.imageUrl);
-          return wikiInfo.imageUrl;
-        }
-        return null;
+        const data = await fetchWikiDataSafe(rawTitle);
+        const imageUrl = data ? data.imageUrl : null;
+        if (imageUrl && this.cache) this.cache.set(key, imageUrl);
+        return imageUrl;
       }
     };
     window.MonumentImageEngine = MonumentImageEngine;
