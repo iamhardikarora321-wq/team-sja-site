@@ -1678,70 +1678,117 @@
       });
     }
 
-    // Panel 2: Environmental & Weather Metrics via Open-Meteo (Resilient & Cached)
-    async function updatePanel2_OpenMeteoWeather(lat, lon) {
-      const parsedLat = parseFloat(lat);
-      const parsedLon = parseFloat(lon);
+    /* ====================================================================
+       CLEAN OPEN-METEO WEATHER ENGINE (HEADER-FREE & DEBOUCED)
+       ==================================================================== */
+    let activeWeatherCoords = null;
+    let weatherDebounceTimer = null;
 
-      if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLon)) return false;
+    function renderWeatherUI(data) {
+      const current = data.current_weather || data.current || {};
+      const temp = Math.round(current.temperature !== undefined ? current.temperature : (current.temperature_2m !== undefined ? current.temperature_2m : 24));
+      const wind = Math.round(current.windspeed !== undefined ? current.windspeed : (current.wind_speed_10m !== undefined ? current.wind_speed_10m : 12));
+      const humidity = Math.round(data.hourly?.relativehumidity_2m?.[0] !== undefined ? data.hourly.relativehumidity_2m[0] : (current.relative_humidity_2m !== undefined ? current.relative_humidity_2m : 58));
+      const code = current.weathercode !== undefined ? current.weathercode : (current.weather_code !== undefined ? current.weather_code : 0);
 
-      // Prevent duplicate requests if coordinates have not changed significantly
+      const weatherInfo = (typeof WEATHER_CODE_MAP !== "undefined" && WEATHER_CODE_MAP[code]) 
+        ? WEATHER_CODE_MAP[code] 
+        : { icon: "🌤️", desc: "Partly Cloudy & Pleasant" };
+
+      const tempEls = document.querySelectorAll('#feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
+      const windEls = document.querySelectorAll('#feature-weather-wind, .env-wind, #amenity-wind, [data-weather-wind]');
+      const humEls = document.querySelectorAll('#feature-weather-humidity, .env-humidity, #amenity-humidity, [data-weather-humidity]');
+
+      tempEls.forEach(el => { el.textContent = `${temp}°C`; });
+      windEls.forEach(el => { el.textContent = `${wind} km/h`; });
+      humEls.forEach(el => { el.textContent = `${humidity}%`; });
+
+      const descEl = document.getElementById("live-weather-desc");
+      if (descEl) descEl.innerText = weatherInfo.desc;
+
+      const iconEl = document.getElementById("weather-icon-display");
+      if (iconEl) iconEl.innerText = weatherInfo.icon;
+
+      const badgeEl = document.getElementById("weather-status-badge");
+      if (badgeEl) badgeEl.innerText = "OPEN-METEO LIVE";
+    }
+    window.renderWeatherUI = renderWeatherUI;
+
+    function renderWeatherFallback() {
+      const tempEls = document.querySelectorAll('#feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
+      const windEls = document.querySelectorAll('#feature-weather-wind, .env-wind, #amenity-wind, [data-weather-wind]');
+      const humEls = document.querySelectorAll('#feature-weather-humidity, .env-humidity, #amenity-humidity, [data-weather-humidity]');
+
+      tempEls.forEach(el => { el.textContent = "24°C"; });
+      windEls.forEach(el => { el.textContent = "12 km/h"; });
+      humEls.forEach(el => { el.textContent = "58%"; });
+
+      const descEl = document.getElementById("live-weather-desc");
+      if (descEl) descEl.innerText = "Ambient Seasonal Climate Active";
+
+      const iconEl = document.getElementById("weather-icon-display");
+      if (iconEl) iconEl.innerText = "🌤️";
+
+      const badgeEl = document.getElementById("weather-status-badge");
+      if (badgeEl) badgeEl.innerText = "AMBIENT FALLBACK";
+    }
+    window.renderWeatherFallback = renderWeatherFallback;
+
+    async function fetchLiveWeather(rawLat, rawLon) {
+      const lat = parseFloat(rawLat);
+      const lon = parseFloat(rawLon);
+
+      // 1. Guard against NaN / undefined coordinates
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        return;
+      }
+
+      // 2. Prevent identical re-fetching if coordinates haven't meaningfully moved (<1 km)
       if (
-        lastWeatherCoords.lat !== null &&
-        Math.abs(lastWeatherCoords.lat - parsedLat) < 0.001 &&
-        Math.abs(lastWeatherCoords.lon - parsedLon) < 0.001
+        activeWeatherCoords &&
+        Math.abs(activeWeatherCoords.lat - lat) < 0.01 &&
+        Math.abs(activeWeatherCoords.lon - lon) < 0.01
       ) {
-        return true;
+        return;
       }
 
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${parsedLat}&longitude=${parsedLon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`;
+      clearTimeout(weatherDebounceTimer);
+      weatherDebounceTimer = setTimeout(async () => {
+        activeWeatherCoords = { lat, lon };
 
-      try {
-        const res = await fetch(url);
-        
-        // Gracefully handle 503 Service Unavailable / rate limits
-        if (!res.ok) {
-          console.warn(`Weather service returned HTTP ${res.status}. Falling back to idle display.`);
-          setWeatherFallback();
-          return false;
+        const weatherParams = new URLSearchParams({
+          latitude: lat.toFixed(4),
+          longitude: lon.toFixed(4),
+          current_weather: 'true',
+          hourly: 'relativehumidity_2m',
+          timezone: 'auto'
+        });
+
+        const endpoint = `https://api.open-meteo.com/v1/forecast?${weatherParams.toString()}`;
+
+        try {
+          // STRICT REQUIREMENT: No custom headers. No User-Agent, No Content-Type.
+          // Custom headers trigger an OPTIONS preflight check that causes Safari to throw "Load failed".
+          const res = await fetch(endpoint, {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'omit'
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          renderWeatherUI(data);
+
+        } catch (err) {
+          console.warn("Weather live feed offline, rendering ambient atmospheric fallback:", err.message);
+          renderWeatherFallback();
         }
+      }, 200);
+    }
+    window.fetchLiveWeather = fetchLiveWeather;
 
-        const data = await res.json();
-        if (!data || !data.current) {
-          setWeatherFallback();
-          return false;
-        }
-
-        lastWeatherCoords = { lat: parsedLat, lon: parsedLon };
-        const current = data.current;
-
-        const temp = Math.round(current.temperature_2m !== undefined ? current.temperature_2m : 24);
-        const wind = Math.round(current.wind_speed_10m !== undefined ? current.wind_speed_10m : 12);
-        const humidity = Math.round(current.relative_humidity_2m !== undefined ? current.relative_humidity_2m : 58);
-        const code = current.weather_code !== undefined ? current.weather_code : 0;
-
-        const weatherInfo = (typeof WEATHER_CODE_MAP !== "undefined" && WEATHER_CODE_MAP[code]) ? WEATHER_CODE_MAP[code] : { icon: "🌤️", desc: "Partly Cloudy & Pleasant" };
-
-        const tempEls = document.querySelectorAll('#feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
-        const windEls = document.querySelectorAll('#feature-weather-wind, .env-wind, #amenity-wind, [data-weather-wind]');
-        const humEls = document.querySelectorAll('#feature-weather-humidity, .env-humidity, #amenity-humidity, [data-weather-humidity]');
-
-        tempEls.forEach(el => { el.textContent = `${temp}°C`; });
-        windEls.forEach(el => { el.textContent = `${wind} km/h`; });
-        humEls.forEach(el => { el.textContent = `${humidity}%`; });
-
-        const descEl = document.getElementById("live-weather-desc");
-        if (descEl) descEl.innerText = weatherInfo.desc;
-
-        const iconEl = document.getElementById("weather-icon-display");
-        if (iconEl) iconEl.innerText = weatherInfo.icon;
-
-        return true;
-      } catch (err) {
-        console.warn("Weather fetch bypassed due to network error:", err.message);
-        setWeatherFallback();
-        return false;
-      }
+    async function updatePanel2_OpenMeteoWeather(lat, lon) {
+      return fetchLiveWeather(lat, lon);
     }
 
         // Panel 3: Local Intelligence via Wikipedia Geosearch & REST API (Clean GET, NO headers, origin=*)
@@ -2748,43 +2795,7 @@
 
     /* FEATURE PANEL 2: ENVIRONMENTAL / WEATHER / ATMOSPHERE (OPEN-METEO 100% KEYLESS) */
     async function fetchOpenMeteoEnvironmentalMetrics(lat, lng) {
-      const tempEl = document.getElementById("live-temp-display");
-      const descEl = document.getElementById("live-weather-desc");
-      const iconEl = document.getElementById("weather-icon-display");
-      const windEl = document.getElementById("amenity-wind");
-      const humEl = document.getElementById("amenity-humidity");
-
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`;
-
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Open-Meteo HTTP status ${res.status}`);
-        const data = await res.json();
-        const current = data.current || {};
-
-        const temp = Math.round(current.temperature_2m !== undefined ? current.temperature_2m : 24);
-        const wind = Math.round(current.wind_speed_10m !== undefined ? current.wind_speed_10m : 12);
-        const humidity = Math.round(current.relative_humidity_2m !== undefined ? current.relative_humidity_2m : 58);
-        const code = current.weather_code !== undefined ? current.weather_code : 0;
-
-        const weatherInfo = WEATHER_CODE_MAP[code] || { icon: "🌤️", desc: "Partly Cloudy & Pleasant" };
-
-        if (tempEl) tempEl.innerText = `${temp}°C`;
-        if (descEl) descEl.innerText = weatherInfo.desc;
-        if (iconEl) iconEl.innerText = weatherInfo.icon;
-        if (windEl) windEl.innerText = `${wind} km/h`;
-        if (humEl) humEl.innerText = `${humidity}%`;
-
-        return true;
-      } catch(err) {
-        console.warn("Open-Meteo fetch failed, using keyless fallback telemetry:", err);
-        if (tempEl) tempEl.innerText = "24°C";
-        if (descEl) descEl.innerText = "Clear Skies & Sunny";
-        if (iconEl) iconEl.innerText = "☀️";
-        if (windEl) windEl.innerText = "12 km/h";
-        if (humEl) humEl.innerText = "58%";
-        return false;
-      }
+      return fetchLiveWeather(lat, lng);
     }
 
     function showWeatherLoadingShimmer() {
