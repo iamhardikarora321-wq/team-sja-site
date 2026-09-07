@@ -4695,6 +4695,22 @@
     }
     window.fetchMonumentPhoto = fetchMonumentPhoto;
 
+    function createSightImage(sight) {
+      if (!sight || !sight.image) return null;
+      const img = document.createElement('img');
+      img.src = sight.image;
+      img.alt = sight.name || 'Sight Image';
+      img.className = 'heritage-thumb';
+      img.style.width = '100%';
+      img.style.height = '150px';
+      img.style.objectFit = 'cover';
+      img.onerror = function() {
+        this.style.display = 'none';
+      };
+      return img;
+    }
+    window.createSightImage = createSightImage;
+
     function renderMonumentMedia(url, title, lat, lon) {
       const safeLat = Number(lat || 0).toFixed(4);
       const safeLon = Number(lon || 0).toFixed(4);
@@ -4702,8 +4718,7 @@
 
       if (!url) return placeholder;
 
-      const safePlaceholder = placeholder.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      return `<img src="${url}" alt="${(title || '').replace(/"/g, '&quot;')}" class="heritage-thumb" style="width:100%; height:150px; object-fit:cover;" onerror="this.outerHTML='${safePlaceholder}';" />`;
+      return `<img src="${url}" alt="${(title || '').replace(/"/g, '&quot;')}" class="heritage-thumb" style="width:100%; height:150px; object-fit:cover;" onerror="this.onerror=null; this.style.display='none';" />`;
     }
     window.renderMonumentMedia = renderMonumentMedia;
 
