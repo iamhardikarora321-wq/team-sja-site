@@ -1747,11 +1747,14 @@
         // Panel 3: Local Intelligence via Wikipedia Geosearch & REST API (Clean GET, NO headers, origin=*)
     async function updatePanel3_WikiLocalIntelligence(lat, lon, displayName) {
       try {
-        const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${lat}|${lon}&gsradius=10000&gslimit=1&format=json&origin=*`;
-        const res = await fetch(wikiUrl); // Clean GET with &origin=* and NO custom headers
-        if (!res.ok) throw new Error(`Wiki error: ${res.status}`);
-        const data = await res.json();
-        const page = data.query?.geosearch?.[0];
+        const data = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+          action: 'query',
+          list: 'geosearch',
+          gscoord: `${lat}|${lon}`,
+          gsradius: '10000',
+          gslimit: '1'
+        });
+        const page = data?.query?.geosearch?.[0];
 
         if (page?.title) {
           const wikiInfo = await fetchWikiDataSafe(page.title);
@@ -1867,6 +1870,58 @@
     }
     window.formatWikiTitle = formatWikiTitle;
 
+    /**
+     * Executes a Wikimedia query via JSONP.
+     * Completely immune to browser CORS, OPTIONS preflight blocks, and Safari "Load failed" errors.
+     */
+    function fetchWikiJSONP(endpointUrl, paramsObj) {
+      return new Promise((resolve) => {
+        const callbackName = 'arvora_wiki_cb_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+        
+        const params = new URLSearchParams(paramsObj);
+        params.set('callback', callbackName);
+        params.set('format', 'json');
+
+        const script = document.createElement('script');
+        script.src = `${endpointUrl}?${params.toString()}`;
+        script.async = true;
+
+        let timedOut = false;
+        const timer = setTimeout(() => {
+          timedOut = true;
+          cleanup();
+          resolve(null);
+        }, 7000);
+
+        function cleanup() {
+          try {
+            delete window[callbackName];
+          } catch (e) {
+            window[callbackName] = undefined;
+          }
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+        }
+
+        window[callbackName] = (data) => {
+          if (timedOut) return;
+          clearTimeout(timer);
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          clearTimeout(timer);
+          cleanup();
+          resolve(null);
+        };
+
+        document.head.appendChild(script);
+      });
+    }
+    window.fetchWikiJSONP = fetchWikiJSONP;
+
     /* ====================================================================
        UNIVERSAL CORS-SAFE WIKI FETCHER (MEDIAWIKI ACTION API & IN-FLIGHT DEDUP)
        ==================================================================== */
@@ -1897,27 +1952,17 @@
       }
 
       const queryPromise = (async () => {
-        const params = new URLSearchParams({
-          action: 'query',
-          titles: normalizedKey,
-          prop: 'pageimages|extracts',
-          pithumbsize: '600',
-          exintro: '1',
-          explaintext: '1',
-          format: 'json',
-          origin: '*' // Required for anonymous browser CORS
-        });
-
         try {
-          // Clean fetch: strictly no custom headers to avoid CORS preflight rejection
-          const res = await fetch(`https://en.wikipedia.org/w/api.php?${params.toString()}`, {
-            method: 'GET',
-            mode: 'cors',
-            credentials: 'omit'
+          const data = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+            action: 'query',
+            titles: normalizedKey,
+            prop: 'pageimages|extracts',
+            pithumbsize: '600',
+            exintro: '1',
+            explaintext: '1'
           });
 
-          if (!res.ok) return null;
-          const data = await res.json();
+          if (!data) return null;
           const pages = data.query?.pages;
           if (!pages) return null;
 
@@ -1933,7 +1978,6 @@
           wikiResponseCache.set(normalizedKey, result);
           return result;
         } catch (err) {
-          // Return null cleanly without crashing or throwing
           return null;
         } finally {
           wikiInFlightRequests.delete(normalizedKey);
@@ -5390,29 +5434,19 @@
       if (lastGeoSearchCoords === coordKey) return null;
       lastGeoSearchCoords = coordKey;
 
-      const params = new URLSearchParams({
-        action: 'query',
-        generator: 'geosearch',
-        ggscoord: `${pLat}|${pLon}`,
-        ggsradius: '20000',
-        ggslimit: '6',
-        prop: 'pageimages|extracts|coordinates',
-        piprop: 'thumbnail',
-        pithumbsize: '500',
-        exintro: '1',
-        explaintext: '1',
-        format: 'json',
-        origin: '*'
-      });
-
       try {
-        const res = await fetch(`https://en.wikipedia.org/w/api.php?${params.toString()}`, {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'omit'
+        return await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+          action: 'query',
+          generator: 'geosearch',
+          ggscoord: `${pLat}|${pLon}`,
+          ggsradius: '20000',
+          ggslimit: '6',
+          prop: 'pageimages|extracts|coordinates',
+          piprop: 'thumbnail',
+          pithumbsize: '500',
+          exintro: '1',
+          explaintext: '1'
         });
-        if (!res.ok) return null;
-        return await res.json();
       } catch (err) {
         return null;
       }
@@ -5524,9 +5558,9 @@
       let photos = [];
       const seenSrcs = new Set();
 
-      // Source A: Wikipedia GeoSearch (CORS-safe Action API with origin=*)
+      // Source A: Wikipedia GeoSearch (CORS-safe JSONP Action API)
       try {
-        const geoParams = new URLSearchParams({
+        const data = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
           action: 'query',
           generator: 'geosearch',
           ggscoord: `${validLat}|${validLon}`,
@@ -5534,14 +5568,10 @@
           ggslimit: '15',
           prop: 'pageimages',
           piprop: 'thumbnail',
-          pithumbsize: '400',
-          format: 'json',
-          origin: '*'
+          pithumbsize: '400'
         });
 
-        const res = await fetch(`https://en.wikipedia.org/w/api.php?${geoParams.toString()}`);
-        if (res.ok) {
-          const data = await res.json();
+        if (data) {
           const pages = data.query?.pages ? Object.values(data.query.pages) : [];
           for (const p of pages) {
             const src = p.thumbnail?.source;
@@ -5559,21 +5589,17 @@
       // Source B: Wikimedia Commons Search Fallback
       if (photos.length < 4 && cleanName) {
         try {
-          const commonsParams = new URLSearchParams({
+          const data = await fetchWikiJSONP('https://commons.wikimedia.org/w/api.php', {
             action: 'query',
             generator: 'search',
             gsrsearch: `${cleanName} monument architecture`,
             gsrlimit: '10',
             prop: 'pageimages',
             piprop: 'thumbnail',
-            pithumbsize: '400',
-            format: 'json',
-            origin: '*'
+            pithumbsize: '400'
           });
 
-          const res = await fetch(`https://commons.wikimedia.org/w/api.php?${commonsParams.toString()}`);
-          if (res.ok) {
-            const data = await res.json();
+          if (data) {
             const pages = data.query?.pages ? Object.values(data.query.pages) : [];
             for (const p of pages) {
               const src = p.thumbnail?.source;
@@ -5637,12 +5663,20 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
       const panel = document.querySelector('#wiki-poi-panel, #nearby-attractions-panel, .local-intelligence-panel');
       if (!panel) return;
 
-      const endpoint = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=20000&ggslimit=8&prop=pageimages|extracts&piprop=thumbnail&pithumbsize=600&exintro=1&explaintext=1&format=json&origin=*`;
-
       try {
-        const res = await fetch(endpoint);
-        const data = await res.json();
-        const pages = data.query?.pages ? Object.values(data.query.pages) : [];
+        const data = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+          action: 'query',
+          generator: 'geosearch',
+          ggscoord: `${lat}|${lon}`,
+          ggsradius: '20000',
+          ggslimit: '8',
+          prop: 'pageimages|extracts',
+          piprop: 'thumbnail',
+          pithumbsize: '600',
+          exintro: '1',
+          explaintext: '1'
+        });
+        const pages = data?.query?.pages ? Object.values(data.query.pages) : [];
 
         // Prioritize POIs that have a real image and an informative summary (>80 characters)
         let bestPoi = pages.find(p => p.thumbnail?.source && p.extract && p.extract.length > 80) || pages[0];
