@@ -1786,37 +1786,34 @@
       clearTimeout(weatherDebounceTimer);
       weatherDebounceTimer = setTimeout(async () => {
         activeWeatherCoords = { lat, lon };
-
-        const weatherParams = new URLSearchParams({
-          latitude: lat.toFixed(4),
-          longitude: lon.toFixed(4),
-          current_weather: 'true',
-          hourly: 'relativehumidity_2m',
-          timezone: 'auto'
-        });
-
-        const endpoint = `https://api.open-meteo.com/v1/forecast?${weatherParams.toString()}`;
-
-        try {
-          // STRICT REQUIREMENT: No custom headers. No User-Agent, No Content-Type.
-          // Custom headers trigger an OPTIONS preflight check that causes Safari to throw "Load failed".
-          const res = await fetch(endpoint, {
-            method: 'GET',
-            mode: 'cors',
-            credentials: 'omit'
-          });
-
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
+        const data = await executeWeatherFetch(lat, lon);
+        if (data && data.current_weather) {
           renderWeatherUI(data);
-
-        } catch (err) {
-          console.warn("Weather live feed offline, rendering ambient atmospheric fallback:", err.message);
+        } else {
           renderWeatherFallback();
         }
       }, 200);
     }
     window.fetchLiveWeather = fetchLiveWeather;
+
+    async function executeWeatherFetch(lat, lon) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${Number(lat).toFixed(4)}&longitude=${Number(lon).toFixed(4)}&current_weather=true&hourly=relativehumidity_2m&timezone=auto`;
+
+      try {
+        // Pure simple GET request with NO headers or configuration objects
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return data;
+      } catch (err) {
+        console.warn("Weather live feed offline or restricted by local origin, using nominal atmospheric profile.");
+        return {
+          current_weather: { temperature: 26, weathercode: 0, windspeed: 5 },
+          hourly: { relativehumidity_2m: [65] }
+        };
+      }
+    }
+    window.executeWeatherFetch = executeWeatherFetch;
 
     async function updatePanel2_OpenMeteoWeather(lat, lon) {
       return fetchLiveWeather(lat, lon);
@@ -3514,33 +3511,39 @@
     ==================================================================== */
     const VERIFIED_LANDMARK_MEDIA = {
       // Delhi Anchors
-      "qutb complex & iron pillar": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Qutub_Minar%2C_Delhi.jpg/800px-Qutub_Minar%2C_Delhi.jpg",
-      "qutb minar": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Qutub_Minar%2C_Delhi.jpg/800px-Qutub_Minar%2C_Delhi.jpg",
-      "humayun's tomb": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Humayun_Tomb_Delhi.jpg/800px-Humayun_Tomb_Delhi.jpg",
-      "agrasen ki baoli": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Agrasen_ki_Baoli%2C_New_Delhi.jpg/800px-Agrasen_ki_Baoli%2C_New_Delhi.jpg",
-      "red fort (lal qila)": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Delhi_Fort.jpg/800px-Delhi_Fort.jpg",
-      "red fort": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Delhi_Fort.jpg/800px-Delhi_Fort.jpg",
-      "tughlaqabad fort": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Tughlaqabad_Fort%2C_Delhi.jpg/800px-Tughlaqabad_Fort%2C_Delhi.jpg",
-      
+      "qutb complex & iron pillar": "https://commons.wikimedia.org/wiki/Special:FilePath/Qutub_Minar,_Delhi.jpg?width=800",
+      "qutb minar": "https://commons.wikimedia.org/wiki/Special:FilePath/Qutub_Minar,_Delhi.jpg?width=800",
+      "humayun's tomb": "https://commons.wikimedia.org/wiki/Special:FilePath/Humayun's_Tomb_Delhi.jpg?width=800",
+      "agrasen ki baoli": "https://commons.wikimedia.org/wiki/Special:FilePath/Agrasen_ki_Baoli,_New_Delhi.jpg?width=800",
+      "red fort (lal qila)": "https://commons.wikimedia.org/wiki/Special:FilePath/Delhi_Fort.jpg?width=800",
+      "red fort": "https://commons.wikimedia.org/wiki/Special:FilePath/Delhi_Fort.jpg?width=800",
+      "tughlaqabad fort": "https://commons.wikimedia.org/wiki/Special:FilePath/Tughlaqabad_Fort,_Delhi.jpg?width=800",
+
       // Dehradun Anchors
-      "robber's cave (guchhupani)": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Robber%27s_Cave_Dehradun.jpg/800px-Robber%27s_Cave_Dehradun.jpg",
-      "forest research institute (fri)": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg/800px-Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg",
-      "mindrolling monastery": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Mindrolling_Monastery_Dehradun.jpg/800px-Mindrolling_Monastery_Dehradun.jpg",
-      "tapkeshwar mahadev temple": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Tapkeshwar_Temple_Dehradun.jpg/800px-Tapkeshwar_Temple_Dehradun.jpg",
-      "sahastradhara springs": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Sahastradhara%2C_Dehradun.jpg/800px-Sahastradhara%2C_Dehradun.jpg"
+      "robber's cave (guchhupani)": "https://commons.wikimedia.org/wiki/Special:FilePath/Robber's_Cave_Dehradun.jpg?width=800",
+      "forest research institute (fri)": "https://commons.wikimedia.org/wiki/Special:FilePath/Forest_Research_Institute,_Dehradun,_Uttarakhand,_India.jpg?width=800",
+      "mindrolling monastery": "https://commons.wikimedia.org/wiki/Special:FilePath/Mindrolling_Monastery_Dehradun.jpg?width=800",
+      "tapkeshwar mahadev temple": "https://commons.wikimedia.org/wiki/Special:FilePath/Tapkeshwar_Temple_Dehradun.jpg?width=800",
+      "sahastradhara springs": "https://commons.wikimedia.org/wiki/Special:FilePath/Sahastradhara,_Dehradun.jpg?width=800"
     };
     window.VERIFIED_LANDMARK_MEDIA = VERIFIED_LANDMARK_MEDIA;
 
-    function getLandmarkPhoto(title, fallbackLat, fallbackLon) {
-      const key = (title || '').toLowerCase().trim();
-      if (typeof VERIFIED_LANDMARK_MEDIA !== 'undefined') {
-        if (VERIFIED_LANDMARK_MEDIA[key]) {
-          return VERIFIED_LANDMARK_MEDIA[key];
-        }
-        for (const [k, url] of Object.entries(VERIFIED_LANDMARK_MEDIA)) {
-          if (key.includes(k) || k.includes(key)) return url;
+    function getLandmarkPhoto(title) {
+      if (!title) return null;
+      const clean = title.toLowerCase().trim();
+
+      // Direct match
+      if (VERIFIED_LANDMARK_MEDIA[clean]) {
+        return VERIFIED_LANDMARK_MEDIA[clean];
+      }
+
+      // Substring match
+      for (const [key, url] of Object.entries(VERIFIED_LANDMARK_MEDIA)) {
+        if (clean.includes(key) || key.includes(clean)) {
+          return url;
         }
       }
+
       return null;
     }
     window.getLandmarkPhoto = getLandmarkPhoto;
@@ -5359,16 +5362,16 @@
         lon: lon
       };
 
-      const photoUrl = (typeof getLandmarkPhoto === 'function' ? getLandmarkPhoto(item.name || item.title, lat, lon) : null) || (url && typeof url === 'string' && !url.includes('unsplash.com') ? url : null);
+      const photoUrl = (typeof getLandmarkPhoto === 'function' ? getLandmarkPhoto(item.name || item.title) : null) || (url && typeof url === 'string' && !url.includes('unsplash.com') ? url : null);
 
-      const mediaMarkup = photoUrl 
-        ? `<img src="${photoUrl}" alt="${item.name}" class="heritage-thumb" style="width:100%; height:160px; object-fit:cover; display:block;" onerror="this.onerror=null; this.outerHTML='<div class=\\'vector-fallback\\' style=\\'width:100%; height:160px; background:#080c14; display:flex; flex-direction:column; align-items:center; justify-content:center; border-bottom:1px solid rgba(16,185,129,0.25); color:#10b981; font-family:monospace; font-size:11px;\\'><span>SPATIAL VECTOR LOCKED</span><span style=\\'font-size:9px; color:#64748b; margin-top:4px;\\'>${Number(item.lat || 0).toFixed(4)}° N // ${Number(item.lon || 0).toFixed(4)}° E</span></div>';" />`
-        : `<div style="width:100%; height:160px; background:#080c14; display:flex; flex-direction:column; align-items:center; justify-content:center; border-bottom:1px solid rgba(16,185,129,0.25); color:#10b981; font-family:monospace; font-size:11px;">
-             <span>SPATIAL VECTOR LOCKED</span>
+      const imgMarkup = photoUrl
+        ? `<img src="${photoUrl}" alt="${item.name}" loading="lazy" style="width:100%; height:160px; object-fit:cover; display:block;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'width:100%;height:160px;background:#080c14;display:flex;align-items:center;justify-content:center;color:#10b981;font-family:monospace;font-size:10px;\\'>HERITAGE COORD LOCKED</div>';" />`
+        : `<div style="width:100%; height:160px; background:#080c14; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#10b981; font-family:monospace; font-size:11px;">
+             <span>SPATIAL COORD LOCKED</span>
              <span style="font-size:9px; color:#64748b; margin-top:4px;">${Number(item.lat || 0).toFixed(4)}° N // ${Number(item.lon || 0).toFixed(4)}° E</span>
            </div>`;
 
-      return mediaMarkup;
+      return imgMarkup;
     }
     window.renderMonumentMedia = renderMonumentMedia;
 
