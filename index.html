@@ -5545,10 +5545,6 @@
       const validLon = parseFloat(lon);
       if (!Number.isFinite(validLat) || !Number.isFinite(validLon)) return;
 
-      const targetId = `${validLat.toFixed(3)}_${validLon.toFixed(3)}_${rawPlaceName}`;
-      if (activeSpectrumTarget === targetId) return;
-      activeSpectrumTarget = targetId;
-
       container.innerHTML = '';
       const cleanName = (rawPlaceName || '')
         .replace(/\b(Central Vector|North Perimeter|East Watershed|South Ridge|Spatial Node)\b/gi, '')
@@ -5558,21 +5554,44 @@
       let photos = [];
       const seenSrcs = new Set();
 
-      // Source A: Wikipedia GeoSearch (CORS-safe JSONP Action API)
-      try {
-        const data = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+      // 1. Wikipedia GeoSearch via JSONP
+      const geoData = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+        action: 'query',
+        generator: 'geosearch',
+        ggscoord: `${validLat}|${validLon}`,
+        ggsradius: '25000',
+        ggslimit: '12',
+        prop: 'pageimages',
+        piprop: 'thumbnail',
+        pithumbsize: '400'
+      });
+
+      if (geoData?.query?.pages) {
+        const pages = Object.values(geoData.query.pages);
+        for (const p of pages) {
+          const src = p.thumbnail?.source;
+          if (src && !seenSrcs.has(src)) {
+            seenSrcs.add(src);
+            photos.push({ title: p.title, src });
+          }
+          if (photos.length >= 4) break;
+        }
+      }
+
+      // 2. Wikimedia Commons fallback if fewer than 4 photos
+      if (photos.length < 4 && cleanName) {
+        const commonsData = await fetchWikiJSONP('https://commons.wikimedia.org/w/api.php', {
           action: 'query',
-          generator: 'geosearch',
-          ggscoord: `${validLat}|${validLon}`,
-          ggsradius: '25000',
-          ggslimit: '15',
+          generator: 'search',
+          gsrsearch: `${cleanName} monument architecture`,
+          gsrlimit: '10',
           prop: 'pageimages',
           piprop: 'thumbnail',
           pithumbsize: '400'
         });
 
-        if (data) {
-          const pages = data.query?.pages ? Object.values(data.query.pages) : [];
+        if (commonsData?.query?.pages) {
+          const pages = Object.values(commonsData.query.pages);
           for (const p of pages) {
             const src = p.thumbnail?.source;
             if (src && !seenSrcs.has(src)) {
@@ -5582,40 +5601,9 @@
             if (photos.length >= 4) break;
           }
         }
-      } catch (err) {
-        console.warn("GeoSearch photo fetch failed:", err);
       }
 
-      // Source B: Wikimedia Commons Search Fallback
-      if (photos.length < 4 && cleanName) {
-        try {
-          const data = await fetchWikiJSONP('https://commons.wikimedia.org/w/api.php', {
-            action: 'query',
-            generator: 'search',
-            gsrsearch: `${cleanName} monument architecture`,
-            gsrlimit: '10',
-            prop: 'pageimages',
-            piprop: 'thumbnail',
-            pithumbsize: '400'
-          });
-
-          if (data) {
-            const pages = data.query?.pages ? Object.values(data.query.pages) : [];
-            for (const p of pages) {
-              const src = p.thumbnail?.source;
-              if (src && !seenSrcs.has(src)) {
-                seenSrcs.add(src);
-                photos.push({ title: p.title, src });
-              }
-              if (photos.length >= 4) break;
-            }
-          }
-        } catch (err) {
-          console.warn("Commons search fallback failed:", err);
-        }
-      }
-
-      // Render exactly 4 slots in a single row
+      // Render strictly 4 tiles horizontally
       for (let i = 0; i < 4; i++) {
         const tile = document.createElement('div');
         tile.className = 'spectrum-photo-tile';
@@ -5623,9 +5611,7 @@
 
         const photo = photos[i];
         if (photo && photo.src) {
-          const safeTitle = (photo.title || '').replace(/"/g, '&quot;');
-          const safeClick = (photo.title || '').replace(/'/g, "\\'");
-          tile.innerHTML = `<img src="${photo.src}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${photo.src}', '${safeClick}');}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:9px;color:#10b981;font-family:monospace;\\'>NODE</span>'" />`;
+          tile.innerHTML = `<img src="${photo.src}" alt="${photo.title}" title="${photo.title}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:9px;color:#10b981;font-family:monospace;\\'>NODE</span>'" />`;
         } else {
           tile.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#334155;font-size:9px;font-family:monospace;">NODE 0${i + 1}</div>`;
         }
