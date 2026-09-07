@@ -5376,6 +5376,49 @@
           console.warn("Backdrop image bypassed:", e.message);
         }
 
+    /* ====================================================================
+       SAFE NEARBY HERITAGE GEOSEARCH (CORS-SAFE MEDIAWIKI API)
+       ==================================================================== */
+    let lastGeoSearchCoords = '';
+
+    async function fetchNearbyHeritageSafe(lat, lon) {
+      const pLat = Number(lat);
+      const pLon = Number(lon);
+      if (!Number.isFinite(pLat) || !Number.isFinite(pLon)) return null;
+
+      const coordKey = `${pLat.toFixed(3)}_${pLon.toFixed(3)}`;
+      if (lastGeoSearchCoords === coordKey) return null;
+      lastGeoSearchCoords = coordKey;
+
+      const params = new URLSearchParams({
+        action: 'query',
+        generator: 'geosearch',
+        ggscoord: `${pLat}|${pLon}`,
+        ggsradius: '20000',
+        ggslimit: '6',
+        prop: 'pageimages|extracts|coordinates',
+        piprop: 'thumbnail',
+        pithumbsize: '500',
+        exintro: '1',
+        explaintext: '1',
+        format: 'json',
+        origin: '*'
+      });
+
+      try {
+        const res = await fetch(`https://en.wikipedia.org/w/api.php?${params.toString()}`, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'omit'
+        });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        return null;
+      }
+    }
+    window.fetchNearbyHeritageSafe = fetchNearbyHeritageSafe;
+
         // B. Nearby Heritage Landmarks via MediaWiki GeoSearch
         if (!heritageContainer) return;
 
@@ -5388,26 +5431,9 @@
           return;
         }
 
-        // Use clean, encoded URLSearchParams with origin=* and no custom headers
-        const params = new URLSearchParams({
-          action: 'query',
-          generator: 'geosearch',
-          ggscoord: `${lat}|${lon}`,
-          ggsradius: '20000',
-          ggslimit: '6',
-          prop: 'pageimages|extracts|coordinates',
-          piprop: 'thumbnail',
-          pithumbsize: '500',
-          exintro: '1',
-          explaintext: '1',
-          format: 'json',
-          origin: '*'
-        });
-
         try {
-          const res = await fetch(`https://en.wikipedia.org/w/api.php?${params.toString()}`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
+          const data = await fetchNearbyHeritageSafe(lat, lon);
+          if (!data) return;
           const pages = data.query?.pages ? Object.values(data.query.pages) : [];
 
           if (pages.length === 0) {
