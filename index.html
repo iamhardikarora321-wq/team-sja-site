@@ -790,10 +790,10 @@
 
   </style>
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-zndLgHsJY4rWv/0sM5G+4v/JjL42zS/0g0fE93A==" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <!-- Leaflet JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qZDqTxe9Z052fVDKEvFI26kNbdT5/5gupQ54Ow1uc/GA45BKG804PUv07fY4U6SnRShQ9bWDBR50PQ==" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     if (typeof L !== 'undefined') {
       // 1. Guard LatLng against NaN
@@ -1634,6 +1634,13 @@
               console.error("Geocoding lookup error:", err);
             }
           }
+
+          setTimeout(() => {
+            const targetMap = window.map || window.arvoraMap;
+            if (targetMap && typeof targetMap.invalidateSize === 'function') {
+              targetMap.invalidateSize();
+            }
+          }, 100);
         };
 
         if (searchForm.tagName === 'FORM') {
@@ -2074,21 +2081,29 @@
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.pushState({}, '', cleanUrl);
       }
+
+      // 5. Trigger resize when switching views
+      setTimeout(() => {
+        const targetMap = window.map || window.arvoraMap;
+        if (targetMap && typeof targetMap.invalidateSize === 'function') {
+          targetMap.invalidateSize();
+        }
+      }, 100);
     };
 
     
-            /* ====================================================================
+    /* ====================================================================
        GLOBAL LEAFLET MAP INSTANCE & UNIFIED LOCATION SYNC ENGINE
        - Stage 1: Geocoding via OpenStreetMap Nominatim
        - Stage 2: Leaflet Map Viewport & Marker Reposition with invalidateSize()
        - Stage 3: Card Population (Panel 1 Telemetry, Panel 2 Open-Meteo, Panel 3 Wikipedia)
     ==================================================================== */
-    function initMap(containerId = 'arvora-spatial-map') {
+    function getOrCreateMap() {
       if (typeof L === 'undefined') return null;
-      const container = document.getElementById('map') || document.querySelector('.map-container') || document.getElementById(containerId) || document.querySelector('.leaflet-container');
+      const container = document.getElementById('arvora-spatial-map');
       if (!container) return null;
 
-      // If a Leaflet instance already exists on window, arvoraMap, or the DOM element, reuse it
+      // Reuse if already initialized
       if (window.map && window.map._leaflet_id) {
         return window.map;
       }
@@ -2132,19 +2147,23 @@
       window.activeLocationMarker = marker;
       if (window.ArvoraState) window.ArvoraState.mapInstance = map;
 
-      // Ensure tiles render completely once DOM settles
+      // Invalidate size once rendered into the DOM
       setTimeout(() => {
         if (map && typeof map.invalidateSize === 'function') {
           map.invalidateSize();
         }
-      }, 200);
+      }, 250);
 
       return map;
     }
 
+    function initMap(containerId = 'arvora-spatial-map') {
+      return getOrCreateMap();
+    }
+
     window.initMap = initMap;
-    window.getOrCreateMap = initMap;
-    window.initArvoraMap = initMap;
+    window.getOrCreateMap = getOrCreateMap;
+    window.initArvoraMap = getOrCreateMap;
 
         async function syncLocationData(query) {
       if (!query) return;
@@ -2300,6 +2319,13 @@
       if (query) {
         syncLocationData(query);
       }
+
+      setTimeout(() => {
+        const targetMap = window.map || window.arvoraMap;
+        if (targetMap && typeof targetMap.invalidateSize === 'function') {
+          targetMap.invalidateSize();
+        }
+      }, 100);
     }
 
     window.executeSearch = executeSearch;
@@ -2327,6 +2353,13 @@
       }
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      setTimeout(() => {
+        const targetMap = window.map || window.arvoraMap;
+        if (targetMap && typeof targetMap.invalidateSize === 'function') {
+          targetMap.invalidateSize();
+        }
+      }, 100);
     };
 
     window.enterFeatures = window.enterDashboard;
