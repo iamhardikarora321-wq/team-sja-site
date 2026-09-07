@@ -513,61 +513,17 @@
       margin-top: 8px;
     }
 
-    /* Explore Places & Heritage Coordinates Container & Two-Tier Layout */
-    .heritage-section-container, #explore-places-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      width: 100%;
-    }
-
-    /* Tier 1: Primary monuments grid (Humayun's Tomb, etc.) */
-    .heritage-primary-sights-grid, #heritage-coordinates-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-      width: 100%;
-    }
-
-    /* Tier 2: Directly below Humayun's Tomb and the primary sights */
-    .specialized-guild-adventure-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      width: 100%;
-      margin-top: 8px;
-      padding-top: 24px;
-      border-top: 1px solid rgba(16, 185, 129, 0.2); /* Subtle divider below the monuments */
-    }
-
-    @media (max-width: 768px) {
-      .specialized-guild-adventure-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Filter Pill Component & Two-Tier Category Ribbon */
+    /* 3-Section Structured Layout for Explore Places */
+    .sights-category-nav,
+    .places-category-bar,
     .category-filter-container {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
       margin: 14px 0 24px 0;
       width: 100%;
     }
-    .category-row-primary,
-    .category-row-secondary,
-    .primary-sights-row,
-    .secondary-options-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-    }
-    .secondary-options-row {
-      flex-basis: 100%;
-      width: 100%;
-      margin-top: 4px;
-    }
+    .cat-pill,
     .filter-pill {
       background: rgba(18, 24, 34, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -581,24 +537,63 @@
       white-space: nowrap;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .cat-pill:hover, .cat-pill.active,
     .filter-pill:hover, .filter-pill.active {
       background: rgba(16, 185, 129, 0.12);
       border-color: rgba(16, 185, 129, 0.5);
       color: #ffffff;
       box-shadow: 0 0 14px rgba(16, 185, 129, 0.18);
     }
-    .category-row-secondary .filter-pill,
-    .secondary-options-row .filter-pill {
-      border-color: rgba(56, 189, 248, 0.35);
+
+    .heritage-results-grid,
+    .heritage-primary-sights-grid,
+    .places-bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      width: 100%;
     }
-    .category-row-secondary .filter-pill:hover,
-    .category-row-secondary .filter-pill.active,
-    .secondary-options-row .filter-pill:hover,
-    .secondary-options-row .filter-pill.active {
-      background: rgba(56, 189, 248, 0.14);
-      border-color: rgba(56, 189, 248, 0.6);
-      color: #ffffff;
-      box-shadow: 0 0 14px rgba(56, 189, 248, 0.22);
+
+    .specialized-heritage-footer,
+    .specialized-guild-adventure-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 20px;
+      width: 100%;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .specialized-block {
+      background: rgba(3, 7, 12, 0.75);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .craft-guild-block {
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .adventure-passes-block {
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .specialized-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+    .spec-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+    }
+    .craft-guild-block .spec-tag {
+      color: #10b981;
+    }
+    .adventure-passes-block .spec-tag {
+      color: #38bdf8;
     }
 
     /* Place Bento Card */
@@ -1340,7 +1335,7 @@
     </section>
 
     <!-- =======================================================
-       EXPLORE PLACES & HERITAGE COORDINATES (50 VERIFIED SIGHTS)
+       EXPLORE PLACES & HERITAGE COORDINATES (3-SECTION LAYOUT)
     ======================================================= -->
     <section id="explore-places-section" class="heritage-section-container" style="margin-top: 50px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 18px; margin-bottom: 24px;">
@@ -1351,52 +1346,44 @@
         <span class="telemetry" id="places-counter" style="color: var(--accent-emerald);">50 VERIFIED SIGHTS LOADED</span>
       </div>
 
-      <!-- Filter Pills (Two-Tier Structured Category Ribbon) -->
-      <div class="places-category-bar category-filter-container">
-        <div class="category-row-primary primary-sights-row">
-          <button class="filter-pill active" onclick="filterPlaces('all', this)">ALL SIGHTS (50)</button>
-          <button class="filter-pill" onclick="filterPlaces('nature', this)">🏔️ NATURE & GEOLOGY (10)</button>
-          <button class="filter-pill" onclick="filterPlaces('historical', this)">🏛️ HISTORICAL & FORTS (10)</button>
-          <button class="filter-pill" onclick="filterPlaces('spiritual', this)">🪔 SPIRITUAL & CAVE SANCTUMS (10)</button>
-        </div>
-        <div class="category-row-secondary secondary-options-row">
-          <button class="filter-pill" onclick="filterPlaces('craft', this)">🏺 CRAFT & GUILD BAZAARS (10)</button>
-          <button class="filter-pill" onclick="filterPlaces('adventure', this)">🧗 ADVENTURE & HIGH PASSES (10)</button>
-        </div>
+      <!-- SECTION 1: SIGHT CATEGORY FILTER BUTTONS -->
+      <div class="sights-category-nav places-category-bar category-filter-container">
+        <button class="cat-pill filter-pill active" data-cat="all" onclick="filterPlaces('all', this)">ALL SIGHTS (50)</button>
+        <button class="cat-pill filter-pill" data-cat="nature" onclick="filterPlaces('nature', this)">🏔️ NATURE & GEOLOGY (10)</button>
+        <button class="cat-pill filter-pill" data-cat="historical" onclick="filterPlaces('historical', this)">🏛️ HISTORICAL & FORTS (10)</button>
+        <button class="cat-pill filter-pill" data-cat="sanctums" onclick="filterPlaces('spiritual', this)">🪔 SPIRITUAL & CAVE SANCTUMS (10)</button>
       </div>
 
-      <!-- TIER 1: Primary Monument Cards Grid (Humayun's Tomb, Qutb Minar, Shaniwar Wada, etc.) -->
-      <div class="places-bento-grid heritage-primary-sights-grid" id="places-grid">
-        <!-- Rendered via JS -->
+      <!-- SECTION 2: DYNAMIC RESULTS GRID (Humayun's Tomb, etc. render here) -->
+      <div id="heritage-coordinates-grid" class="heritage-results-grid places-bento-grid heritage-primary-sights-grid">
+        <!-- Dynamic monument cards injected here -->
       </div>
 
-      <!-- TIER 2: Directly Below Humayun's Tomb and Primary Monument Cards -->
-      <div id="crafts-adventure-section" class="specialized-guild-adventure-row">
-        <!-- Craft & Guild Bazaars Panel -->
-        <div id="crafts-panel" style="background: rgba(3, 7, 12, 0.75); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; padding: 24px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+      <!-- SECTION 3: SPECIALIZED DOMAINS (Strictly BELOW the results) -->
+      <div class="specialized-heritage-footer specialized-guild-adventure-row" id="crafts-adventure-section">
+        <div class="specialized-block craft-guild-block" id="crafts-panel">
+          <div class="specialized-header">
             <div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #10b981; letter-spacing: 1px;">HERITAGE TRADE GUILDS</span>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px;">CRAFT & GUILD BAZAARS</h3>
+              <span class="spec-tag">VERNACULAR COMMERCE</span>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px;">Craft & Guild Bazaars</h3>
             </div>
             <span style="font-size: 1.4rem;">🏺</span>
           </div>
-          <div id="craft-bazaars-grid" class="craft-bazaars-list">
-            <!-- Rendered via JS -->
+          <div id="craft-bazaars-grid" class="spec-content-grid craft-bazaars-list">
+            <!-- Craft items rendered dynamically -->
           </div>
         </div>
 
-        <!-- Adventure & High Passes Panel -->
-        <div id="adventure-panel" style="background: rgba(3, 7, 12, 0.75); border: 1px solid rgba(56,189,248,0.25); border-radius: 12px; padding: 24px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+        <div class="specialized-block adventure-passes-block" id="adventure-panel">
+          <div class="specialized-header">
             <div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #38bdf8; letter-spacing: 1px;">TOPOGRAPHIC TRAILS & RIDGES</span>
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px;">ADVENTURE & HIGH PASSES</h3>
+              <span class="spec-tag">TOPOGRAPHIC EXPEDITIONS</span>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px;">Adventure & High Passes</h3>
             </div>
             <span style="font-size: 1.4rem;">🧗</span>
           </div>
-          <div id="adventure-passes-grid" class="adventure-passes-list">
-            <!-- Rendered via JS -->
+          <div id="adventure-passes-grid" class="spec-content-grid adventure-passes-list">
+            <!-- Pass items rendered dynamically -->
           </div>
         </div>
       </div>
@@ -4115,7 +4102,7 @@
 
     function renderPlaces(filterCategory = "all") {
       currentCategoryFilter = filterCategory;
-      const container = document.getElementById("places-grid");
+      const container = document.getElementById("heritage-coordinates-grid") || document.getElementById("places-grid") || document.getElementById("heritage-places-results");
       if (!container) return;
 
       const dataset = getCurrentCityPlaces();
@@ -4172,7 +4159,7 @@
     }
 
     function filterPlaces(cat, btnElement) {
-      document.querySelectorAll(".places-category-bar .filter-pill").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".sights-category-nav .filter-pill, .sights-category-nav .cat-pill, .places-category-bar .filter-pill").forEach(b => b.classList.remove("active"));
       if (btnElement) btnElement.classList.add("active");
       renderPlaces(cat);
     }
