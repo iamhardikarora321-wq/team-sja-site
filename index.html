@@ -4662,17 +4662,36 @@
     /* ====================================================================
        OFFICIAL WIKIPEDIA REST API MONUMENT PHOTO & VECTOR PLACEHOLDER ENGINE
     ==================================================================== */
-    async function fetchMonumentPhoto(title) {
+    const WIKI_DISAMBIGUATION_MAP = {
+      "robber's cave": "Robber's_Cave,_India",
+      "robbers cave": "Robber's_Cave,_India",
+      "guchhupani": "Robber's_Cave,_India",
+      "fri": "Forest_Research_Institute_(India)",
+      "forest research institute": "Forest_Research_Institute_(India)",
+      "tapkeshwar": "Tapkeshwar_Temple",
+      "tapkeshwar temple": "Tapkeshwar_Temple"
+    };
+
+    async function getVerifiedMonumentImage(placeName) {
+      const key = (placeName || '').trim().toLowerCase();
+      const targetPage = WIKI_DISAMBIGUATION_MAP[key] || encodeURIComponent(placeName);
+
       try {
-        const cleanTitle = (title || '').trim();
-        if (!cleanTitle) return null;
-        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanTitle)}`);
-        if (!res.ok) return null;
-        const data = await res.json();
-        return data.thumbnail?.source || data.originalimage?.source || null;
-      } catch {
-        return null;
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${targetPage}`);
+        if (res.ok) {
+          const data = await res.json();
+          return data.originalimage?.source || data.thumbnail?.source || null;
+        }
+      } catch (err) {
+        console.warn(`Could not resolve image for ${placeName}:`, err);
       }
+      return null;
+    }
+    window.WIKI_DISAMBIGUATION_MAP = WIKI_DISAMBIGUATION_MAP;
+    window.getVerifiedMonumentImage = getVerifiedMonumentImage;
+
+    async function fetchMonumentPhoto(title) {
+      return await getVerifiedMonumentImage(title);
     }
     window.fetchMonumentPhoto = fetchMonumentPhoto;
 
@@ -4806,14 +4825,10 @@
         try {
           const cleanName = (placeName || '').split(',')[0].trim();
           if (cleanName) {
-            const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
-            if (summaryRes.ok) {
-              const summary = await summaryRes.json();
-              const photoUrl = summary.originalimage?.source || summary.thumbnail?.source;
-              if (photoUrl && backdropEl) {
-                backdropEl.style.backgroundImage = `radial-gradient(circle at 50% 30%, rgba(4, 6, 8, 0.25) 0%, #040608 85%), url('${photoUrl}')`;
-                backdropEl.style.opacity = '0.28';
-              }
+            const photoUrl = await getVerifiedMonumentImage(cleanName);
+            if (photoUrl && backdropEl) {
+              backdropEl.style.backgroundImage = `radial-gradient(circle at 50% 30%, rgba(4, 6, 8, 0.25) 0%, #040608 85%), url('${photoUrl}')`;
+              backdropEl.style.opacity = '0.28';
             }
           }
         } catch (e) {
