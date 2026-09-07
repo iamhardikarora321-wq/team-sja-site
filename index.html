@@ -1094,10 +1094,10 @@
 
   </style>
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
 
   <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <script>
     if (typeof L !== 'undefined') {
       // 1. Guard LatLng against NaN
@@ -1723,6 +1723,23 @@
       return cleaned || 'Ancient Settlement';
     }
     window.sanitizePlaceName = sanitizePlaceName;
+
+    // Universal safe key extractor helper
+    function deriveCodexKey(input) {
+      if (!input) return 'delhi';
+      const str = (typeof input === 'string' ? input : (input.displayName || input.name || '')).toLowerCase();
+      
+      if (str.includes('pune') || str.includes('maharashtra')) return 'pune';
+      if (str.includes('dehradun') || str.includes('doon') || str.includes('uttarakhand')) return 'dehradun';
+      if (str.includes('kanpur')) return 'kanpur';
+      if (str.includes('varanasi') || str.includes('banaras') || str.includes('kashi')) return 'varanasi';
+      if (str.includes('delhi')) return 'delhi';
+      
+      // Default to sanitized first token or fallback to delhi
+      const cleaned = str.replace(/[^a-z0-9]/g, ' ').trim().split(/\s+/)[0];
+      return cleaned || 'delhi';
+    }
+    window.deriveCodexKey = deriveCodexKey;
 
     /* ====================================================================
        CULTURAL INQUIRIES GENERATOR & RENDERER
@@ -3456,9 +3473,12 @@
       const inqDeck = document.getElementById("inquiries-deck") || document.getElementById("inquiries-root");
       const pillarsDeck = document.getElementById("pillars-deck") || document.getElementById("dna-root");
 
+      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(cityKey) : (cityKey || 'delhi').toLowerCase();
+      const placeName = typeof sanitizePlaceName === 'function' ? sanitizePlaceName(cityKey) : cityKey;
+
       if (inqDeck) {
         if (typeof renderInquiryCards === "function") {
-          renderInquiryCards(inqDeck, key || placeName, activeLat, activeLon);
+          renderInquiryCards(inqDeck, placeName, activeLat, activeLon);
         }
       }
 
@@ -5008,7 +5028,7 @@
       const container = document.getElementById('craft-bazaars-grid') || document.querySelector('.craft-bazaars-list, #crafts-panel');
       if (!container) return;
 
-      const key = resolveDossierKey(placeName) || ((placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi');
+      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(placeName) : (resolveDossierKey(placeName) || 'delhi');
       const items = CRAFT_BAZAAR_CATALOG[key] || [
         { name: `${placeName || 'Regional'} Artisan Guild Bazaars`, guild: "Indigenous Handloom & Metalcraft Guild", focus: "Native vernacular artefacts, regional hand-embroidery, and marketplace traders", zone: "Central Old Quarter" }
       ];
@@ -5048,7 +5068,7 @@
       const container = document.getElementById('adventure-passes-grid') || document.querySelector('.adventure-passes-list, #adventure-panel');
       if (!container) return;
 
-      const key = resolveDossierKey(placeName) || ((placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi');
+      const key = typeof deriveCodexKey === 'function' ? deriveCodexKey(placeName) : (resolveDossierKey(placeName) || 'delhi');
       const items = ADVENTURE_PASS_CATALOG[key] || [
         { name: `${placeName || 'Regional'} High Topo Vector`, type: "Regional Ridge & Trail Corridor", elevation: "Topographic Apex", trail: "Vernacular terrain traverses, gradient trails, and exploration vantage points" }
       ];
