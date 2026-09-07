@@ -5215,15 +5215,12 @@
                         document.querySelector('.photographic-spectrum-grid, .photographic-spectrum');
       if (!container) return;
 
-      // 1. Instantly flush prior elements
       container.innerHTML = '';
+      const cleanName = typeof sanitizePlaceName === 'function' ? sanitizePlaceName(rawName) : (rawName || '').split(',')[0].trim();
 
-      const cleanName = (rawName || '').replace(/Central Vector|North Perimeter|East Watershed|South Ridge/gi, '').split(',')[0].trim();
-
-      // 2. Fetch real photos from Wikipedia GeoSearch within 20km
       let photos = [];
       try {
-        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=20000&ggslimit=10&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=20000&ggslimit=8&prop=pageimages&piprop=thumbnail&pithumbsize=320&format=json&origin=*`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
@@ -5239,37 +5236,38 @@
           }
         }
       } catch (err) {
-        console.warn("Spectrum fetch failed:", err);
+        console.warn("Spectrum GeoSearch failed:", err);
       }
 
-      // Fallback: If fewer than 4, get the primary place summary photo
+      // Fallback if GeoSearch found fewer than 4 photos
       if (photos.length < 4 && cleanName) {
         try {
           const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
           if (res.ok) {
             const data = await res.json();
-            const mainImg = data.thumbnail?.source || data.originalimage?.source;
-            if (mainImg && !photos.some(p => p.src === mainImg)) {
-              photos.unshift({ title: data.title, src: mainImg });
+            const mainSrc = data.thumbnail?.source || data.originalimage?.source;
+            if (mainSrc && !photos.some(p => p.src === mainSrc)) {
+              photos.unshift({ title: data.title, src: mainSrc });
             }
           }
         } catch (e) {}
       }
 
-      // 3. Render only the photos that exist (max 4). Do not render empty dummy boxes!
-      if (photos.length === 0) {
-        container.innerHTML = '<div style="color:#64748b;font-size:10px;font-family:monospace;padding:8px;">AWAITING SPATIAL SPECTRUM...</div>';
-        return;
-      }
-
-      photos.slice(0, 4).forEach(item => {
+      // Render up to 4 tiles; if fewer, leave clean dark blueprint tiles (NO dummy text)
+      for (let i = 0; i < 4; i++) {
         const tile = document.createElement('div');
         tile.className = 'spectrum-photo-tile';
-        const safeTitle = (item.title || '').replace(/"/g, '&quot;');
-        const safeClick = (item.title || '').replace(/'/g, "\\'");
-        tile.innerHTML = `<img src="${item.src}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.src}', '${safeClick}');}" onerror="this.parentElement.remove()" />`;
+        const photo = photos[i];
+
+        if (photo && photo.src) {
+          const safeTitle = (photo.title || '').replace(/"/g, '&quot;');
+          const safeClick = (photo.title || '').replace(/'/g, "\\'");
+          tile.innerHTML = `<img src="${photo.src}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${photo.src}', '${safeClick}');}" onerror="this.parentElement.style.opacity='0.3'" />`;
+        } else {
+          tile.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#1e293b;font-size:9px;font-family:monospace;">—</div>`;
+        }
         container.appendChild(tile);
-      });
+      }
     }
     window.updatePhotographicSpectrum = updatePhotographicSpectrum;
 
