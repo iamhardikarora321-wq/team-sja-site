@@ -5519,16 +5519,20 @@
 
         const titleEl = panel.querySelector('.poi-title, h4, #wiki-poi-title');
         const descEl = panel.querySelector('.poi-desc, p, #wiki-poi-extract');
-        const mediaEl = panel.querySelector('.poi-media, #wiki-poi-image');
+        const mediaContainer = document.querySelector('.local-intelligence-panel .poi-media, #wiki-poi-image');
 
         if (bestPoi) {
           if (titleEl) titleEl.textContent = bestPoi.title;
           if (descEl) descEl.textContent = bestPoi.extract || "Documented geographic and cultural heritage site.";
-          if (mediaEl) {
-            if (bestPoi.thumbnail?.source) {
-              mediaEl.innerHTML = `<img src="${bestPoi.thumbnail.source}" alt="${bestPoi.title}" />`;
-            } else {
-              mediaEl.innerHTML = `<div style="height:80px; display:flex; align-items:center; justify-content:center; background:#080d14; border-radius:6px; border:1px dashed rgba(16,185,129,0.2); color:#10b981; font-size:11px; font-family:monospace;">HERITAGE SITE // ${bestPoi.title.toUpperCase()}</div>`;
+          if (mediaContainer) {
+            // Clear any existing images
+            mediaContainer.innerHTML = '';
+            if (bestPoi && bestPoi.thumbnail?.source) {
+              const img = document.createElement('img');
+              img.src = bestPoi.thumbnail.source;
+              img.alt = bestPoi.title;
+              img.style.cssText = 'width:100%; height:140px; object-fit:cover; border-radius:8px; display:block;';
+              mediaContainer.appendChild(img);
             }
           }
         } else {
