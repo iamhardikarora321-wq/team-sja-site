@@ -892,74 +892,8 @@
       <button class="btn btn-emerald" onclick="executeSearch()">RESOLVE CODEX</button>
     </div>
 
-    <div class="scan-line" id="scan-line"></div>
-
-    <!-- Quick Location Chips -->
-    <div class="hud-chips">
-      <button class="hud-chip active" onclick="loadLocation('Delhi')">Delhi</button>
-      <button class="hud-chip" onclick="loadLocation('Dehradun')">Dehradun</button>
-      <button class="hud-chip" onclick="loadLocation('Varanasi')">Varanasi</button>
-      <button class="hud-chip" onclick="loadLocation('Hampi')">Hampi</button>
-      <button class="hud-chip" onclick="loadLocation('Agra')">Agra</button>
-      <button class="hud-chip" onclick="loadLocation('Kashmir')">Kashmir</button>
-      <button class="hud-chip" onclick="loadLocation('Goa')">Goa</button>
-      <button class="hud-chip" onclick="loadLocation('Amritsar')">Amritsar</button>
-      <button class="hud-chip" onclick="loadLocation('Jaipur')">Jaipur</button>
-      <button class="hud-chip" onclick="loadLocation('Ladakh')">Ladakh</button>
-      <button class="hud-chip" onclick="loadLocation('Kerala')">Kerala</button>
-    </div>
-
-    <!-- Dynamic Telemetry Banner -->
-    <div class="meta-banner">
-      <div>
-        <span class="telemetry" id="geo-coords"><span class="telemetry-dot"></span> GEOSPATIAL VECTOR VERIFIED</span>
-        <h2 class="destination-headline" id="destination-title">DELHI: AUTONOMOUS CODEX</h2>
-      </div>
-      <span class="telemetry" style="color:var(--accent-amber);" id="extract-source">LIVE GEODATA ENGINE</span>
-    </div>
-
-    <!-- Micro-Telemetry HUD Grid (4 Glass Cards) -->
-    <div class="telemetry-grid">
-      <div class="telemetry-card">
-        <div class="telemetry-icon">🌤️</div>
-        <div>
-          <div class="telemetry" style="font-size:0.65rem;">CLIMATE MATRIX</div>
-          <div style="font-size:1.1rem; font-weight:700; color:#fff;" id="hud-temp">24°C Pleasant</div>
-          <div style="font-size:0.75rem; color:var(--text-dim);" id="hud-climate-sub">Plains Microclimate &bull; 58% RH</div>
-        </div>
-      </div>
-
-      <div class="telemetry-card">
-        <div class="telemetry-icon">📅</div>
-        <div>
-          <div class="telemetry" style="font-size:0.65rem;">PRIME WINDOW</div>
-          <div style="font-size:1.1rem; font-weight:700; color:#fff;" id="hud-season">Oct – Mar</div>
-          <div style="font-size:0.75rem; color:var(--text-dim);" id="hud-season-sub">Clear Skies &bull; Ideal Festivals</div>
-        </div>
-      </div>
-
-      <div class="telemetry-card">
-        <div class="telemetry-icon">💰</div>
-        <div>
-          <div class="telemetry" style="font-size:0.65rem;">DAILY BURN RATE</div>
-          <div style="font-size:1.1rem; font-weight:700; color:#fff;" id="hud-burn">₹2,200 – ₹5,500</div>
-          <div style="font-size:0.75rem; color:var(--text-dim);" id="hud-burn-sub">Per Head INR (Stay + Meals)</div>
-        </div>
-      </div>
-
-      <div class="telemetry-card">
-        <div class="telemetry-icon">🗓️</div>
-        <div>
-          <div class="telemetry" style="font-size:0.65rem;">DWELL TIME</div>
-          <div style="font-size:1.1rem; font-weight:700; color:#fff;" id="hud-dwell">2 – 4 Days</div>
-          <div style="font-size:0.75rem; color:var(--text-dim);" id="hud-dwell-sub">Recommended Codex Scope</div>
-        </div>
-      </div>
-    </div>
-
-
     <!-- Interactive Spatial Vector Map Viewport -->
-    <div class="spatial-map-wrapper" style="margin-bottom: 40px;">
+    <div class="spatial-map-wrapper" style="margin-top: 24px; margin-bottom: 40px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <span class="telemetry"><span class="telemetry-dot"></span> LIVE SPATIAL VECTOR MAP // OPENSTREETMAP LEAFLET ENGINE</span>
         <span class="telemetry" id="map-target-status" style="color: var(--accent-emerald);">VECTOR LOCKED</span>
@@ -3550,10 +3484,16 @@
       }
     });
 
-    // Initialize Autocomplete & State from URL on DOM Ready
+    // Initialize Autocomplete, State from URL, & Recalibrate Map on DOM Ready
     document.addEventListener("DOMContentLoaded", () => {
       setupSearchAutocomplete();
       ArvoraState.initFromURL();
+      setTimeout(() => {
+        const targetMap = window.map || window.arvoraMap;
+        if (targetMap && typeof targetMap.invalidateSize === 'function') {
+          targetMap.invalidateSize();
+        }
+      }, 300);
     });
 
   </script>
