@@ -814,8 +814,131 @@
       align-items: center;
       transition: border-color 0.2s ease;
     }
-    .poi-item-row:hover {
+    /* Faded Ambient Backdrop Engine */
+    #arvora-ambient-backdrop {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background-size: cover;
+      background-position: center 25%;
+      background-repeat: no-repeat;
+      opacity: 0.22; /* Subtle, cinematic faded aesthetic */
+      filter: blur(8px) saturate(1.1) brightness(0.7);
+      transition: background-image 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Ensure app content sits cleanly above the backdrop */
+    .app-container, header, main, #arvora-spatial-map, .search-container, #main-page, #dashboard-view, section {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Heritage Coordinates Vector Cards */
+    .heritage-coordinate-card {
+      background: rgba(8, 14, 22, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+    .heritage-coordinate-card:hover {
+      transform: translateY(-3px);
       border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    .heritage-card-media {
+      position: relative;
+      height: 160px;
+      width: 100%;
+      background: rgba(3, 7, 12, 0.9);
+      overflow: hidden;
+    }
+    .heritage-card-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .heritage-coordinate-card:hover .heritage-card-thumb {
+      transform: scale(1.05);
+    }
+    .heritage-card-vector-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(16,185,129,0.15) 0%, rgba(3,7,12,0.95) 70%);
+    }
+    .heritage-card-vector-placeholder span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: #10b981;
+      letter-spacing: 1px;
+      border: 1px dashed rgba(16, 185, 129, 0.4);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    .coord-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(3, 5, 7, 0.85);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #10b981;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .heritage-card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .heritage-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 6px 0;
+      line-height: 1.3;
+    }
+    .heritage-card-snippet {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin: 0 0 14px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .re-center-vector-btn {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .re-center-vector-btn:hover {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: #10b981;
+      color: #fff;
     }
 
   </style>
@@ -877,6 +1000,7 @@
   </script>
 </head>
 <body>
+  <div id="arvora-ambient-backdrop" class="ambient-backdrop" aria-hidden="true"></div>
 
   <!-- Dynamic Photographic Layer -->
   <div class="viewport-stage">
@@ -4259,12 +4383,111 @@
     }
     window.renderStateDossier = renderStateDossier;
 
+    /* ====================================================================
+       AUTHENTIC WIKIPEDIA REAL PHOTO & HERITAGE BACKDROP ENGINE
+    ==================================================================== */
+    async function updateHeritageAndBackdrop(placeName, lat, lon) {
+      const backdropEl = document.getElementById('arvora-ambient-backdrop');
+      const heritageContainer = document.getElementById('heritage-coordinates-grid') || 
+                                document.getElementById('places-grid') ||
+                                document.querySelector('.heritage-coordinates-container, #explore-places-list');
+
+      // A. Fetch City Summary & Ambient Faded Backdrop Photo
+      try {
+        const cleanQuery = (placeName || 'India').split(',')[0].trim();
+        const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanQuery)}`);
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          const cityPhoto = summaryData.originalimage?.source || summaryData.thumbnail?.source;
+          if (cityPhoto && backdropEl) {
+            backdropEl.style.backgroundImage = `radial-gradient(circle at 50% 30%, rgba(4, 6, 8, 0.2) 0%, #040608 85%), url('${cityPhoto}')`;
+            backdropEl.style.opacity = '0.28';
+          }
+        }
+      } catch (e) {
+        console.warn("Backdrop photo fetch bypassed:", e.message);
+      }
+
+      // B. Fetch Nearby Heritage Landmarks with Real Images via Wikipedia GeoSearch & PageImages
+      if (!heritageContainer) return;
+      heritageContainer.innerHTML = '<div class="loading-pulse" style="grid-column: 1/-1; text-align:center; padding: 40px; color:#10b981; font-family:\'JetBrains Mono\', monospace;">CALIBRATING SPATIAL HERITAGE VECTORS...</div>';
+
+      const geoQueryUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}|${lon}&ggsradius=20000&ggslimit=6&prop=pageimages|extracts|coordinates&piprop=thumbnail&pithumbsize=600&exintro=1&explaintext=1&exchars=140&format=json&origin=*`;
+
+      try {
+        const res = await fetch(geoQueryUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const pages = data.query?.pages ? Object.values(data.query.pages) : [];
+
+        if (pages.length === 0) {
+          heritageContainer.innerHTML = `<div class="codex-empty-msg" style="grid-column: 1/-1; text-align:center; padding: 40px; color:#94a3b8; font-family:\'JetBrains Mono\', monospace;">No indexed heritage vectors within 20 km of ${placeName}.</div>`;
+          return;
+        }
+
+        heritageContainer.innerHTML = '';
+        pages.forEach((item) => {
+          const card = document.createElement('div');
+          card.className = 'heritage-coordinate-card';
+          
+          // Real thumbnail from Wikipedia or dark vector graphic placeholder
+          const thumbImg = item.thumbnail?.source 
+            ? `<img src="${item.thumbnail.source}" alt="${(item.title || '').replace(/"/g, '&quot;')}" class="heritage-card-thumb" onerror="this.parentElement.innerHTML='<div class=\\'heritage-card-vector-placeholder\\'><span>VECTOR LOCKED</span></div>'" />` 
+            : `<div class="heritage-card-vector-placeholder"><span>VECTOR LOCKED</span></div>`;
+
+          const itemLat = item.coordinates?.[0]?.lat ?? lat;
+          const itemLon = item.coordinates?.[0]?.lon ?? lon;
+
+          card.innerHTML = `
+            <div class="heritage-card-media">
+              ${thumbImg}
+              <span class="coord-badge">${Number(itemLat).toFixed(4)}° N, ${Number(itemLon).toFixed(4)}° E</span>
+            </div>
+            <div class="heritage-card-body">
+              <div>
+                <h4 class="heritage-card-title">${item.title}</h4>
+                <p class="heritage-card-snippet">${item.extract || 'Documented heritage site and spatial cultural landmark.'}</p>
+              </div>
+              <button class="re-center-vector-btn" type="button">TARGET MAP VECTOR ↗</button>
+            </div>
+          `;
+
+          // Tapping card flies Leaflet directly to that specific landmark
+          card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const targetMap = window.map || window.arvoraMap;
+            if (targetMap && typeof targetMap.flyTo === 'function') {
+              targetMap.flyTo([itemLat, itemLon], 15, { duration: 1.2 });
+              if (window.activeMarker && typeof window.activeMarker.setLatLng === 'function') {
+                window.activeMarker.setLatLng([itemLat, itemLon]);
+                if (typeof window.activeMarker.bindPopup === 'function') {
+                  window.activeMarker.bindPopup(`<b>${item.title}</b>`).openPopup();
+                }
+              }
+            }
+          });
+
+          heritageContainer.appendChild(card);
+        });
+
+        const counter = document.getElementById("places-counter");
+        if (counter) counter.innerText = `${pages.length} VERIFIED HERITAGE SIGHTS DISPLAYED`;
+
+      } catch (err) {
+        console.warn("Heritage coordinates fetch bypassed:", err.message);
+      }
+    }
+    window.updateHeritageAndBackdrop = updateHeritageAndBackdrop;
+
     // Initialize on page load
     document.addEventListener("DOMContentLoaded", () => {
       loadLocation("Delhi");
       renderPlaces("all");
       if (typeof renderStateDossier === "function") {
         renderStateDossier("Delhi", 28.6139, 77.2090);
+      }
+      if (typeof updateHeritageAndBackdrop === "function") {
+        updateHeritageAndBackdrop("Delhi", 28.6139, 77.2090);
       }
     });
   
@@ -4295,17 +4518,25 @@
       if (typeof renderStateDossier === "function") {
         renderStateDossier(cleanName, parsedLat, parsedLon);
       }
+
+      // 5. Update Ambient Faded Backdrop & Fetch Real Photos from Wikipedia GeoSearch
+      if (typeof updateHeritageAndBackdrop === "function") {
+        updateHeritageAndBackdrop(cleanName, parsedLat, parsedLon);
+      }
     }
     window.updateAllCulturalPanels = updateAllCulturalPanels;
 
     // Register subscribers to synchronize all modules on location update
     ArvoraState.subscribe((state) => {
       if (!state) return;
-      const placeName = (state.displayName || state.name || 'Current Location').split(',')[0].trim();
+      const placeName = (state.displayName || state.name || 'India').split(',')[0].trim();
       const lat = parseFloat(state.lat);
       const lon = parseFloat(state.lon ?? state.lng);
       if (Number.isFinite(lat) && Number.isFinite(lon)) {
         updateAllCulturalPanels(placeName, lat, lon);
+        if (typeof updateHeritageAndBackdrop === "function") {
+          updateHeritageAndBackdrop(placeName, lat, lon);
+        }
       }
     });
 
