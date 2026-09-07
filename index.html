@@ -4454,9 +4454,25 @@
       }
     };
 
+    /* ====================================================================
+       RESOLVE DOSSIER KEY HELPER
+    ==================================================================== */
+    function resolveDossierKey(query) {
+      const q = (query || '').toLowerCase().trim();
+      if (q.includes('dehradun') || q.includes('doon') || q.includes('uttarakhand') || q.includes('guchhupani')) return 'dehradun';
+      if (q.includes('pune') || q.includes('maharashtra')) return 'pune';
+      if (q.includes('delhi')) return 'delhi';
+      if (q.includes('varanasi') || q.includes('kashi') || q.includes('banaras')) return 'varanasi';
+      return null;
+    }
+    window.resolveDossierKey = resolveDossierKey;
+
     function getStateDossier(placeName, lat, lon) {
       if (!placeName) placeName = "Delhi";
       const clean = placeName.trim().toLowerCase();
+
+      const resolved = resolveDossierKey(clean);
+      if (resolved && STATE_DOSSIERS[resolved]) return STATE_DOSSIERS[resolved];
 
       if (STATE_DOSSIERS[clean]) return STATE_DOSSIERS[clean];
 
@@ -4640,6 +4656,11 @@
         { name: "Tambat Ali (Coppersmiths' Alley)", guild: "Tambat Coppersmith Guild (17th c. Peshwa Artillerymen)", focus: "Hand-beaten Matharpat work, conductive copper drinkware & sacred vessels", zone: "Kasba Peth" },
         { name: "Laxmi Road & Raviwar Peth", guild: "Traditional Textiles & Gold Bullion Guilds", focus: "Paithani silk drapes, handcrafted silver amulets, and ceremonial fabrics", zone: "Old City Peths" },
         { name: "Bohri Ali Hardware Quarter", guild: "Artisan Leather, Hardware & Pigment Guilds", focus: "Raw earth minerals, paint pigments, hand-tools, and brass fittings", zone: "Raviwar Peth" }
+      ],
+      dehradun: [
+        { name: "Paltan Bazaar & Ghanta Ghar Guilds", guild: "Doon Heritage Spice & Garhwali Artisan Guild", focus: "Pure Garhwali pulses, Kashmiri saffron valuation, and brass utensils", zone: "Clock Tower Spine" },
+        { name: "Tibetan Market & Buda Temple Axis", guild: "Himalayan Handloom & Woolen Craft Guild", focus: "Hand-knotted carpets, Thangka scroll tapestries, and winter woolens", zone: "Clement Town Perimeter" },
+        { name: "Moti Bazaar Ayurvedic Quarter", guild: "Traditional Herbalists & Brass Engravers", focus: "Raw Himalayan minerals, Ayurvedic roots, and handcrafted copper vessels", zone: "Old City Quarter" }
       ]
     };
 
@@ -4647,7 +4668,7 @@
       const container = document.getElementById('craft-bazaars-grid') || document.querySelector('.craft-bazaars-list, #crafts-panel');
       if (!container) return;
 
-      const key = (placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi';
+      const key = resolveDossierKey(placeName) || ((placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi');
       const items = CRAFT_BAZAAR_CATALOG[key] || [
         { name: `${placeName || 'Regional'} Artisan Guild Bazaars`, guild: "Indigenous Handloom & Metalcraft Guild", focus: "Native vernacular artefacts, regional hand-embroidery, and marketplace traders", zone: "Central Old Quarter" }
       ];
@@ -4675,6 +4696,11 @@
         { name: "Sinhagad Ridge & Katraj-to-Sinhagad (K2S)", type: "Sahyadri Basalt Mountain Ridge Pass", elevation: "1,312 m MSL", trail: "16 km nocturnal cliffline trek across 14 consecutive volcanic hills" },
         { name: "Bhor Ghat / Khandala Mountain Pass", type: "Historic Continental Fault Scarp", elevation: "548 m MSL", trail: "Steep monsoon waterfall ascents, Duke's Nose vertical rock rappelling" },
         { name: "Torna Fort (Prachandagad) Scramble", type: "High-Altitude Maratha Stronghold Escarpment", elevation: "1,403 m MSL", trail: "Exposed knife-edge ridge traverse, steep stone-cut steps and high Sahyadri wind gales" }
+      ],
+      dehradun: [
+        { name: "Robber's Cave (Guchhupani) Limestone Gorge", type: "Subterranean Karst Stream Canyon", elevation: "680 m MSL", trail: "600 m wading trek inside dark limestone cliff fractures with hidden waterfall drop" },
+        { name: "Sahastradhara Sulphur Springs & Aquifers", type: "Terraced Limestone Mineral Cascades", elevation: "750 m MSL", trail: "Dripping limestone stalactite cavern trails & natural mineral pool wading" },
+        { name: "George Everest Peak & Mussoorie Ridge Trail", type: "Lower Himalayan Escarpment Ridge", elevation: "2,020 m MSL", trail: "Steep pine forest climb offering 360° views of Doon Valley & snow peaks" }
       ]
     };
 
@@ -4682,7 +4708,7 @@
       const container = document.getElementById('adventure-passes-grid') || document.querySelector('.adventure-passes-list, #adventure-panel');
       if (!container) return;
 
-      const key = (placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi';
+      const key = resolveDossierKey(placeName) || ((placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi');
       const items = ADVENTURE_PASS_CATALOG[key] || [
         { name: `${placeName || 'Regional'} High Topo Vector`, type: "Regional Ridge & Trail Corridor", elevation: "Topographic Apex", trail: "Vernacular terrain traverses, gradient trails, and exploration vantage points" }
       ];
