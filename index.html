@@ -5740,50 +5740,80 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
       const panel = document.querySelector('.local-intelligence-panel, #wiki-poi-panel');
       if (!panel) return;
 
+      const titleEl = panel.querySelector('.poi-title, h4, #wiki-poi-title');
+      const descEl = panel.querySelector('.poi-desc, p, #wiki-poi-extract');
+      const mediaEl = panel.querySelector('.poi-media, #wiki-poi-image, .poi-media-container');
+
       const validLat = parseFloat(lat);
       const validLon = parseFloat(lon);
       if (!Number.isFinite(validLat) || !Number.isFinite(validLon)) return;
 
+      // Use JSONP to ensure zero CORS/Load Failed errors
       const data = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
         action: 'query',
         generator: 'geosearch',
         ggscoord: `${validLat}|${validLon}`,
         ggsradius: '20000',
-        ggslimit: '8',
+        ggslimit: '12',
         prop: 'pageimages|extracts',
         piprop: 'thumbnail',
-        pithumbsize: '600',
+        pithumbsize: '640',
         exintro: '1',
         explaintext: '1'
       });
 
       const pages = data?.query?.pages ? Object.values(data.query.pages) : [];
-      let bestPoi = pages.find(p => p.thumbnail?.source && p.extract && p.extract.length > 80) || pages[0];
 
-      const titleEl = panel.querySelector('.poi-title, h4, #wiki-poi-title');
-      const descEl = panel.querySelector('.poi-desc, p, #wiki-poi-extract');
-      const mediaEl = panel.querySelector('.poi-media, #wiki-poi-image, .poi-media-container');
+      // 1. Pick the best landmark that actually has a photo and a meaningful extract
+      let candidate = pages.find(p => p.thumbnail?.source && p.extract && p.extract.length > 80 && !p.title.toLowerCase().includes('district'));
 
-      if (bestPoi) {
-        if (titleEl) titleEl.textContent = bestPoi.title;
-        if (descEl) descEl.textContent = bestPoi.extract || "Documented geographic and spatial cultural node.";
-        if (mediaEl) {
-          mediaEl.innerHTML = '';
-          if (bestPoi.thumbnail?.source) {
-            const img = document.createElement('img');
-            img.src = bestPoi.thumbnail.source;
-            img.alt = bestPoi.title;
-            img.style.cssText = 'width: 100%; height: 140px; object-fit: cover; border-radius: 8px; display: block; border: 1px solid rgba(16, 185, 129, 0.25);';
-            img.onerror = () => {
-              renderRuralPoiFallback(panel, bestPoi.title || placeName, validLat, validLon);
-            };
-            mediaEl.appendChild(img);
-          } else {
-            renderRuralPoiFallback(panel, bestPoi.title || placeName, validLat, validLon);
+      // 2. If no candidate has both, find one with at least a photo
+      if (!candidate) {
+        candidate = pages.find(p => p.thumbnail?.source);
+      }
+
+      // 3. Fallback: Search by place name directly if geosearch had no photos
+      if (!candidate || !candidate.thumbnail?.source) {
+        const cleanName = (placeName || 'Delhi').split(',')[0].trim();
+        const directData = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+          action: 'query',
+          titles: cleanName,
+          prop: 'pageimages|extracts',
+          piprop: 'thumbnail',
+          pithumbsize: '640',
+          exintro: '1',
+          explaintext: '1'
+        });
+        if (directData?.query?.pages) {
+          const directPage = Object.values(directData.query.pages)[0];
+          if (directPage && directPage.missing === undefined) {
+            candidate = directPage;
           }
         }
-      } else {
-        // Render clean fallback if location has no direct Wikipedia article
+      }
+
+      // Render content safely
+      if (candidate) {
+        if (titleEl) titleEl.textContent = candidate.title;
+        if (descEl) descEl.textContent = candidate.extract 
+          ? (candidate.extract.slice(0, 180) + '...') 
+          : 'Documented spatial cultural node and historical heritage anchor.';
+        
+        if (mediaEl) {
+          mediaEl.innerHTML = '';
+          if (candidate.thumbnail?.source) {
+            mediaEl.innerHTML = `<img src="${candidate.thumbnail.source}" alt="${candidate.title}" style="width:100%; height:140px; object-fit:cover; border-radius:8px; border:1px solid rgba(16,185,129,0.3); display:block;" />`;
+          } else {
+            // Fallback UI to prevent a blank black box
+            mediaEl.innerHTML = `
+              <div style="width:100%; height:140px; background:#080c14; border-radius:8px; border:1px dashed rgba(16,185,129,0.25); display:flex; flex-direction:column; align-items:center; justify-content:center; color:#10b981; font-family:monospace; font-size:11px; gap:4px;">
+                <span>ACTIVE HERITAGE NODE</span>
+                <span style="font-size:9px; color:#64748b;">${candidate.title.toUpperCase()}</span>
+              </div>
+            `;
+          }
+        }
+      } else if (typeof renderRuralPoiFallback === 'function') {
         renderRuralPoiFallback(panel, placeName || 'Regional', validLat, validLon);
       }
     }
