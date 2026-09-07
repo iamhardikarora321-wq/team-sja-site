@@ -2006,6 +2006,55 @@
     }
     window.renderInquiryCards = renderInquiryCards;
 
+    /* ====================================================================
+       VERNACULAR PHYSICS DATA & DECK RENDERER (MODULE 02)
+       ==================================================================== */
+    const VERNACULAR_PHYSICS_DATA = [
+      {
+        domain: "ACOUSTICS",
+        badge: "DOUBLE DOME",
+        title: "Mughal Double-Dome Aerodynamics",
+        detail: "An inner dome calibrated to human acoustic scale sits beneath an elevated outer dome. The enclosed void prevents solar heat transmission while venting hot air through apex flues."
+      },
+      {
+        domain: "HYDRODYNAMICS",
+        badge: "STEPWELL",
+        title: "Subterranean Baoli Evaporative Sink",
+        detail: "Inverted pyramid architecture forces descending air to pass over underground aquifer reservoirs, creating an evaporative microclimate up to 6°C cooler than ground temperature."
+      },
+      {
+        domain: "METALLURGY",
+        badge: "MISAWITE SKIN",
+        title: "Gupta-Era Iron Passive Passivation",
+        detail: "High phosphorus content in 5th-century forging catalyses a crystalline misawite layer (iron hydrogen phosphate), rendering massive iron pillars rust-impervious for 1,600+ years."
+      }
+    ];
+    window.VERNACULAR_PHYSICS_DATA = VERNACULAR_PHYSICS_DATA;
+
+    function renderVernacularPhysics(container) {
+      if (!container) return;
+      container.className = "inquiry-grid";
+      container.innerHTML = VERNACULAR_PHYSICS_DATA.map((p, idx) => `
+        <div class="inquiry-card" onclick="this.classList.toggle('active-tap')">
+          <div class="inquiry-card-front">
+            <div class="inquiry-card-header">
+              <span class="pill">• ${p.domain}</span>
+              <span class="tag">${p.badge}</span>
+            </div>
+            <h4 class="inquiry-card-title">${p.title}</h4>
+            <div class="inquiry-hint">
+              <span>UN-SHROUD PHYSICS</span> <span>↗</span>
+            </div>
+          </div>
+          <div class="inquiry-drawer">
+            <p class="inquiry-drawer-answer" style="font-size: 13px;">${p.detail}</p>
+            <div class="inquiry-drawer-secret">PHYSICAL VECTOR VERIFIED</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    window.renderVernacularPhysics = renderVernacularPhysics;
+
     function selectPoiTarget(poi) {
       if (!poi) return;
       const targetLat = parseFloat(poi.lat);
@@ -3689,42 +3738,11 @@
         }
       }
 
-      // Render Pillars Deck
-      if (pillarsDeck && data.pillars) {
-        pillarsDeck.innerHTML = data.pillars.map(item => {
-          const tag = item.tag || item.lens || "PHYSICS VECTOR";
-          const metric = item.metric || item.badge || "MECHANICS";
-          const title = item.title || item.question || item.q || "";
-          const desc = item.desc || item.answer || item.a || "";
-
-          return `
-          <div class="flip-card" onclick="this.classList.toggle('flipped')">
-            <div class="flip-inner">
-              <div class="flip-front" style="background: rgba(10, 16, 24, 0.75);">
-                <div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <span class="telemetry" style="color:#06b6d4;">● ${tag}</span>
-                    <span style="font-family:'JetBrains Mono', monospace; font-size:0.65rem; color:#06b6d4; background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px;">${metric}</span>
-                  </div>
-                  <h4 style="font-size:1.15rem; font-weight:700; color:#fff; line-height:1.4;">${title}</h4>
-                </div>
-                <div style="font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:#06b6d4;">
-                  UN-SHROUD PHYSICS ➔
-                </div>
-              </div>
-              <div class="flip-back" style="border-color:rgba(6,182,212,0.5);">
-                <div>
-                  <span class="telemetry" style="color:#06b6d4;">ENGINEERING MECHANICS</span>
-                  <p style="font-size:0.9rem; color:#cbd5e1; line-height:1.6; margin-top:12px;">${desc}</p>
-                </div>
-                <div style="font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:#64748b; margin-top:8px;">
-                  TAP TO RETURN
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        }).join("");
+      // Render Pillars Deck / Vernacular Physics
+      if (pillarsDeck) {
+        if (typeof renderVernacularPhysics === "function") {
+          renderVernacularPhysics(pillarsDeck);
+        }
       }
     }
 
