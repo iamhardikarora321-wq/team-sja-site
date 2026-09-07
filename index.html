@@ -5290,11 +5290,11 @@
         console.warn("Spectrum GeoSearch failed:", err);
       }
 
-      // Fallback if GeoSearch found fewer than 4 photos
+      // Fallback: If GeoSearch found fewer than 4 photos, fetch primary place thumbnail safely
       if (photos.length < 4 && cleanName) {
-        const wikiInfo = await fetchWikiDataSafe(cleanName);
-        if (wikiInfo && wikiInfo.imageUrl && !photos.some(p => p.src === wikiInfo.imageUrl)) {
-          photos.unshift({ title: wikiInfo.title, src: wikiInfo.imageUrl });
+        const mainWiki = await fetchWikiDataSafe(cleanName);
+        if (mainWiki && mainWiki.imageUrl && !photos.some(p => p.src === mainWiki.imageUrl)) {
+          photos.unshift({ title: mainWiki.title, src: mainWiki.imageUrl });
         }
       }
 
