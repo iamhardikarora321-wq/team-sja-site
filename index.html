@@ -4386,96 +4386,132 @@
     /* ====================================================================
        AUTHENTIC WIKIPEDIA REAL PHOTO & HERITAGE BACKDROP ENGINE
     ==================================================================== */
-    async function updateHeritageAndBackdrop(placeName, lat, lon) {
-      const backdropEl = document.getElementById('arvora-ambient-backdrop');
-      const heritageContainer = document.getElementById('heritage-coordinates-grid') || 
-                                document.getElementById('places-grid') ||
-                                document.querySelector('.heritage-coordinates-container, #explore-places-list');
+    let lastHeritageCoords = { lat: null, lon: null };
+    let heritageFetchDebounce = null;
 
-      // A. Fetch City Summary & Ambient Faded Backdrop Photo
-      try {
-        const cleanQuery = (placeName || 'India').split(',')[0].trim();
-        const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanQuery)}`);
-        if (summaryRes.ok) {
-          const summaryData = await summaryRes.json();
-          const cityPhoto = summaryData.originalimage?.source || summaryData.thumbnail?.source;
-          if (cityPhoto && backdropEl) {
-            backdropEl.style.backgroundImage = `radial-gradient(circle at 50% 30%, rgba(4, 6, 8, 0.2) 0%, #040608 85%), url('${cityPhoto}')`;
-            backdropEl.style.opacity = '0.28';
-          }
-        }
-      } catch (e) {
-        console.warn("Backdrop photo fetch bypassed:", e.message);
+    async function updateHeritageAndBackdrop(placeName, rawLat, rawLon) {
+      const lat = parseFloat(rawLat);
+      const lon = parseFloat(rawLon);
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+      // Prevent duplicate fetches if coordinates haven't changed
+      if (
+        lastHeritageCoords.lat !== null &&
+        Math.abs(lastHeritageCoords.lat - lat) < 0.0005 &&
+        Math.abs(lastHeritageCoords.lon - lon) < 0.0005
+      ) {
+        return;
       }
 
-      // B. Fetch Nearby Heritage Landmarks with Real Images via Wikipedia GeoSearch & PageImages
-      if (!heritageContainer) return;
-      heritageContainer.innerHTML = '<div class="loading-pulse" style="grid-column: 1/-1; text-align:center; padding: 40px; color:#10b981; font-family:\'JetBrains Mono\', monospace;">CALIBRATING SPATIAL HERITAGE VECTORS...</div>';
+      // Debounce rapid state firing
+      clearTimeout(heritageFetchDebounce);
+      heritageFetchDebounce = setTimeout(async () => {
+        lastHeritageCoords = { lat, lon };
 
-      const geoQueryUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}|${lon}&ggsradius=20000&ggslimit=6&prop=pageimages|extracts|coordinates&piprop=thumbnail&pithumbsize=600&exintro=1&explaintext=1&exchars=140&format=json&origin=*`;
+        const backdropEl = document.getElementById('arvora-ambient-backdrop');
+        const heritageContainer = document.getElementById('heritage-coordinates-grid') || 
+                                  document.getElementById('places-grid') ||
+                                  document.querySelector('.heritage-coordinates-container, #explore-places-list');
 
-      try {
-        const res = await fetch(geoQueryUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        const pages = data.query?.pages ? Object.values(data.query.pages) : [];
-
-        if (pages.length === 0) {
-          heritageContainer.innerHTML = `<div class="codex-empty-msg" style="grid-column: 1/-1; text-align:center; padding: 40px; color:#94a3b8; font-family:\'JetBrains Mono\', monospace;">No indexed heritage vectors within 20 km of ${placeName}.</div>`;
-          return;
-        }
-
-        heritageContainer.innerHTML = '';
-        pages.forEach((item) => {
-          const card = document.createElement('div');
-          card.className = 'heritage-coordinate-card';
-          
-          // Real thumbnail from Wikipedia or dark vector graphic placeholder
-          const thumbImg = item.thumbnail?.source 
-            ? `<img src="${item.thumbnail.source}" alt="${(item.title || '').replace(/"/g, '&quot;')}" class="heritage-card-thumb" onerror="this.parentElement.innerHTML='<div class=\\'heritage-card-vector-placeholder\\'><span>VECTOR LOCKED</span></div>'" />` 
-            : `<div class="heritage-card-vector-placeholder"><span>VECTOR LOCKED</span></div>`;
-
-          const itemLat = item.coordinates?.[0]?.lat ?? lat;
-          const itemLon = item.coordinates?.[0]?.lon ?? lon;
-
-          card.innerHTML = `
-            <div class="heritage-card-media">
-              ${thumbImg}
-              <span class="coord-badge">${Number(itemLat).toFixed(4)}° N, ${Number(itemLon).toFixed(4)}° E</span>
-            </div>
-            <div class="heritage-card-body">
-              <div>
-                <h4 class="heritage-card-title">${item.title}</h4>
-                <p class="heritage-card-snippet">${item.extract || 'Documented heritage site and spatial cultural landmark.'}</p>
-              </div>
-              <button class="re-center-vector-btn" type="button">TARGET MAP VECTOR ↗</button>
-            </div>
-          `;
-
-          // Tapping card flies Leaflet directly to that specific landmark
-          card.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const targetMap = window.map || window.arvoraMap;
-            if (targetMap && typeof targetMap.flyTo === 'function') {
-              targetMap.flyTo([itemLat, itemLon], 15, { duration: 1.2 });
-              if (window.activeMarker && typeof window.activeMarker.setLatLng === 'function') {
-                window.activeMarker.setLatLng([itemLat, itemLon]);
-                if (typeof window.activeMarker.bindPopup === 'function') {
-                  window.activeMarker.bindPopup(`<b>${item.title}</b>`).openPopup();
-                }
+        // A. Ambient Faded Backdrop from Primary Place Summary (REST API - 100% CORS-safe)
+        try {
+          const cleanName = (placeName || '').split(',')[0].trim();
+          if (cleanName) {
+            const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
+            if (summaryRes.ok) {
+              const summary = await summaryRes.json();
+              const photoUrl = summary.originalimage?.source || summary.thumbnail?.source;
+              if (photoUrl && backdropEl) {
+                backdropEl.style.backgroundImage = `radial-gradient(circle at 50% 30%, rgba(4, 6, 8, 0.25) 0%, #040608 85%), url('${photoUrl}')`;
+                backdropEl.style.opacity = '0.28';
               }
             }
-          });
+          }
+        } catch (e) {
+          console.warn("Backdrop image bypassed:", e.message);
+        }
 
-          heritageContainer.appendChild(card);
+        // B. Nearby Heritage Landmarks via MediaWiki GeoSearch
+        if (!heritageContainer) return;
+
+        // Use clean, encoded URLSearchParams with origin=* and no custom headers
+        const params = new URLSearchParams({
+          action: 'query',
+          generator: 'geosearch',
+          ggscoord: `${lat}|${lon}`,
+          ggsradius: '20000',
+          ggslimit: '6',
+          prop: 'pageimages|extracts|coordinates',
+          piprop: 'thumbnail',
+          pithumbsize: '500',
+          exintro: '1',
+          explaintext: '1',
+          format: 'json',
+          origin: '*'
         });
 
-        const counter = document.getElementById("places-counter");
-        if (counter) counter.innerText = `${pages.length} VERIFIED HERITAGE SIGHTS DISPLAYED`;
+        try {
+          const res = await fetch(`https://en.wikipedia.org/w/api.php?${params.toString()}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          const pages = data.query?.pages ? Object.values(data.query.pages) : [];
 
-      } catch (err) {
-        console.warn("Heritage coordinates fetch bypassed:", err.message);
-      }
+          if (pages.length === 0) {
+            heritageContainer.innerHTML = `<div class="codex-empty-msg" style="padding: 24px; color: rgba(255,255,255,0.6); font-family: monospace; grid-column: 1/-1; text-align: center;">NO HERITAGE VECTORS FOUND WITHIN 20KM</div>`;
+            return;
+          }
+
+          heritageContainer.innerHTML = '';
+          pages.forEach((item) => {
+            const card = document.createElement('div');
+            card.className = 'heritage-coordinate-card';
+
+            const itemLat = item.coordinates?.[0]?.lat ?? lat;
+            const itemLon = item.coordinates?.[0]?.lon ?? lon;
+            const thumb = item.thumbnail?.source;
+
+            card.innerHTML = `
+              <div class="heritage-card-media" style="position: relative; overflow: hidden; height: 160px; background: #0c1015; border-radius: 8px 8px 0 0;">
+                ${thumb ? `<img src="${thumb}" alt="${(item.title || '').replace(/"/g, '&quot;')}" style="width:100%; height:100%; object-fit:cover;" onerror="this.remove()" />` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:#10b981;font-family:monospace;">VECTOR LOCKED</div>'}
+                <span style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.75); padding:2px 8px; border-radius:4px; font-size:10px; color:#10b981; font-family:monospace;">
+                  ${Number(itemLat).toFixed(4)}° N, ${Number(itemLon).toFixed(4)}° E
+                </span>
+              </div>
+              <div class="heritage-card-body" style="padding: 14px; background: rgba(10,14,20,0.85); border-radius: 0 0 8px 8px;">
+                <h4 style="margin: 0 0 6px 0; color: #f1f5f9; font-size: 14px; font-weight: 600;">${item.title}</h4>
+                <p style="margin: 0 0 12px 0; color: #94a3b8; font-size: 12px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  ${item.extract || 'Documented heritage site and spatial cultural landmark.'}
+                </p>
+                <button type="button" style="background: transparent; border: 1px solid rgba(16,185,129,0.5); color: #10b981; padding: 4px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; font-family: monospace; width: 100%;">
+                  TARGET MAP VECTOR ↗
+                </button>
+              </div>
+            `;
+
+            card.addEventListener('click', () => {
+              const targetMap = window.map || window.arvoraMap;
+              if (targetMap && typeof targetMap.flyTo === 'function') {
+                targetMap.flyTo([itemLat, itemLon], 15, { duration: 1.2 });
+                if (window.activeMarker && typeof window.activeMarker.setLatLng === 'function') {
+                  window.activeMarker.setLatLng([itemLat, itemLon]);
+                  if (typeof window.activeMarker.bindPopup === 'function') {
+                    window.activeMarker.bindPopup(`<b>${item.title}</b>`).openPopup();
+                  }
+                }
+              }
+            });
+
+            heritageContainer.appendChild(card);
+          });
+
+          const counter = document.getElementById("places-counter");
+          if (counter) counter.innerText = `${pages.length} VERIFIED HERITAGE SIGHTS DISPLAYED`;
+
+        } catch (err) {
+          console.warn("Heritage geosearch fetch bypassed:", err.message);
+        }
+      }, 250);
     }
     window.updateHeritageAndBackdrop = updateHeritageAndBackdrop;
 
