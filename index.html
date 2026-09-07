@@ -1858,8 +1858,12 @@
       },
 
       notify() {
-        this.subscribers.forEach(cb => {
-          try { cb(this); } catch(e) { console.error(e); }
+        this.subscribers.forEach((callback) => {
+          try {
+            callback(this.state || this);
+          } catch (subscriberError) {
+            console.warn("Subscriber execution isolated:", subscriberError);
+          }
         });
       },
 
