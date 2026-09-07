@@ -5244,8 +5244,8 @@
 
       let photos = [];
       try {
-        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=20000&ggslimit=8&prop=pageimages&piprop=thumbnail&pithumbsize=320&format=json&origin=*`;
-        const res = await fetch(url);
+        const geoUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${encodeURIComponent(lat + '|' + lon)}&ggsradius=20000&ggslimit=8&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+        const res = await fetch(geoUrl);
         if (res.ok) {
           const data = await res.json();
           const pages = data.query?.pages ? Object.values(data.query.pages) : [];
