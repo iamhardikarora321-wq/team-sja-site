@@ -95,13 +95,15 @@
     /* Local Intelligence Panel POI Media Container */
     .local-intelligence-panel .poi-media-container, .local-intelligence-panel .poi-media, #wiki-poi-image {
       width: 100%;
-      height: 140px;
-      max-height: 140px;
+      min-height: 0;
       border-radius: 8px;
       overflow: hidden;
       margin-top: 12px;
-      background: #080c12;
-      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .local-intelligence-panel .poi-media:empty, #wiki-poi-image:empty {
+      display: none;
+      margin-top: 0;
     }
 
     .local-intelligence-panel .poi-media-container img, .local-intelligence-panel .poi-media img, #wiki-poi-image img {
@@ -109,6 +111,8 @@
       height: 140px;
       object-fit: cover;
       display: block;
+      border-radius: 8px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
     }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #040608; }
@@ -1401,7 +1405,12 @@
           <div id="wiki-poi-content" style="margin-bottom: 14px;">
             <div style="font-size:0.95rem; font-weight:700; color:#fff; margin-bottom:4px;" id="wiki-poi-title" class="poi-title">Loading Wikipedia intelligence...</div>
             <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.55; margin-bottom:10px;" id="wiki-poi-extract" class="poi-desc">Searching radius 10,000m for spatial heritage nodes...</div>
-            <div id="wiki-poi-image" class="poi-media" style="margin-top:10px;"></div>
+            <div id="wiki-poi-image" class="poi-media" style="margin-top:10px;">
+              <div style="width:100%; height:140px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#080c14; border-radius:8px; border:1px dashed rgba(16,185,129,0.25); color:#10b981; font-family:monospace; font-size:11px; gap:4px;">
+                <span>SPATIAL COORD LOCKED</span>
+                <span style="font-size:9px; color:#64748b;">INITIALIZING GEOSPATIAL RADAR...</span>
+              </div>
+            </div>
           </div>
 
           <div id="nearby-pois-list" style="display: flex; flex-direction: column; gap: 8px;">
@@ -3503,11 +3512,30 @@
     /* ====================================================================
        DESTINATION CULTURAL INTELLIGENCE & FLIP DECK ENGINE
     ==================================================================== */
+    const VERIFIED_LANDMARK_MEDIA = {
+      // Delhi Anchors
+      "qutb complex & iron pillar": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Qutub_Minar%2C_Delhi.jpg/800px-Qutub_Minar%2C_Delhi.jpg",
+      "qutb minar": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Qutub_Minar%2C_Delhi.jpg/800px-Qutub_Minar%2C_Delhi.jpg",
+      "humayun's tomb": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Humayun_Tomb_Delhi.jpg/800px-Humayun_Tomb_Delhi.jpg",
+      "agrasen ki baoli": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Agrasen_ki_Baoli%2C_New_Delhi.jpg/800px-Agrasen_ki_Baoli%2C_New_Delhi.jpg",
+      "red fort (lal qila)": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Delhi_Fort.jpg/800px-Delhi_Fort.jpg",
+      "red fort": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Delhi_Fort.jpg/800px-Delhi_Fort.jpg",
+      "tughlaqabad fort": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Tughlaqabad_Fort%2C_Delhi.jpg/800px-Tughlaqabad_Fort%2C_Delhi.jpg",
+      
+      // Dehradun Anchors
+      "robber's cave (guchhupani)": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Robber%27s_Cave_Dehradun.jpg/800px-Robber%27s_Cave_Dehradun.jpg",
+      "forest research institute (fri)": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg/800px-Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg",
+      "mindrolling monastery": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Mindrolling_Monastery_Dehradun.jpg/800px-Mindrolling_Monastery_Dehradun.jpg",
+      "tapkeshwar mahadev temple": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Tapkeshwar_Temple_Dehradun.jpg/800px-Tapkeshwar_Temple_Dehradun.jpg",
+      "sahastradhara springs": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Sahastradhara%2C_Dehradun.jpg/800px-Sahastradhara%2C_Dehradun.jpg"
+    };
+    window.VERIFIED_LANDMARK_MEDIA = VERIFIED_LANDMARK_MEDIA;
+
     const DEHRADUN_VERIFIED_SIGHTS = [
       {
         name: "Robber's Cave (Guchhupani)",
         wikiTitle: "Robber's_Cave,_India",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Robber%27s_Cave_Dehradun.jpg/800px-Robber%27s_Cave_Dehradun.jpg",
+        image: VERIFIED_LANDMARK_MEDIA["robber's cave (guchhupani)"],
         lat: 30.3756,
         lon: 78.0601,
         tag: "KARST GORGE & COLD AQUIFER",
@@ -3516,7 +3544,7 @@
       {
         name: "Forest Research Institute (FRI)",
         wikiTitle: "Forest_Research_Institute_(India)",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg/800px-Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg",
+        image: VERIFIED_LANDMARK_MEDIA["forest research institute (fri)"],
         lat: 30.3429,
         lon: 77.9997,
         tag: "GRECO-ROMAN BRICK MONUMENT",
@@ -3525,7 +3553,7 @@
       {
         name: "Mindrolling Monastery",
         wikiTitle: "Mindrolling_Monastery",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Mindrolling_Monastery_Dehradun.jpg/800px-Mindrolling_Monastery_Dehradun.jpg",
+        image: VERIFIED_LANDMARK_MEDIA["mindrolling monastery"],
         lat: 30.2608,
         lon: 78.0094,
         tag: "TIBETAN SACRED SANCTUM",
@@ -3534,11 +3562,20 @@
       {
         name: "Tapkeshwar Mahadev Cavern",
         wikiTitle: "Tapkeshwar_Temple",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Tapkeshwar_Temple_Dehradun.jpg/800px-Tapkeshwar_Temple_Dehradun.jpg",
+        image: VERIFIED_LANDMARK_MEDIA["tapkeshwar mahadev temple"],
         lat: 30.3547,
         lon: 78.0181,
         tag: "SPELEOTHEM DRIP SHRINE",
         desc: "Natural sulfurous riverside cave where continuous mineral water droplets drip naturally over the subterranean lingam."
+      },
+      {
+        name: "Sahastradhara Springs",
+        wikiTitle: "Sahastradhara",
+        image: VERIFIED_LANDMARK_MEDIA["sahastradhara springs"],
+        lat: 30.3872,
+        lon: 78.1316,
+        tag: "THOUSAND-FOLD SULPHUR SPRINGS",
+        desc: "Cascading sulphur springs and limestone terraces known for high mineral content and therapeutic water pools."
       }
     ];
 
@@ -3555,7 +3592,7 @@
         subtitle: "Peshwa hydrology, basalt rock-cut acoustics, and Sahyadri defense lines.",
         coords: "LAT 18.5204° N // LON 73.8567° E",
         tag: "NODE // MH-01",
-        bg: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1920&q=80",
+        bg: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Shaniwarwada_Fort_Pune.jpg/1280px-Shaniwarwada_Fort_Pune.jpg",
         temp: "27°C Pleasant",
         climateSub: "Deccan Plateau &bull; 54% RH",
         season: "Oct – Mar",
@@ -3612,7 +3649,7 @@
         subtitle: "Aravalli stone defensive physics, subterranean baolis, and Mughal thermal architecture.",
         coords: "LAT 28.6139° N // LON 77.2090° E",
         tag: "NODE // DL-01",
-        bg: "https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?auto=format&fit=crop&w=1920&q=80",
+        bg: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Qutub_Minar%2C_Delhi.jpg/1280px-Qutub_Minar%2C_Delhi.jpg",
         temp: "24°C Pleasant",
         climateSub: "Plains Microclimate &bull; 58% RH",
         season: "Oct – Mar",
@@ -3622,11 +3659,11 @@
         dwell: "2 – 4 Days",
         dwellSub: "Recommended Codex Scope",
         heritageCoordinates: [
-          { name: "Qutb Complex & Iron Pillar", lat: 28.5245, lon: 77.1855, desc: "Corrosion-resistant high-phosphorus wrought iron alloy (1600+ yrs)", dist: "South" },
-          { name: "Humayun's Tomb", lat: 28.5933, lon: 77.2507, desc: "Charbagh geometric microclimate cooling & double-dome aerodynamics", dist: "Central East" },
-          { name: "Agrasen ki Baoli", lat: 28.6258, lon: 77.2250, desc: "108-step subterranean water harvesting & evaporative cooling sink", dist: "Central" },
-          { name: "Red Fort (Lal Qila)", lat: 28.6562, lon: 77.2410, desc: "Red sandstone thermal shield with Nahr-i-Bihisht canal system", dist: "Old Delhi" },
-          { name: "Tughlaqabad Fort", lat: 28.5135, lon: 77.2605, desc: "Massive sloping cyclopean masonry walls for seismic stability", dist: "South East" }
+          { name: "Qutb Complex & Iron Pillar", lat: 28.5245, lon: 77.1855, desc: "Corrosion-resistant high-phosphorus wrought iron alloy (1600+ yrs)", dist: "South", image: VERIFIED_LANDMARK_MEDIA["qutb complex & iron pillar"] },
+          { name: "Humayun's Tomb", lat: 28.5933, lon: 77.2507, desc: "Charbagh geometric microclimate cooling & double-dome aerodynamics", dist: "Central East", image: VERIFIED_LANDMARK_MEDIA["humayun's tomb"] },
+          { name: "Agrasen ki Baoli", lat: 28.6258, lon: 77.2250, desc: "108-step subterranean water harvesting & evaporative cooling sink", dist: "Central", image: VERIFIED_LANDMARK_MEDIA["agrasen ki baoli"] },
+          { name: "Red Fort (Lal Qila)", lat: 28.6562, lon: 77.2410, desc: "Red sandstone thermal shield with Nahr-i-Bihisht canal system", dist: "Old Delhi", image: VERIFIED_LANDMARK_MEDIA["red fort (lal qila)"] },
+          { name: "Tughlaqabad Fort", lat: 28.5135, lon: 77.2605, desc: "Massive sloping cyclopean masonry walls for seismic stability", dist: "South East", image: VERIFIED_LANDMARK_MEDIA["tughlaqabad fort"] }
         ],
         inquiries: [
           {
@@ -4094,7 +4131,7 @@
         fee: "₹40 (Indians) / ₹600 (Foreigners)",
         timings: "06:00 AM – 06:00 PM",
         duration: "2 Hours",
-        image: "https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?auto=format&fit=crop&w=800&q=80",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Humayun_Tomb_Delhi.jpg/800px-Humayun_Tomb_Delhi.jpg",
         desc: "The earliest example of Mughal garden-tomb architecture in India, built in 1570 with geometric Persian Charbagh quadrants.",
         mechanics: "Pioneered the double-dome engineering system, allowing a high outer decorative dome while keeping the interior ceiling intimate.",
         secret: "Over 150 Mughal royal family members are interred in the perimeter crypt vaults without external markers."
@@ -4643,11 +4680,11 @@
        VERIFIED THEMATIC FALLBACK IMAGE ENGINE
     ==================================================================== */
     const FALLBACK_IMAGES = {
-      nature: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=800&q=80",
-      historical: "https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?auto=format&fit=crop&w=800&q=80",
-      spiritual: "https://images.unsplash.com/photo-1514222134-b57cbb8ce073?auto=format&fit=crop&w=800&q=80",
-      craft: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
-      adventure: "https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=800&q=80"
+      nature: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Robber%27s_Cave_Dehradun.jpg/800px-Robber%27s_Cave_Dehradun.jpg",
+      historical: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Qutub_Minar%2C_Delhi.jpg/800px-Qutub_Minar%2C_Delhi.jpg",
+      spiritual: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Mindrolling_Monastery_Dehradun.jpg/800px-Mindrolling_Monastery_Dehradun.jpg",
+      craft: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Agrasen_ki_Baoli%2C_New_Delhi.jpg/800px-Agrasen_ki_Baoli%2C_New_Delhi.jpg",
+      adventure: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Sahastradhara%2C_Dehradun.jpg/800px-Sahastradhara%2C_Dehradun.jpg"
     };
 
     function getThematicFallbackPhoto(cat, index) {
@@ -5303,11 +5340,29 @@
     function renderMonumentMedia(url, title, lat, lon) {
       const safeLat = Number(lat || 0).toFixed(4);
       const safeLon = Number(lon || 0).toFixed(4);
-      const placeholder = `<div class="monument-vector-placeholder" style="background:#090d14; border-bottom:1px solid rgba(16,185,129,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; height:150px;"><span style="color:#10b981; font-family:monospace; font-size:12px; letter-spacing:1px;">SPATIAL COORD LOCKED</span><span style="color:#64748b; font-size:10px; font-family:monospace; margin-top:4px;">${safeLat}°N //${safeLon}°E</span></div>`;
+      const placeholder = `<div class="monument-vector-placeholder" style="background:#090d14; border-bottom:1px solid rgba(16,185,129,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; height:150px;"><span style="color:#10b981; font-family:monospace; font-size:12px; letter-spacing:1px;">SPATIAL COORD LOCKED</span><span style="color:#64748b; font-size:10px; font-family:monospace; margin-top:4px;">${safeLat}°N // ${safeLon}°E</span></div>`;
 
-      if (!url) return placeholder;
+      const cleanKey = (title || '').toLowerCase().trim();
+      let mediaUrl = url;
 
-      return `<img src="${url}" alt="${(title || '').replace(/"/g, '&quot;')}" class="heritage-thumb" style="width:100%; height:150px; object-fit:cover;" onerror="this.onerror=null; this.style.display='none';" />`;
+      if (typeof VERIFIED_LANDMARK_MEDIA !== 'undefined') {
+        if (VERIFIED_LANDMARK_MEDIA[cleanKey]) {
+          mediaUrl = VERIFIED_LANDMARK_MEDIA[cleanKey];
+        } else {
+          for (const [key, val] of Object.entries(VERIFIED_LANDMARK_MEDIA)) {
+            if (cleanKey.includes(key) || key.includes(cleanKey)) {
+              mediaUrl = val;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!mediaUrl || typeof mediaUrl !== 'string' || mediaUrl.includes('unsplash.com')) {
+        return placeholder;
+      }
+
+      return `<img src="${mediaUrl}" alt="${(title || '').replace(/"/g, '&quot;')}" class="heritage-thumb" style="width:100%; height:150px; object-fit:cover;" onerror="this.onerror=null; this.outerHTML='${placeholder.replace(/'/g, "\\'")}';" />`;
     }
     window.renderMonumentMedia = renderMonumentMedia;
 
@@ -5712,16 +5767,18 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
             const img = document.createElement('img');
             img.src = bestPoi.thumbnail.source;
             img.alt = bestPoi.title;
-            img.style.cssText = 'width: 100%; height: 140px; object-fit: cover; border-radius: 8px; display: block;';
+            img.style.cssText = 'width: 100%; height: 140px; object-fit: cover; border-radius: 8px; display: block; border: 1px solid rgba(16, 185, 129, 0.25);';
+            img.onerror = () => {
+              renderRuralPoiFallback(panel, bestPoi.title || placeName, validLat, validLon);
+            };
             mediaEl.appendChild(img);
+          } else {
+            renderRuralPoiFallback(panel, bestPoi.title || placeName, validLat, validLon);
           }
         }
       } else {
         // Render clean fallback if location has no direct Wikipedia article
-        const clean = (placeName || 'Regional').split(',')[0].trim();
-        if (titleEl) titleEl.textContent = `${clean} Sector Node`;
-        if (descEl) descEl.textContent = `Autonomous spatial sector situated at ${validLat.toFixed(4)}° N, ${validLon.toFixed(4)}° E. Historical records and oral accounts are catalogued in the regional archetype dossier.`;
-        if (mediaEl) mediaEl.innerHTML = '';
+        renderRuralPoiFallback(panel, placeName || 'Regional', validLat, validLon);
       }
     }
     window.updateLocalWikiPOI = updateLocalWikiPOI;
