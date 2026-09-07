@@ -4696,6 +4696,12 @@
     }
     window.renderStateDossier = renderStateDossier;
 
+    function renderUniversalDossier(name, stateName, lat, lon) {
+      const targetQuery = stateName || name;
+      return renderStateDossier(targetQuery, lat, lon);
+    }
+    window.renderUniversalDossier = renderUniversalDossier;
+
     /* ====================================================================
        OFFICIAL WIKIPEDIA REST API MONUMENT PHOTO & VECTOR PLACEHOLDER ENGINE
     ==================================================================== */
@@ -5195,20 +5201,26 @@
     // Register subscribers to synchronize all modules on location update
     ArvoraState.subscribe((state) => {
       if (!state) return;
-      const placeName = (state.displayName || state.name || 'India').split(',')[0].trim();
       const lat = parseFloat(state.lat);
       const lon = parseFloat(state.lon ?? state.lng);
+      const name = (state.displayName || state.name || 'India').split(',')[0].trim();
+      const stateName = (state.address?.state || '').toLowerCase();
+
       if (Number.isFinite(lat) && Number.isFinite(lon)) {
-        updateAllCulturalPanels(placeName, lat, lon);
-        if (typeof updateHeritageAndBackdrop === "function") {
-          updateHeritageAndBackdrop(placeName, lat, lon);
+        if (typeof updatePhotographicSpectrum === "function") {
+          updatePhotographicSpectrum(lat, lon, name);
         }
-      }
-      if (typeof renderCraftBazaars === "function") {
-        renderCraftBazaars(placeName);
-      }
-      if (typeof renderAdventurePasses === "function") {
-        renderAdventurePasses(placeName);
+        if (typeof updateLocalWikiPOI === "function") {
+          updateLocalWikiPOI(lat, lon, name);
+        }
+        if (typeof renderUniversalDossier === "function") {
+          renderUniversalDossier(name, stateName, lat, lon);
+        } else if (typeof renderStateDossier === "function") {
+          renderStateDossier(name, lat, lon);
+        }
+        if (typeof updateAllCulturalPanels === "function") {
+          updateAllCulturalPanels(name, lat, lon);
+        }
       }
     });
 
