@@ -5764,30 +5764,45 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
     }
     window.updateAllCulturalPanels = updateAllCulturalPanels;
 
-    // Register subscribers to synchronize all modules on location update
-    ArvoraState.subscribe((state) => {
-      if (!state) return;
-      const lat = parseFloat(state.lat);
-      const lon = parseFloat(state.lon ?? state.lng);
-      const name = (state.displayName || state.name || 'India').split(',')[0].trim();
-      const stateName = (state.address?.state || '').toLowerCase();
-
-      if (Number.isFinite(lat) && Number.isFinite(lon)) {
-        if (typeof updatePhotographicSpectrum === "function") {
-          updatePhotographicSpectrum(lat, lon, name);
-        }
-        if (typeof updateLocalWikiPOI === "function") {
-          updateLocalWikiPOI(lat, lon, name);
-        }
-        if (typeof renderUniversalDossier === "function") {
-          renderUniversalDossier(name, stateName, lat, lon);
-        } else if (typeof renderStateDossier === "function") {
-          renderStateDossier(name, lat, lon);
-        }
-        if (typeof updateAllCulturalPanels === "function") {
-          updateAllCulturalPanels(name, lat, lon);
-        }
+    function updateLocalIntelligence(lat, lon, name) {
+      if (typeof updateLocalWikiPOI === "function") {
+        updateLocalWikiPOI(lat, lon, name);
       }
+      if (typeof updateAllCulturalPanels === "function") {
+        updateAllCulturalPanels(name, lat, lon);
+      }
+    }
+    window.updateLocalIntelligence = updateLocalIntelligence;
+
+    let arvoraStateDebounce = null;
+
+    ArvoraState.subscribe((state) => {
+      clearTimeout(arvoraStateDebounce);
+      arvoraStateDebounce = setTimeout(() => {
+        if (!state) return;
+        const name = state.displayName || state.name || 'India';
+        const lat = parseFloat(state.lat);
+        const lon = parseFloat(state.lon ?? state.lng);
+
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          if (typeof updatePhotographicSpectrum === "function") {
+            updatePhotographicSpectrum(lat, lon, name);
+          }
+          if (typeof updateLocalIntelligence === "function") {
+            updateLocalIntelligence(lat, lon, name);
+          } else if (typeof updateLocalWikiPOI === "function") {
+            updateLocalWikiPOI(lat, lon, name);
+          }
+          const inqContainer = document.querySelector('.inquiry-grid') || document.getElementById('inquiries-deck') || document.getElementById('inquiries-root');
+          if (inqContainer && typeof renderInquiryCards === "function") {
+            renderInquiryCards(inqContainer, name, lat, lon);
+          }
+          const stateName = (state.address?.state || '').toLowerCase();
+          if (typeof renderUniversalDossier === "function") {
+            renderUniversalDossier(name, stateName, lat, lon);
+          }
+        }
+      }, 150);
     });
 
     // Initialize Autocomplete, State from URL, Gateway Buttons, & Recalibrate Map on DOM Ready
