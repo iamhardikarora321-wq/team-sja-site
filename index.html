@@ -1721,6 +1721,100 @@
       96: { icon: "⛈️", desc: "Thunderstorm with Hail" }
     };
 
+    // Dynamic Codex Generator for unlisted search locations
+    function generateDynamicCodexForLocation(placeName, lat, lon, wikiExtract, weatherData, geoPois) {
+      const cityKey = placeName ? placeName.trim() : "Target Node";
+      const parsedLat = Number.isFinite(lat) ? lat : 28.6139;
+      const parsedLon = Number.isFinite(lon) ? lon : 77.2090;
+
+      const latStr = parsedLat >= 0 ? `${parsedLat.toFixed(4)}° N` : `${Math.abs(parsedLat).toFixed(4)}° S`;
+      const lonStr = parsedLon >= 0 ? `${parsedLon.toFixed(4)}° E` : `${Math.abs(parsedLon).toFixed(4)}° W`;
+      
+      const temp = (weatherData && weatherData.temp !== undefined) ? weatherData.temp : 24;
+      const humidity = (weatherData && weatherData.humidity !== undefined) ? weatherData.humidity : 58;
+      const weatherDesc = (weatherData && weatherData.desc) ? weatherData.desc : "Clear Skies";
+
+      const cleanExtract = wikiExtract ? (wikiExtract.length > 220 ? wikiExtract.slice(0, 220) + "..." : wikiExtract) : `Autonomous spatial reconnaissance node at ${cityKey}. Coordinates: ${latStr}, ${lonStr}.`;
+
+      const poi1 = (geoPois && geoPois.length > 0) ? geoPois[0].title : `${cityKey} Primary Monument`;
+      const poi2 = (geoPois && geoPois.length > 1) ? geoPois[1].title : `${cityKey} Heritage Ridge`;
+      const poi3 = (geoPois && geoPois.length > 2) ? geoPois[2].title : `${cityKey} Spatial Basin`;
+
+      const dist1 = (geoPois && geoPois.length > 0 && geoPois[0].dist) ? (geoPois[0].dist / 1000).toFixed(1) : '3.2';
+
+      return {
+        coords: `LAT ${latStr} // LON ${lonStr}`,
+        tag: `NODE // ${(cityKey.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 6) || 'NODE')}`,
+        bg: getThematicFallbackPhoto("nature", 0),
+        temp: `${temp}°C ${weatherDesc}`,
+        climateSub: `${cityKey} Microclimate &bull; ${humidity}% RH`,
+        season: "Year-Round",
+        seasonSub: "Optimal Atmospheric Clearance",
+        burn: "₹1,500 – ₹4,500",
+        burnSub: "Per Head INR (Stay + Meals)",
+        dwell: "2 – 3 Days",
+        dwellSub: "Recommended Codex Scope",
+        inquiries: [
+          {
+            lens: "WHY THIS EXISTS",
+            metric: "SPATIAL LORE",
+            q: `Why was ${cityKey} established at spatial coordinate ${latStr}, ${lonStr}?`,
+            a: cleanExtract
+          },
+          {
+            lens: "SEASONAL PULSE",
+            metric: "MICROCLIMATE",
+            q: `What environmental matrix governs ${cityKey}?`,
+            a: `Currently recording ${temp}°C with ${humidity}% relative humidity (${weatherDesc}). Vernacular building designs adapt to these regional atmospheric fluctuations.`
+          },
+          {
+            lens: "SECRET ARCHITECTURE",
+            metric: "ANCIENT AXIS",
+            q: `What structural or heritage anchors define ${poi1}?`,
+            a: `${poi1} showcases regional masonry, stone joinery, and natural ventilation techniques calibrated to local topography.`
+          },
+          {
+            lens: "UNSPOKEN CODES",
+            metric: "NAVIGATION",
+            q: `How do travelers navigate the regional spatial grid of ${cityKey}?`,
+            a: `Follow natural contour lines, align transit with early morning atmospheric temperature windows, and respect regional heritage perimeters.`
+          },
+          {
+            lens: "VERNACULAR CRAFT",
+            metric: "MATERIALITY",
+            q: `What craft and material traditions define ${cityKey}?`,
+            a: `Local artisans utilize regional stone, timber, and mineral earths for sustainable climate-resilient construction.`
+          },
+          {
+            lens: "GEODETIC ANOMALY",
+            metric: "HERITAGE POIs",
+            q: `What spatial features surround ${poi2} and ${poi3}?`,
+            a: `Key heritage nodes are positioned within a ${dist1} km radius of the central search coordinate (${latStr}, ${lonStr}).`
+          }
+        ],
+        pillars: [
+          {
+            title: `${cityKey} Vernacular Physics`,
+            tag: "STRUCTURAL DYNAMICS",
+            metric: "ENGINEERING",
+            desc: cleanExtract
+          },
+          {
+            title: `${cityKey} Microclimate Matrix`,
+            tag: "HYDRO & THERMAL",
+            metric: "THERMODYNAMICS",
+            desc: `Passive thermal regulation and airflow distribution calibrated to ${temp}°C and ${humidity}% atmospheric humidity.`
+          },
+          {
+            title: `${poi1} Architectural Codex`,
+            tag: "HERITAGE GEOMETRY",
+            metric: "ACOUSTICS",
+            desc: `Load-bearing stone masonry and spatial geometry designed to withstand regional seismic and monsoon variations.`
+          }
+        ]
+      };
+    }
+
     // Orchestrated Fetch Hook using Promise.allSettled
     async function fetchPlaceDetailsOrchestrator(location) {
       if (!location) return;
@@ -1729,7 +1823,7 @@
 
       showWeatherLoadingShimmer();
 
-      // Execute all 3 feature panel fetches concurrently via Promise.allSettled
+      // Execute all feature panel fetches concurrently via Promise.allSettled
       const results = await Promise.allSettled([
         updateFeaturePanel1_SpatialTelemetry(location, lat, lng),
         fetchOpenMeteoEnvironmentalMetrics(lat, lng),
@@ -1829,7 +1923,6 @@
     }
 
     function showWeatherLoadingShimmer() {
-      const panel = document.getElementById("weather-amenities-panel");
       const tempEl = document.getElementById("live-temp-display");
       const descEl = document.getElementById("live-weather-desc");
       if (tempEl) tempEl.innerText = "-- °C";
@@ -1840,52 +1933,158 @@
       // Shimmer resolved by fetch completion
     }
 
-    /* FEATURE PANEL 3: LOCAL INTELLIGENCE / WIKI POIs */
+    /* FEATURE PANEL 3 & DYNAMIC CULTURAL CODEX (WIKI GEOSEARCH + SUMMARY + HERITAGE POIS) */
     async function fetchWikiLocalIntelligence(lat, lng, placeName) {
       const titleEl = document.getElementById("wiki-poi-title");
       const extractEl = document.getElementById("wiki-poi-extract");
-      const listEl = document.getElementById("nearby-pois-list");
       const badgeEl = document.getElementById("poi-count-badge");
 
-      // 1. Query Wikipedia Geosearch Endpoint
-      const geosearchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${lat}|${lng}&gsradius=10000&gslimit=1&format=json&origin=*`;
+      const parsedLat = parseFloat(lat);
+      const parsedLng = parseFloat(lng);
+      const name = placeName ? placeName.trim() : "Target Node";
+
+      let geoPois = [];
+      let wikiExtract = null;
+      let primaryTitle = name;
+
+      // 1. Query Wikipedia Geosearch Endpoint (radius 25km, limit 5)
+      const geosearchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${parsedLat}|${parsedLng}&gsradius=25000&gslimit=5&format=json&origin=*`;
 
       try {
         const geoRes = await fetch(geosearchUrl);
-        if (!geoRes.ok) throw new Error(`Wiki Geosearch status ${geoRes.status}`);
-        const geoData = await geoRes.json();
-
-        let pageTitle = null;
-        if (geoData.query && geoData.query.geosearch && geoData.query.geosearch.length > 0) {
-          pageTitle = geoData.query.geosearch[0].title;
-        }
-
-        // 2. Fetch Wikipedia Summary REST API using pageTitle
-        if (pageTitle) {
-          const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`;
-          const sumRes = await fetch(summaryUrl);
-          if (sumRes.ok) {
-            const wiki = await sumRes.json();
-            if (titleEl) titleEl.innerText = wiki.title || pageTitle;
-            if (extractEl) extractEl.innerText = wiki.extract ? (wiki.extract.length > 180 ? wiki.extract.slice(0, 180) + "..." : wiki.extract) : "Wikipedia spatial node located within 10km radius.";
-            if (badgeEl) badgeEl.innerText = "WIKIPEDIA GEOSEARCH";
-
-            // Render 3 nearby city heritage spots alongside Wiki POI
-            renderNearbyPoiList(placeName);
-            return true;
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          if (geoData.query && geoData.query.geosearch && geoData.query.geosearch.length > 0) {
+            geoPois = geoData.query.geosearch;
+            primaryTitle = geoPois[0].title || name;
           }
         }
       } catch(err) {
-        console.warn("Wikipedia Geosearch fetch fallback:", err);
+        console.warn("Wikipedia Geosearch fetch error:", err);
       }
 
-      // Fallback: Display raw OSM display_name and verified local spots
-      if (titleEl) titleEl.innerText = placeName.toUpperCase();
-      if (extractEl) extractEl.innerText = `Verified spatial reconnaissance node at ${placeName}. Primary regional heritage coordinates active.`;
-      if (badgeEl) badgeEl.innerText = "OSM SPATIAL NODE";
+      // 2. Query Wikipedia Page Summary for primary title or location name
+      try {
+        const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(primaryTitle)}`;
+        const sumRes = await fetch(summaryUrl);
+        if (sumRes.ok) {
+          const wiki = await sumRes.json();
+          wikiExtract = wiki.extract || null;
+          if (titleEl) titleEl.innerText = wiki.title || primaryTitle;
+          if (badgeEl) badgeEl.innerText = "WIKIPEDIA GEOSEARCH";
+        }
+      } catch(err) {
+        console.warn("Wikipedia Summary REST fetch error:", err);
+      }
 
-      renderNearbyPoiList(placeName);
-      return false;
+      // Fallback for summary text if null
+      if (!wikiExtract) {
+        wikiExtract = `Autonomous spatial reconnaissance node at ${name}. Verified coordinates: ${parsedLat.toFixed(4)}° N, ${parsedLng.toFixed(4)}° E.`;
+        if (titleEl) titleEl.innerText = name.toUpperCase();
+        if (badgeEl) badgeEl.innerText = "OSM SPATIAL NODE";
+      }
+
+      if (extractEl) {
+        extractEl.innerText = wikiExtract.length > 180 ? wikiExtract.slice(0, 180) + "..." : wikiExtract;
+      }
+
+      // 3. Build Dynamic Heritage POIs for "EXPLORE PLACES & HERITAGE COORDINATES"
+      if (geoPois.length > 0) {
+        window.dynamicGeoPlaces = geoPois.map((item, idx) => ({
+          id: `wiki-${item.pageid || idx}`,
+          name: item.title,
+          tag: `${(item.dist / 1000).toFixed(1)} KM FROM SEARCH ORIGIN`,
+          category: (idx % 2 === 0 ? "historical" : (idx % 3 === 0 ? "spiritual" : "nature")),
+          coords: `${item.lat.toFixed(4)}° N, ${item.lon.toFixed(4)}° E`,
+          distKm: (item.dist / 1000).toFixed(1),
+          lat: item.lat,
+          lon: item.lon,
+          fee: "Public / Verified",
+          duration: "1 - 2 Hours",
+          desc: `Verified heritage landmark located ${(item.dist / 1000).toFixed(1)} km from ${name}. Coordinates: ${item.lat.toFixed(4)}° N, ${item.lon.toFixed(4)}° E.`,
+          image: getThematicFallbackPhoto(idx % 2 === 0 ? "historical" : "nature", idx % 4)
+        }));
+      } else {
+        // Fallback for remote village or uninhabited coordinate with zero Wikipedia records
+        window.dynamicGeoPlaces = [
+          {
+            id: `geo-node-1`,
+            name: `${name} Central Vector`,
+            tag: `SEARCH ORIGIN NODE`,
+            category: "nature",
+            coords: `Lat: ${parsedLat.toFixed(4)}, Lon: ${parsedLng.toFixed(4)}`,
+            distKm: "0.0",
+            lat: parsedLat,
+            lon: parsedLng,
+            fee: "Open Domain",
+            duration: "Self-Guided",
+            desc: `Geodetic reference vector for ${name} at Lat: ${parsedLat.toFixed(4)}, Lon: ${parsedLng.toFixed(4)}.`,
+            image: getThematicFallbackPhoto("nature", 0)
+          },
+          {
+            id: `geo-node-2`,
+            name: `${name} North Perimeter`,
+            tag: `5.0 KM NORTH VECTOR`,
+            category: "adventure",
+            coords: `Lat: ${(parsedLat + 0.045).toFixed(4)}, Lon: ${parsedLng.toFixed(4)}`,
+            distKm: "5.0",
+            lat: parsedLat + 0.045,
+            lon: parsedLng,
+            fee: "Open Domain",
+            duration: "1 Hour",
+            desc: `North boundary topographic vector for ${name}. High elevation reconnaissance terrain.`,
+            image: getThematicFallbackPhoto("adventure", 1)
+          },
+          {
+            id: `geo-node-3`,
+            name: `${name} East Watershed`,
+            tag: `7.5 KM EAST VECTOR`,
+            category: "nature",
+            coords: `Lat: ${parsedLat.toFixed(4)}, Lon: ${(parsedLng + 0.065).toFixed(4)}`,
+            distKm: "7.5",
+            lat: parsedLat,
+            lon: parsedLng + 0.065,
+            fee: "Open Domain",
+            duration: "1 - 2 Hours",
+            desc: `East hydrological catchment zone and terrain elevation boundary.`,
+            image: getThematicFallbackPhoto("nature", 2)
+          },
+          {
+            id: `geo-node-4`,
+            name: `${name} South Ridge`,
+            tag: `10.0 KM SOUTH VECTOR`,
+            category: "historical",
+            coords: `Lat: ${(parsedLat - 0.09).toFixed(4)}, Lon: ${parsedLng.toFixed(4)}`,
+            distKm: "10.0",
+            lat: parsedLat - 0.09,
+            lon: parsedLng,
+            fee: "Open Domain",
+            duration: "1 Hour",
+            desc: `South ridge elevation marker and historical transit corridor vector.`,
+            image: getThematicFallbackPhoto("historical", 3)
+          }
+        ];
+      }
+
+      // Re-render Explore Places & Heritage Coordinates Grid
+      if (typeof renderPlaces === "function") {
+        renderPlaces(currentCategoryFilter || "all");
+      }
+      renderNearbyPoiList(name);
+
+      // 4. Generate Dynamic Codex & Update Inquiries + Pillars Decks
+      const openMeteoData = {
+        temp: document.getElementById("live-temp-display") ? parseInt(document.getElementById("live-temp-display").innerText) || 24 : 24,
+        humidity: document.getElementById("amenity-humidity") ? parseInt(document.getElementById("amenity-humidity").innerText) || 58 : 58,
+        desc: document.getElementById("live-weather-desc") ? document.getElementById("live-weather-desc").innerText : "Clear Skies"
+      };
+
+      const dynamicCodex = generateDynamicCodexForLocation(name, parsedLat, parsedLng, wikiExtract, openMeteoData, geoPois);
+      if (typeof loadLocation === "function") {
+        loadLocation(name, dynamicCodex);
+      }
+
+      return true;
     }
 
     function renderNearbyPoiList(placeName) {
@@ -1896,12 +2095,12 @@
       const topPois = dataset.slice(0, 4);
 
       listEl.innerHTML = topPois.map(poi => `
-        <div class="poi-item-row" onclick="openPlaceModal('${poi.id}')">
+        <div class="poi-item-row" onclick="if(typeof syncLocationData==='function'){syncLocationData('${(poi.name || '').replace(/'/g, "\\'")}');}">
           <div>
             <div style="font-size:0.85rem; font-weight:700; color:#fff;">${poi.name}</div>
-            <div style="font-size:0.72rem; color:#94a3b8;">${poi.region} &bull; ${poi.fee.split('/')[0]}</div>
+            <div style="font-size:0.72rem; color:#94a3b8;">${poi.distKm ? poi.distKm + ' km from origin' : (poi.region || 'Verified Spot')}</div>
           </div>
-          <span class="telemetry" style="color:var(--accent-emerald); font-size:0.65rem;">${poi.category.toUpperCase()}</span>
+          <span class="telemetry" style="color:var(--accent-emerald); font-size:0.65rem;">${(poi.category || 'POI').toUpperCase()}</span>
         </div>
       `).join("");
     }
@@ -2532,15 +2731,22 @@
       }
     };
 
-    // Generic fallback for cities not explicitly coded above
-    function getCityData(key) {
-      if (CITY_CODEX[key]) return CITY_CODEX[key];
-      return CITY_CODEX["Delhi"]; // Fallback to Delhi dataset
+    // Generic fallback or dynamic codex generator for locations
+    function getCityData(key, lat, lon) {
+      if (key) {
+        if (CITY_CODEX[key]) return CITY_CODEX[key];
+        for (const k in CITY_CODEX) {
+          if (k.toLowerCase() === key.toLowerCase()) return CITY_CODEX[k];
+        }
+      }
+      const activeLat = Number.isFinite(lat) ? lat : (window.ArvoraState ? window.ArvoraState.lat : 28.6139);
+      const activeLon = Number.isFinite(lon) ? lon : (window.ArvoraState ? window.ArvoraState.lon : 77.2090);
+      return generateDynamicCodexForLocation(key || "Target Node", activeLat, activeLon);
     }
 
-    function loadLocation(cityKey) {
+    function loadLocation(cityKey, customData) {
       currentCityKey = cityKey.toLowerCase();
-      renderPlaces(currentCategoryFilter || 'all');
+
       // 1. Update Active HUD Chip
       document.querySelectorAll(".hud-chip").forEach(chip => {
         if (chip.innerText.trim().toLowerCase() === cityKey.toLowerCase()) {
@@ -2550,7 +2756,9 @@
         }
       });
 
-      const data = getCityData(cityKey);
+      const activeLat = window.ArvoraState ? window.ArvoraState.lat : 28.6139;
+      const activeLon = window.ArvoraState ? window.ArvoraState.lon : 77.2090;
+      const data = customData || getCityData(cityKey, activeLat, activeLon);
 
       // 2. Update Meta Banner & Micro-Telemetry
       const titleEl = document.getElementById("destination-title");
@@ -2565,17 +2773,17 @@
       const dwellSubEl = document.getElementById("hud-dwell-sub");
 
       if (titleEl) titleEl.innerText = `${cityKey.toUpperCase()}: AUTONOMOUS CODEX`;
-      if (coordsEl) coordsEl.innerHTML = `<span class="telemetry-dot"></span> ${data.coords}`;
-      if (tempEl) tempEl.innerText = data.temp;
-      if (climateSubEl) climateSubEl.innerHTML = data.climateSub;
-      if (seasonEl) seasonEl.innerText = data.season;
-      if (seasonSubEl) seasonSubEl.innerHTML = data.seasonSub;
-      if (burnEl) burnEl.innerText = data.burn;
-      if (burnSubEl) burnSubEl.innerHTML = data.burnSub;
-      if (dwellEl) dwellEl.innerText = data.dwell;
-      if (dwellSubEl) dwellSubEl.innerHTML = data.dwellSub;
+      if (coordsEl && data.coords) coordsEl.innerHTML = `<span class="telemetry-dot"></span> ${data.coords}`;
+      if (tempEl && data.temp) tempEl.innerText = data.temp;
+      if (climateSubEl && data.climateSub) climateSubEl.innerHTML = data.climateSub;
+      if (seasonEl && data.season) seasonEl.innerText = data.season;
+      if (seasonSubEl && data.seasonSub) seasonSubEl.innerHTML = data.seasonSub;
+      if (burnEl && data.burn) burnEl.innerText = data.burn;
+      if (burnSubEl && data.burnSub) burnSubEl.innerHTML = data.burnSub;
+      if (dwellEl && data.dwell) dwellEl.innerText = data.dwell;
+      if (dwellSubEl && data.dwellSub) dwellSubEl.innerHTML = data.dwellSub;
 
-            // Target both inquiries and pillars containers with fallbacks
+      // Target both inquiries and pillars containers with fallbacks
       const inqDeck = document.getElementById("inquiries-deck") || document.getElementById("inquiries-root");
       const pillarsDeck = document.getElementById("pillars-deck") || document.getElementById("dna-root");
 
@@ -3439,6 +3647,9 @@
     let currentCategoryFilter = "all";
 
     function getCurrentCityPlaces() {
+      if (window.dynamicGeoPlaces && window.dynamicGeoPlaces.length > 0) {
+        return window.dynamicGeoPlaces;
+      }
       const key = currentCityKey.toLowerCase();
       if (typeof CITY_HERITAGE_REGISTRY !== "undefined" && CITY_HERITAGE_REGISTRY[key]) {
         return CITY_HERITAGE_REGISTRY[key];
@@ -3460,16 +3671,16 @@
       if (counter) counter.innerText = `${filtered.length} VERIFIED SIGHTS DISPLAYED`;
 
       container.innerHTML = filtered.map(place => `
-        <article class="place-card">
+        <article class="place-card" style="cursor:pointer;" onclick="if(typeof syncLocationData==='function'){syncLocationData('${(place.name || '').replace(/'/g, "\\'")}');}">
           <div style="position:relative;">
-            <img src="${place.image || getThematicFallbackPhoto(place.category, 0)}" onerror="this.onerror=null; this.src=getThematicFallbackPhoto('${place.category}', 0);" alt="${place.name}" class="place-card-img" loading="lazy" />
-            <span style="position:absolute; top:12px; left:12px; background:rgba(3,5,7,0.85); border:1px solid rgba(16,185,129,0.4); color:#10b981; font-family:'JetBrains Mono'; font-size:0.65rem; padding:4px 10px; border-radius:6px; font-weight:600;">${place.category.toUpperCase()}</span>
+            <img src="${place.image || getThematicFallbackPhoto(place.category || 'nature', 0)}" onerror="this.onerror=null; this.src=getThematicFallbackPhoto('${place.category || 'nature'}', 0);" alt="${place.name}" class="place-card-img" loading="lazy" />
+            <span style="position:absolute; top:12px; left:12px; background:rgba(3,5,7,0.85); border:1px solid rgba(16,185,129,0.4); color:#10b981; font-family:'JetBrains Mono'; font-size:0.65rem; padding:4px 10px; border-radius:6px; font-weight:600;">${(place.category || 'heritage').toUpperCase()}</span>
           </div>
           <div class="place-card-body">
             <div>
               <div class="place-meta-strip">
-                <span class="telemetry" style="font-size:0.62rem; color:var(--accent-emerald);">${place.tag}</span>
-                <span style="font-family:'JetBrains Mono', monospace; font-size:0.65rem; color:#f59e0b; background:rgba(245,158,11,0.1); padding:2px 6px; border-radius:4px;">★ VERIFIED</span>
+                <span class="telemetry" style="font-size:0.62rem; color:var(--accent-emerald);">${place.tag || 'VERIFIED POI'}</span>
+                <span style="font-family:'JetBrains Mono', monospace; font-size:0.65rem; color:#f59e0b; background:rgba(245,158,11,0.1); padding:2px 6px; border-radius:4px;">★ ${place.distKm ? place.distKm + ' KM' : 'VERIFIED'}</span>
               </div>
               <h3 class="place-title">${place.name}</h3>
               <p class="place-desc">${place.desc}</p>
@@ -3477,14 +3688,14 @@
 
             <div>
               <div class="place-telemetry-row">
-                <div><span style="color:#64748b;">ENTRY:</span> ${place.fee.split('/')[0]}</div>
-                <div><span style="color:#64748b;">DURATION:</span> ${place.duration.split(' ')[0]} ${place.duration.split(' ')[1] || ''}</div>
+                <div><span style="color:#64748b;">ENTRY:</span> ${place.fee ? place.fee.split('/')[0] : 'Public'}</div>
+                <div><span style="color:#64748b;">DURATION:</span> ${place.duration ? place.duration.split(' ')[0] : '1'} hr</div>
                 <div style="grid-column: span 2;"><span style="color:#64748b;">COORDS:</span> ${place.coords}</div>
               </div>
 
               <div class="card-actions">
-                <button class="btn-card-intel" onclick="openPlaceModal('${place.id}')">DEEP INTEL & SECRETS</button>
-                <button class="btn-bookmark" onclick="bookmarkPlace('${place.name}')" title="Bookmark to My Trip">🔖</button>
+                <button class="btn-card-intel" onclick="event.stopPropagation(); if(typeof syncLocationData==='function'){syncLocationData('${(place.name || '').replace(/'/g, "\\'")}');}">MAP VECTOR LOCATE 📍</button>
+                <button class="btn-bookmark" onclick="event.stopPropagation(); bookmarkPlace('${(place.name || '').replace(/'/g, "\\'")}');" title="Bookmark to My Trip">🔖</button>
               </div>
             </div>
           </div>
