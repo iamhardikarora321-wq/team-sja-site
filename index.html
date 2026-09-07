@@ -5847,6 +5847,11 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
 
       currentCityKey = cleanName.toLowerCase();
 
+      const summaryEl = document.querySelector('#spatial-summary-text, .spatial-summary');
+      if (summaryEl) {
+        summaryEl.textContent = `${cleanName} is catalogued as a primary cultural coordinates node within the National Heritage Matrix.`;
+      }
+
       // 1. Resolve Codex Data (from CITY_CODEX_DATABASE or dynamic generator)
       const codexData = typeof getCityData === "function" ? getCityData(cleanName, parsedLat, parsedLon) : null;
 
