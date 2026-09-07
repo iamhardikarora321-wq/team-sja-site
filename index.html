@@ -1513,8 +1513,8 @@
     // Panel 1: Spatial Telemetry
     async function updatePanel1_SpatialTelemetry(lat, lon, displayName, locationData) {
       const latStr = lat >= 0 ? `${lat.toFixed(4)}° N` : `${Math.abs(lat).toFixed(4)}° S`;
-      const lonStr = lon >= 0 ? `${lon.toFixed(4)}° E` : `${Math.abs(lon).toFixed(4)}° W`;
-      const name = (locationData && locationData.name) ? locationData.name : (displayName ? displayName.split(',')[0].trim() : "Target Location");
+      const rawPlaceName = (locationData && locationData.name) ? locationData.name : (displayName ? displayName.split(',')[0].trim() : "Target Location");
+      const name = typeof sanitizePlaceName === "function" ? sanitizePlaceName(rawPlaceName) : rawPlaceName;
 
       const coordEls = document.querySelectorAll("#feature-coordinates, .telemetry-coords, #overview-coords-telemetry, [data-coord]");
       coordEls.forEach(el => { el.textContent = `📍 ${latStr}, ${lonStr}`; });
@@ -1711,6 +1711,20 @@
     }
 
     /* ====================================================================
+       UNIVERSAL PLACE NAME SANITIZER
+       ==================================================================== */
+    function sanitizePlaceName(raw) {
+      if (!raw || typeof raw !== 'string') return 'Ancient Settlement';
+      const cleaned = raw
+        .replace(/\b(Central Vector|North Perimeter|East Watershed|South Ridge|Spatial Node|Primary Heritage Monument|Primary Monument)\b/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/^[\s,-]+|[\s,-]+$/g, '')
+        .trim();
+      return cleaned || 'Ancient Settlement';
+    }
+    window.sanitizePlaceName = sanitizePlaceName;
+
+    /* ====================================================================
        1. GLOBAL STATE DEFINITION (ATTACHED TO WINDOW AT TOP OF SCRIPT)
        ==================================================================== */
     window.ArvoraState = window.ArvoraState || {
@@ -1767,11 +1781,11 @@
           const rawLon = locationData.lon ?? locationData.lng ?? locationData.longitude ?? coords.lng ?? coords.lon;
           parsedLat = parseFloat(rawLat);
           parsedLon = parseFloat(rawLon);
-          name = locationData.name || locationData.displayName || locationData.osmDisplayName || '';
+          name = sanitizePlaceName(locationData.name || locationData.displayName || locationData.osmDisplayName || '');
         } else {
           parsedLat = parseFloat(firstArg);
           parsedLon = parseFloat(secondArg);
-          name = thirdArg || '';
+          name = sanitizePlaceName(thirdArg || '');
           locationData = {
             name: name,
             osmDisplayName: name,
@@ -2803,7 +2817,7 @@
 
         async function syncLocationData(query, directLat, directLon) {
       if (!query) return;
-      const searchQuery = query.trim();
+      const searchQuery = typeof sanitizePlaceName === "function" ? sanitizePlaceName(query) : query.trim();
       console.log(`[Arvora Audit Stage 1: Geocoding Result] Initiating location sync for: "${searchQuery}"`);
 
       let lat = 28.6139;
