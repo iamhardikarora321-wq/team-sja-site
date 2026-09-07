@@ -3531,6 +3531,20 @@
     };
     window.VERIFIED_LANDMARK_MEDIA = VERIFIED_LANDMARK_MEDIA;
 
+    function getLandmarkPhoto(title, fallbackLat, fallbackLon) {
+      const key = (title || '').toLowerCase().trim();
+      if (typeof VERIFIED_LANDMARK_MEDIA !== 'undefined') {
+        if (VERIFIED_LANDMARK_MEDIA[key]) {
+          return VERIFIED_LANDMARK_MEDIA[key];
+        }
+        for (const [k, url] of Object.entries(VERIFIED_LANDMARK_MEDIA)) {
+          if (key.includes(k) || k.includes(key)) return url;
+        }
+      }
+      return null;
+    }
+    window.getLandmarkPhoto = getLandmarkPhoto;
+
     const DEHRADUN_VERIFIED_SIGHTS = [
       {
         name: "Robber's Cave (Guchhupani)",
@@ -5342,19 +5356,11 @@
       const safeLon = Number(lon || 0).toFixed(4);
       const placeholder = `<div class="monument-vector-placeholder" style="background:#090d14; border-bottom:1px solid rgba(16,185,129,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; height:150px;"><span style="color:#10b981; font-family:monospace; font-size:12px; letter-spacing:1px;">SPATIAL COORD LOCKED</span><span style="color:#64748b; font-size:10px; font-family:monospace; margin-top:4px;">${safeLat}°N // ${safeLon}°E</span></div>`;
 
-      const cleanKey = (title || '').toLowerCase().trim();
       let mediaUrl = url;
-
-      if (typeof VERIFIED_LANDMARK_MEDIA !== 'undefined') {
-        if (VERIFIED_LANDMARK_MEDIA[cleanKey]) {
-          mediaUrl = VERIFIED_LANDMARK_MEDIA[cleanKey];
-        } else {
-          for (const [key, val] of Object.entries(VERIFIED_LANDMARK_MEDIA)) {
-            if (cleanKey.includes(key) || key.includes(cleanKey)) {
-              mediaUrl = val;
-              break;
-            }
-          }
+      if (typeof getLandmarkPhoto === 'function') {
+        const verifiedPhoto = getLandmarkPhoto(title, lat, lon);
+        if (verifiedPhoto) {
+          mediaUrl = verifiedPhoto;
         }
       }
 
