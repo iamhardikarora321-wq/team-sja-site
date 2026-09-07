@@ -1684,52 +1684,74 @@
     let activeWeatherCoords = null;
     let weatherDebounceTimer = null;
 
+    function mapWmoWeatherCode(code) {
+      if (code === 0) return { label: 'Clear Sky & Sunshine', icon: '☀️' };
+      if (code >= 1 && code <= 3) return { label: 'Mainly Clear / Scattered Clouds', icon: '🌤️' };
+      if (code >= 45 && code <= 48) return { label: 'Atmospheric Mist & Fog', icon: '🌫️' };
+      if (code >= 51 && code <= 67) return { label: 'Precipitation / Light Showers', icon: '🌧️' };
+      if (code >= 71 && code <= 77) return { label: 'High Altitude Snow Flurries', icon: '❄️' };
+      if (code >= 80 && code <= 82) return { label: 'Monsoonal Rain Convection', icon: '🌧️' };
+      if (code >= 95) return { label: 'Severe Thunderstorm Front', icon: '⛈️' };
+      return { label: 'Stable Atmospheric Envelope', icon: '🌤️' };
+    }
+    window.mapWmoWeatherCode = mapWmoWeatherCode;
+
     function renderWeatherUI(data) {
-      const current = data.current_weather || data.current || {};
-      const temp = Math.round(current.temperature !== undefined ? current.temperature : (current.temperature_2m !== undefined ? current.temperature_2m : 24));
-      const wind = Math.round(current.windspeed !== undefined ? current.windspeed : (current.wind_speed_10m !== undefined ? current.wind_speed_10m : 12));
-      const humidity = Math.round(data.hourly?.relativehumidity_2m?.[0] !== undefined ? data.hourly.relativehumidity_2m[0] : (current.relative_humidity_2m !== undefined ? current.relative_humidity_2m : 58));
-      const code = current.weathercode !== undefined ? current.weathercode : (current.weather_code !== undefined ? current.weather_code : 0);
-
-      const weatherInfo = (typeof WEATHER_CODE_MAP !== "undefined" && WEATHER_CODE_MAP[code]) 
-        ? WEATHER_CODE_MAP[code] 
-        : { icon: "🌤️", desc: "Partly Cloudy & Pleasant" };
-
-      const tempEls = document.querySelectorAll('#feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
-      const windEls = document.querySelectorAll('#feature-weather-wind, .env-wind, #amenity-wind, [data-weather-wind]');
-      const humEls = document.querySelectorAll('#feature-weather-humidity, .env-humidity, #amenity-humidity, [data-weather-humidity]');
-
-      tempEls.forEach(el => { el.textContent = `${temp}°C`; });
-      windEls.forEach(el => { el.textContent = `${wind} km/h`; });
-      humEls.forEach(el => { el.textContent = `${humidity}%`; });
-
-      const descEl = document.getElementById("live-weather-desc");
-      if (descEl) descEl.innerText = weatherInfo.desc;
-
+      const tempEls = document.querySelectorAll('#weather-temp, .weather-temp-val, #feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
+      const descEls = document.querySelectorAll('#weather-desc, .weather-desc-text, #live-weather-desc');
+      const windEls = document.querySelectorAll('#weather-wind, [data-metric="wind"], #feature-weather-wind, .env-wind, #amenity-wind');
+      const humidityEls = document.querySelectorAll('#weather-humidity, [data-metric="humidity"], #feature-weather-humidity, .env-humidity, #amenity-humidity');
       const iconEl = document.getElementById("weather-icon-display");
-      if (iconEl) iconEl.innerText = weatherInfo.icon;
-
       const badgeEl = document.getElementById("weather-status-badge");
+
+      const current = data?.current_weather || data?.current || {};
+      const condition = mapWmoWeatherCode(current?.weathercode ?? current?.weather_code ?? 0);
+      const temp = Math.round(current?.temperature ?? current?.temperature_2m ?? 24);
+      const wind = Math.round(current?.windspeed ?? current?.wind_speed_10m ?? 6);
+      
+      let humidity = 65;
+      if (data?.hourly?.relativehumidity_2m?.length > 0) {
+        humidity = data.hourly.relativehumidity_2m[0];
+      } else if (current?.relative_humidity_2m !== undefined) {
+        humidity = Math.round(current.relative_humidity_2m);
+      }
+
+      tempEls.forEach(el => {
+        if (el.id === 'weather-temp' || el.classList.contains('weather-temp-val')) {
+          el.innerHTML = `<span style="margin-right: 6px;">${condition.icon}</span> ${temp}°C`;
+        } else {
+          el.textContent = `${temp}°C`;
+        }
+      });
+      descEls.forEach(el => { el.textContent = condition.label; });
+      windEls.forEach(el => { el.textContent = `${wind} km/h`; });
+      humidityEls.forEach(el => { el.textContent = `${humidity}%`; });
+
+      if (iconEl) iconEl.innerText = condition.icon;
       if (badgeEl) badgeEl.innerText = "OPEN-METEO LIVE";
     }
     window.renderWeatherUI = renderWeatherUI;
 
     function renderWeatherFallback() {
-      const tempEls = document.querySelectorAll('#feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
-      const windEls = document.querySelectorAll('#feature-weather-wind, .env-wind, #amenity-wind, [data-weather-wind]');
-      const humEls = document.querySelectorAll('#feature-weather-humidity, .env-humidity, #amenity-humidity, [data-weather-humidity]');
-
-      tempEls.forEach(el => { el.textContent = "24°C"; });
-      windEls.forEach(el => { el.textContent = "12 km/h"; });
-      humEls.forEach(el => { el.textContent = "58%"; });
-
-      const descEl = document.getElementById("live-weather-desc");
-      if (descEl) descEl.innerText = "Ambient Seasonal Climate Active";
-
+      const tempEls = document.querySelectorAll('#weather-temp, .weather-temp-val, #feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
+      const descEls = document.querySelectorAll('#weather-desc, .weather-desc-text, #live-weather-desc');
+      const windEls = document.querySelectorAll('#weather-wind, [data-metric="wind"], #feature-weather-wind, .env-wind, #amenity-wind');
+      const humidityEls = document.querySelectorAll('#weather-humidity, [data-metric="humidity"], #feature-weather-humidity, .env-humidity, #amenity-humidity');
       const iconEl = document.getElementById("weather-icon-display");
-      if (iconEl) iconEl.innerText = "🌤️";
-
       const badgeEl = document.getElementById("weather-status-badge");
+
+      tempEls.forEach(el => {
+        if (el.id === 'weather-temp' || el.classList.contains('weather-temp-val')) {
+          el.innerHTML = `🌤️ 25°C`;
+        } else {
+          el.textContent = '25°C';
+        }
+      });
+      descEls.forEach(el => { el.textContent = 'Nominal Atmospheric Envelope'; });
+      windEls.forEach(el => { el.textContent = '8 km/h'; });
+      humidityEls.forEach(el => { el.textContent = '62%'; });
+
+      if (iconEl) iconEl.innerText = "🌤️";
       if (badgeEl) badgeEl.innerText = "AMBIENT FALLBACK";
     }
     window.renderWeatherFallback = renderWeatherFallback;
