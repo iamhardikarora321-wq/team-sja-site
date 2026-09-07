@@ -513,7 +513,21 @@
       margin-top: 8px;
     }
 
-        /* Filter Pill Component */
+        /* Filter Pill Component & Two-Tier Category Ribbon */
+    .category-filter-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 14px 0 24px 0;
+      width: 100%;
+    }
+    .category-row-primary,
+    .category-row-secondary {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
     .filter-pill {
       background: rgba(18, 24, 34, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -532,6 +546,16 @@
       border-color: rgba(16, 185, 129, 0.5);
       color: #ffffff;
       box-shadow: 0 0 14px rgba(16, 185, 129, 0.18);
+    }
+    .category-row-secondary .filter-pill {
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    .category-row-secondary .filter-pill:hover,
+    .category-row-secondary .filter-pill.active {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.6);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.22);
     }
 
     /* Place Bento Card */
@@ -1284,14 +1308,18 @@
         <span class="telemetry" id="places-counter" style="color: var(--accent-emerald);">50 VERIFIED SIGHTS LOADED</span>
       </div>
 
-      <!-- Filter Pills (10+ per category) -->
-      <div class="places-category-bar" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 24px; scrollbar-width: none;">
-        <button class="filter-pill active" onclick="filterPlaces('all', this)">ALL SIGHTS (50)</button>
-        <button class="filter-pill" onclick="filterPlaces('nature', this)">🏔️ NATURE & GEOLOGY (10)</button>
-        <button class="filter-pill" onclick="filterPlaces('historical', this)">🏛️ HISTORICAL & FORTS (10)</button>
-        <button class="filter-pill" onclick="filterPlaces('spiritual', this)">🪔 SPIRITUAL & CAVE SANCTUMS (10)</button>
-        <button class="filter-pill" onclick="filterPlaces('craft', this)">🏺 CRAFT & GUILD BAZAARS (10)</button>
-        <button class="filter-pill" onclick="filterPlaces('adventure', this)">🧗 ADVENTURE & HIGH PASSES (10)</button>
+      <!-- Filter Pills (Two-Tier Structured Category Ribbon) -->
+      <div class="places-category-bar category-filter-container">
+        <div class="category-row-primary">
+          <button class="filter-pill active" onclick="filterPlaces('all', this)">ALL SIGHTS (50)</button>
+          <button class="filter-pill" onclick="filterPlaces('nature', this)">🏔️ NATURE & GEOLOGY (10)</button>
+          <button class="filter-pill" onclick="filterPlaces('historical', this)">🏛️ HISTORICAL & FORTS (10)</button>
+          <button class="filter-pill" onclick="filterPlaces('spiritual', this)">🪔 SPIRITUAL & CAVE SANCTUMS (10)</button>
+        </div>
+        <div class="category-row-secondary">
+          <button class="filter-pill" onclick="filterPlaces('craft', this)">🏺 CRAFT & GUILD BAZAARS (10)</button>
+          <button class="filter-pill" onclick="filterPlaces('adventure', this)">🧗 ADVENTURE & HIGH PASSES (10)</button>
+        </div>
       </div>
 
       <!-- Dynamic Card Grid -->
