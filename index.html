@@ -3864,24 +3864,39 @@
       renderPlaces("all");
     });
   
-    // Register subscribers to synchronize all modules on location update
-    ArvoraState.subscribe((location) => {
-      if (!location || !location.name) return;
-      currentCityKey = location.name.toLowerCase();
+    function updateAllCulturalPanels(placeName, lat, lon) {
+      if (!placeName) return;
+      const cleanName = placeName.split(',')[0].trim();
+      const parsedLat = parseFloat(lat);
+      const parsedLon = parseFloat(lon);
 
-      // 1. Update loadLocation UI (HUD, Micro-Telemetry & Flip Cards)
+      if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLon)) return;
+
+      currentCityKey = cleanName.toLowerCase();
+
+      // 1. Resolve Codex Data (from CITY_CODEX_DATABASE or dynamic generator)
+      const codexData = typeof getCityData === "function" ? getCityData(cleanName, parsedLat, parsedLon) : null;
+
+      // 2. Load Location Codex (HUD, Micro-Telemetry, Inquiries & Pillars Decks, Heritage Coordinates)
       if (typeof loadLocation === "function") {
-        loadLocation(location.name);
+        loadLocation(cleanName, codexData);
       }
 
-      // 2. Synchronize Explore Places & Heritage Coordinates Grid
+      // 3. Synchronize Explore Places Grid
       if (typeof renderPlaces === "function") {
         renderPlaces(currentCategoryFilter || "all");
       }
+    }
+    window.updateAllCulturalPanels = updateAllCulturalPanels;
 
-      // 3. Synchronize Cartography Map Component (flyTo, fitBounds, custom marker & tooltip)
-      if (typeof updateMapToLocation === "function") {
-        updateMapToLocation(location);
+    // Register subscribers to synchronize all modules on location update
+    ArvoraState.subscribe((state) => {
+      if (!state) return;
+      const placeName = (state.displayName || state.name || 'Current Location').split(',')[0].trim();
+      const lat = parseFloat(state.lat);
+      const lon = parseFloat(state.lon ?? state.lng);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        updateAllCulturalPanels(placeName, lat, lon);
       }
     });
 
