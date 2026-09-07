@@ -5438,60 +5438,97 @@
     let activeSpectrumTarget = '';
 
     async function updatePhotographicSpectrum(lat, lon, rawPlaceName) {
-      const pLat = parseFloat(lat);
-      const pLon = parseFloat(lon);
-      if (!Number.isFinite(pLat) || !Number.isFinite(pLon)) return;
-
-      const targetId = `${pLat.toFixed(3)}_${pLon.toFixed(3)}_${rawPlaceName}`;
-      if (activeSpectrumTarget === targetId) return;
-      activeSpectrumTarget = targetId;
-
       const container = document.getElementById('photographic-spectrum') || 
                         document.querySelector('.photographic-spectrum-grid, .photographic-spectrum');
       if (!container) return;
 
-      container.innerHTML = '';
-      const cleanName = (rawPlaceName || '').split(',')[0].trim();
-      let photos = [];
+      const validLat = parseFloat(lat);
+      const validLon = parseFloat(lon);
+      if (!Number.isFinite(validLat) || !Number.isFinite(validLon)) return;
 
-      // Source A: Wikipedia GeoSearch
+      const targetId = `${validLat.toFixed(3)}_${validLon.toFixed(3)}_${rawPlaceName}`;
+      if (activeSpectrumTarget === targetId) return;
+      activeSpectrumTarget = targetId;
+
+      container.innerHTML = '';
+      const cleanName = (rawPlaceName || '')
+        .replace(/\b(Central Vector|North Perimeter|East Watershed|South Ridge|Spatial Node)\b/gi, '')
+        .split(',')[0]
+        .trim();
+
+      let photos = [];
+      const seenSrcs = new Set();
+
+      // Source A: Wikipedia GeoSearch (CORS-safe Action API with origin=*)
       try {
-        const geoUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=25000&ggslimit=15&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
-        const res = await fetch(geoUrl);
+        const geoParams = new URLSearchParams({
+          action: 'query',
+          generator: 'geosearch',
+          ggscoord: `${validLat}|${validLon}`,
+          ggsradius: '25000',
+          ggslimit: '15',
+          prop: 'pageimages',
+          piprop: 'thumbnail',
+          pithumbsize: '400',
+          format: 'json',
+          origin: '*'
+        });
+
+        const res = await fetch(`https://en.wikipedia.org/w/api.php?${geoParams.toString()}`);
         if (res.ok) {
           const data = await res.json();
           const pages = data.query?.pages ? Object.values(data.query.pages) : [];
           for (const p of pages) {
-            if (p.thumbnail?.source && !photos.some(x => x.src === p.thumbnail.source)) {
-              photos.push({ title: p.title, src: p.thumbnail.source });
+            const src = p.thumbnail?.source;
+            if (src && !seenSrcs.has(src)) {
+              seenSrcs.add(src);
+              photos.push({ title: p.title, src });
             }
+            if (photos.length >= 4) break;
           }
         }
-      } catch (e) {}
+      } catch (err) {
+        console.warn("GeoSearch photo fetch failed:", err);
+      }
 
-      // Source B: Wikimedia Commons Fallback to ensure 4 distinct photos
-      if (photos.length < 4) {
+      // Source B: Wikimedia Commons Search Fallback
+      if (photos.length < 4 && cleanName) {
         try {
-          const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanName + ' monument architecture')}&gsrlimit=8&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
-          const res = await fetch(commonsUrl);
+          const commonsParams = new URLSearchParams({
+            action: 'query',
+            generator: 'search',
+            gsrsearch: `${cleanName} monument architecture`,
+            gsrlimit: '10',
+            prop: 'pageimages',
+            piprop: 'thumbnail',
+            pithumbsize: '400',
+            format: 'json',
+            origin: '*'
+          });
+
+          const res = await fetch(`https://commons.wikimedia.org/w/api.php?${commonsParams.toString()}`);
           if (res.ok) {
             const data = await res.json();
             const pages = data.query?.pages ? Object.values(data.query.pages) : [];
             for (const p of pages) {
-              if (p.thumbnail?.source && !photos.some(x => x.src === p.thumbnail.source)) {
-                photos.push({ title: p.title, src: p.thumbnail.source });
+              const src = p.thumbnail?.source;
+              if (src && !seenSrcs.has(src)) {
+                seenSrcs.add(src);
+                photos.push({ title: p.title, src });
               }
               if (photos.length >= 4) break;
             }
           }
-        } catch (e) {}
+        } catch (err) {
+          console.warn("Commons search fallback failed:", err);
+        }
       }
 
-      // Render exactly 4 slots
+      // Render exactly 4 slots in a single row
       for (let i = 0; i < 4; i++) {
         const tile = document.createElement('div');
         tile.className = 'spectrum-photo-tile';
-        tile.style.cssText = 'flex: 1 1 0; min-width: 0; height: 52px; border-radius: 6px; overflow: hidden; background: #080c12; border: 1px solid rgba(16,185,129,0.3);';
+        tile.style.cssText = 'flex: 1 1 0; min-width: 0; height: 52px; border-radius: 6px; overflow: hidden; background: #080c12; border: 1px solid rgba(16,185,129,0.3); position: relative;';
 
         const photo = photos[i];
         if (photo && photo.src) {
@@ -5499,7 +5536,7 @@
           const safeClick = (photo.title || '').replace(/'/g, "\\'");
           tile.innerHTML = `<img src="${photo.src}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${photo.src}', '${safeClick}');}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:9px;color:#10b981;font-family:monospace;\\'>NODE</span>'" />`;
         } else {
-          tile.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#334155;font-size:9px;font-family:monospace;">NODE 0${i+1}</div>`;
+          tile.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#334155;font-size:9px;font-family:monospace;">NODE 0${i + 1}</div>`;
         }
         container.appendChild(tile);
       }
