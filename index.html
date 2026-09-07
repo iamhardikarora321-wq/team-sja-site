@@ -243,10 +243,13 @@
       transition: opacity 0.5s ease, transform 0.5s ease;
       max-width: 1440px;
       margin: 0 auto;
-      padding: 36px 24px 100px;
+      padding: 24px 24px 80px;
+      flex-direction: column;
+      justify-content: flex-start !important;
+      gap: 16px !important;
     }
     #features-page.active {
-      display: block;
+      display: flex;
       opacity: 1;
       transform: translateY(0);
     }
@@ -262,8 +265,35 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 0 !important;
       box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .spatial-map-wrapper {
+      margin-top: 0 !important;
+      margin-bottom: 16px !important;
+      width: 100%;
+    }
+
+    .spatial-telemetry-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px !important;
+      max-height: 30px;
+    }
+
+    #arvora-spatial-map {
+      margin-top: 0 !important;
+      width: 100% !important;
+      height: calc(100vh - 220px) !important;
+      min-height: 450px !important;
+      border-radius: 16px;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      overflow: hidden;
+      background: #040608;
+      z-index: 10;
     }
 
     .search-input-box {
@@ -895,12 +925,12 @@
     </div>
 
     <!-- Interactive Spatial Vector Map Viewport -->
-    <div class="spatial-map-wrapper" style="margin-top: 24px; margin-bottom: 40px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <div class="spatial-map-wrapper">
+      <div class="spatial-telemetry-bar">
         <span class="telemetry"><span class="telemetry-dot"></span> LIVE SPATIAL VECTOR MAP // OPENSTREETMAP LEAFLET ENGINE</span>
         <span class="telemetry" id="map-target-status" style="color: var(--accent-emerald);">VECTOR LOCKED</span>
       </div>
-      <div id="arvora-spatial-map" style="width: 100%; height: 380px; border-radius: 16px; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.8); overflow: hidden; background: #040608; z-index: 10;"></div>
+      <div id="arvora-spatial-map"></div>
     </div>
 
 
