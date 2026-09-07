@@ -1161,7 +1161,7 @@
         
         <div>
           <div style="font-family:'JetBrains Mono', monospace; font-size: 0.68rem; color: #94a3b8; margin-bottom: 10px;">PHOTOGRAPHIC SPECTRUM</div>
-          <div id="location-photo-gallery" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <div id="photographic-spectrum" class="photographic-spectrum" data-photo-spectrum style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
             <!-- Dynamic Photo Gallery Thumbnails -->
           </div>
         </div>
@@ -1465,15 +1465,8 @@
         bboxEl.innerHTML = `<span style="color:#64748b;">BBOX BOUNDS:</span> [${parseFloat(b[0]).toFixed(4)}, ${parseFloat(b[1]).toFixed(4)}, ${parseFloat(b[2]).toFixed(4)}, ${parseFloat(b[3]).toFixed(4)}]`;
       }
 
-      if (typeof getThematicFallbackPhoto === "function") {
-        const gallery = document.getElementById("location-photo-gallery");
-        if (gallery) {
-          const categoryPool = ["nature", "historical", "spiritual", "craft"];
-          const galleryPhotos = categoryPool.map((cat, idx) => getValidImageUrl(getThematicFallbackPhoto(cat, idx), cat));
-          gallery.innerHTML = galleryPhotos.map((url, i) => `
-            <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" style="width:100%; height:55px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.style.display='none';" />
-          `).join("");
-        }
+      if (typeof updatePhotographicSpectrum === "function" && locationData) {
+        updatePhotographicSpectrum(locationData.lat, locationData.lon, locationData.name || name);
       }
 
       return true;
@@ -2217,14 +2210,8 @@
       }
       if (descEl) descEl.innerText = summary;
 
-      // Gallery Assets
-      const categoryPool = ["nature", "historical", "spiritual", "craft"];
-      const galleryPhotos = categoryPool.map((cat, idx) => getValidImageUrl(getThematicFallbackPhoto(cat, idx), cat));
-
-      if (gallery) {
-        gallery.innerHTML = galleryPhotos.map((url, i) => `
-          <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.style.display='none';" />
-        `).join("");
+      if (typeof updatePhotographicSpectrum === "function") {
+        updatePhotographicSpectrum(lat, lng, name);
       }
 
       return Promise.resolve(true);
@@ -4948,6 +4935,70 @@
     }
     window.updateHeritageAndBackdrop = updateHeritageAndBackdrop;
 
+    /* ====================================================================
+       DYNAMIC PHOTOGRAPHIC SPECTRUM ENGINE (15KM GEOSEARCH REAL PHOTOS)
+    ==================================================================== */
+    async function updatePhotographicSpectrum(lat, lon, placeName) {
+      const container = document.querySelector('#photographic-spectrum, #location-photo-gallery, .photographic-spectrum, [data-photo-spectrum]');
+      if (!container) return;
+
+      container.innerHTML = '<div style="color:#64748b; font-size:11px; font-family:monospace; padding:8px; grid-column:1/-1;">FETCHING SPATIAL SPECTRUM...</div>';
+
+      const endpoint = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=15000&ggslimit=10&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
+
+      try {
+        const res = await fetch(endpoint);
+        const data = await res.json();
+        const pages = data.query?.pages ? Object.values(data.query.pages) : [];
+        const validPhotos = pages
+          .filter(p => p.thumbnail && p.thumbnail.source)
+          .map(p => ({ title: p.title, url: p.thumbnail.source }));
+
+        container.innerHTML = '';
+
+        if (validPhotos.length === 0) {
+          // Fallback: Fetch the photo of the searched place or its district
+          const cleanName = (placeName || '').split(',')[0].trim();
+          if (cleanName) {
+            try {
+              const directUrl = typeof getVerifiedMonumentImage === 'function' ? await getVerifiedMonumentImage(cleanName) : null;
+              if (directUrl) {
+                validPhotos.push({ title: cleanName, url: directUrl });
+              } else {
+                const directRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
+                if (directRes.ok) {
+                  const directData = await directRes.json();
+                  if (directData.thumbnail?.source) {
+                    validPhotos.push({ title: directData.title || cleanName, url: directData.thumbnail.source });
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn("Direct photo fallback failed:", e);
+            }
+          }
+        }
+
+        // Render up to 4 images
+        for (let i = 0; i < 4; i++) {
+          const item = validPhotos[i];
+          const slot = document.createElement('div');
+          slot.className = 'spectrum-photo-slot';
+          slot.style.cssText = 'width: 100%; height: 55px; border-radius: 6px; overflow: hidden; background: #0c1015; border: 1px solid rgba(16,185,129,0.3); position: relative; cursor: pointer;';
+
+          if (item) {
+            slot.innerHTML = `<img src="${item.url}" alt="${(item.title || '').replace(/"/g, '&quot;')}" title="${(item.title || '').replace(/"/g, '&quot;')}" style="width:100%; height:100%; object-fit:cover;" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.url}', '${(item.title || '').replace(/'/g, "\\'")}');}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:9px;color:#10b981;padding:4px;display:block;text-align:center;\\'>VEC</span>';" />`;
+          } else {
+            slot.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#334155;font-size:9px;font-family:monospace;">NODE ${i+1}</div>`;
+          }
+          container.appendChild(slot);
+        }
+      } catch (err) {
+        console.warn("Spectrum photo fetch failed:", err);
+      }
+    }
+    window.updatePhotographicSpectrum = updatePhotographicSpectrum;
+
     // Initialize on page load
     document.addEventListener("DOMContentLoaded", () => {
       loadLocation("Delhi");
@@ -5005,6 +5056,11 @@
       // 6. Update Ambient Faded Backdrop & Fetch Real Photos from Wikipedia GeoSearch
       if (typeof updateHeritageAndBackdrop === "function") {
         updateHeritageAndBackdrop(cleanName, parsedLat, parsedLon);
+      }
+
+      // 7. Update Dynamic Photographic Spectrum (4 Distinct Real Photos via GeoSearch)
+      if (typeof updatePhotographicSpectrum === "function") {
+        updatePhotographicSpectrum(parsedLat, parsedLon, cleanName);
       }
     }
     window.updateAllCulturalPanels = updateAllCulturalPanels;
