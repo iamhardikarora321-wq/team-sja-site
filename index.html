@@ -1250,8 +1250,13 @@
       },
 
       subscribe(fn) {
-        if (typeof fn === 'function') {
-          this.subscribers.push(fn);
+        if (typeof fn !== 'function') return;
+        this.subscribers.push(fn);
+        
+        // CRITICAL: Only trigger the callback immediately if coordinates ALREADY EXIST and are valid numbers!
+        const lat = parseFloat(this.lat);
+        const lon = parseFloat(this.lon ?? this.lng);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
           try { fn(this); } catch(e) { console.error(e); }
         }
         return () => {
@@ -1495,28 +1500,25 @@
     /* ==================================================================== */
         // Subscribe Leaflet Map with safe validation, ready check, and flyTo
     ArvoraState.subscribe((state) => {
-      const lat = Number(state.lat);
-      const lon = Number(state.lon ?? state.lng);
-      const zoom = Number.isFinite(Number(state.zoom)) ? Number(state.zoom) : 13;
-
+      const lat = parseFloat(state.lat);
+      const lon = parseFloat(state.lon ?? state.lng);
+      
+      // ABORT if coordinates are not finite numbers
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-        return; // Silently skip Leaflet update if coordinates are not yet numbers
+        return;
       }
 
-      let targetMap = window.map || window.arvoraMap || state.mapInstance;
-      if (!targetMap && typeof initArvoraMap === 'function') {
-        targetMap = initArvoraMap();
-      }
+      const map = window.map || (typeof getOrCreateMap === 'function' ? getOrCreateMap('arvora-spatial-map') : null);
+      if (!map) return;
 
-      if (targetMap) {
-        if (!window.map) window.map = targetMap;
+      const safeZoom = Number.isFinite(Number(map.getZoom())) && map.getZoom() > 0 ? map.getZoom() : 13;
 
+      try {
         const updateMap = () => {
-          window.map.flyTo([lat, lon], zoom, { duration: 1.2 });
-
-          let marker = window.activeMarker || window.activeLocationMarker || state.activeMarker;
-          if (marker) {
-            marker.setLatLng([lat, lon]);
+          map.flyTo([lat, lon], safeZoom, { duration: 1.2 });
+          
+          if (window.activeMarker) {
+            window.activeMarker.setLatLng([lat, lon]);
           } else if (typeof L !== 'undefined') {
             const customIcon = L.divIcon({
               className: 'custom-arvora-marker',
@@ -1524,23 +1526,23 @@
               iconSize: [22, 22],
               iconAnchor: [11, 11]
             });
-            marker = L.marker([lat, lon], { icon: customIcon }).addTo(window.map);
-            window.activeMarker = marker;
-            window.activeLocationMarker = marker;
-            state.activeMarker = marker;
+            window.activeMarker = L.marker([lat, lon], { icon: customIcon }).addTo(map);
+            window.activeLocationMarker = window.activeMarker;
+            state.activeMarker = window.activeMarker;
           }
-          
-          const displayName = state.displayName || (state.currentLocation ? state.currentLocation.osmDisplayName || state.currentLocation.name : "");
-          if (window.activeMarker && displayName) {
-            window.activeMarker.bindPopup(`<b>${displayName}</b>`).openPopup();
+
+          if (window.activeMarker && state.displayName) {
+            window.activeMarker.bindPopup(`<b>${state.displayName}</b>`).openPopup();
           }
         };
 
-        if (typeof targetMap.whenReady === 'function') {
-          targetMap.whenReady(updateMap);
+        if (typeof map.whenReady === 'function') {
+          map.whenReady(updateMap);
         } else {
           updateMap();
         }
+      } catch (err) {
+        console.warn("Map view update safely caught:", err);
       }
     });
 
@@ -1561,9 +1563,7 @@
        3. EXECUTION & INITIALIZATION (Defer until DOM is ready)
        ========================================================= */
     function initializeArvoraApp() {
-      if (typeof initArvoraMap === "function") {
-        initArvoraMap();
-      }
+      window.map = typeof getOrCreateMap === "function" ? getOrCreateMap('arvora-spatial-map') : (typeof initArvoraMap === "function" ? initArvoraMap() : null);
 
       const searchForm = document.querySelector('#search-form, .search-container form, input[type="search"], #query-input');
       if (searchForm) {
@@ -2001,52 +2001,61 @@
        - Stage 2: Leaflet Map Viewport & Marker Reposition with invalidateSize()
        - Stage 3: Card Population (Panel 1 Telemetry, Panel 2 Open-Meteo, Panel 3 Wikipedia)
     ==================================================================== */
-    var arvoraMap = null;
-    var activeLocationMarker = null;
+    function getOrCreateMap(containerId = 'arvora-spatial-map') {
+      if (typeof L === 'undefined') return null;
+      const container = document.getElementById(containerId) || document.querySelector('.leaflet-container') || document.getElementById('map');
+      if (!container) return null;
 
-                function initArvoraMap() {
-      const mapContainer = document.getElementById("arvora-spatial-map");
-      if (!mapContainer || typeof L === "undefined") return null;
-      if (window.arvoraMap || arvoraMap) return window.arvoraMap || arvoraMap;
-
-      const stateLat = window.ArvoraState ? window.ArvoraState.lat : null;
-      const stateLon = window.ArvoraState ? (window.ArvoraState.lon ?? window.ArvoraState.lng) : null;
-      const initLat = Number.isFinite(Number(stateLat)) ? Number(stateLat) : 28.6139;
-      const initLng = Number.isFinite(Number(stateLon)) ? Number(stateLon) : 77.2090;
-
-      try {
-        arvoraMap = L.map("arvora-spatial-map", {
-          zoomControl: true,
-          scrollWheelZoom: false
-        }).setView([initLat, initLng], 13);
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(arvoraMap);
-
-        const customIcon = L.divIcon({
-          className: 'custom-arvora-marker',
-          html: '<div style="width:22px; height:22px; background:#10b981; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 20px #10b981, 0 0 40px #10b981; transform:translate(-50%, -50%);"></div>',
-          iconSize: [22, 22],
-          iconAnchor: [11, 11]
-        });
-
-        activeLocationMarker = L.marker([initLat, initLng], { icon: customIcon }).addTo(arvoraMap);
-        activeLocationMarker.bindPopup("<b>DELHI SPATIAL NODE</b><br/>National Capital Territory, India").openPopup();
-
-        window.arvoraMap = arvoraMap;
-        window.map = arvoraMap;
-        if (window.ArvoraState) window.ArvoraState.mapInstance = arvoraMap;
-        window.activeLocationMarker = activeLocationMarker;
-        window.activeMarker = activeLocationMarker;
-
-        setTimeout(() => { if (arvoraMap) arvoraMap.invalidateSize(); }, 400);
-        return arvoraMap;
-      } catch(e) {
-        console.error("Failed to initialize Leaflet Map:", e);
-        return null;
+      // If a Leaflet instance already exists on window, arvoraMap, or the DOM element, reuse it
+      if (window.map && window.map._leaflet_id) {
+        return window.map;
       }
+      if (window.arvoraMap && window.arvoraMap._leaflet_id) {
+        window.map = window.arvoraMap;
+        return window.map;
+      }
+      if (container._leaflet_id && window.map) {
+        return window.map;
+      }
+
+      // Initialize map ONCE with valid numeric center and zoom
+      const defaultLat = window.ArvoraState && Number.isFinite(Number(window.ArvoraState.lat)) ? Number(window.ArvoraState.lat) : 28.6139;
+      const defaultLng = window.ArvoraState && Number.isFinite(Number(window.ArvoraState.lon ?? window.ArvoraState.lng)) ? Number(window.ArvoraState.lon ?? window.ArvoraState.lng) : 77.2090;
+
+      const map = L.map(container, {
+        zoomControl: true,
+        scrollWheelZoom: false
+      }).setView([defaultLat, defaultLng], 12);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      const customIcon = L.divIcon({
+        className: 'custom-arvora-marker',
+        html: '<div style="width:22px; height:22px; background:#10b981; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 20px #10b981, 0 0 40px #10b981; transform:translate(-50%, -50%);"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+
+      const marker = L.marker([defaultLat, defaultLng], { icon: customIcon }).addTo(map);
+      marker.bindPopup("<b>DELHI SPATIAL NODE</b><br/>National Capital Territory, India").openPopup();
+
+      window.map = map;
+      window.arvoraMap = map;
+      window.activeMarker = marker;
+      window.activeLocationMarker = marker;
+      if (window.ArvoraState) window.ArvoraState.mapInstance = map;
+
+      setTimeout(() => { if (map && typeof map.invalidateSize === 'function') map.invalidateSize(); }, 400);
+
+      return map;
+    }
+    window.getOrCreateMap = getOrCreateMap;
+
+    function initArvoraMap() {
+      return getOrCreateMap('arvora-spatial-map');
     }
 
         async function syncLocationData(query) {
