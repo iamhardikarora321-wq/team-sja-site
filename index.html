@@ -2031,6 +2031,26 @@
     }
     window.selectAutocompleteSuggestion = selectAutocompleteSuggestion;
 
+    window.returnToGateway = function() {
+      // Reset search inputs
+      const searchInput = document.querySelector('input[type="search"], #search-input, .search-input, #query-input');
+      if (searchInput) searchInput.value = '';
+
+      // Smoothly scroll back to the gateway/hero section or top of the page
+      const gatewaySection = document.getElementById('main-page') || document.getElementById('gateway') || document.querySelector('.portal-container, .gateway-section, header, hero');
+      if (gatewaySection) {
+        gatewaySection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Reset URL params without reloading
+      if (window.history && window.history.pushState) {
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+      }
+    };
+
     
             /* ====================================================================
        GLOBAL LEAFLET MAP INSTANCE & UNIFIED LOCATION SYNC ENGINE
@@ -2625,7 +2645,7 @@
         fee: "₹25 (Indians) / ₹500 (Foreigners)",
         timings: "07:00 AM – 06:00 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "Dense sandstone cliffs showcasing continuous human cave habitation from the Upper Paleolithic to medieval eras.",
         mechanics: "Paintings made with manganese, hematite, and animal fat have bonded directly into the porous quartzite rock.",
         secret: "Auditorium Cave has a massive central bell-rock that emits a deep resonant ringing chime heard a kilometer away."
@@ -2719,7 +2739,7 @@
         fee: "₹40 (Indians) / ₹600 (Foreigners)",
         timings: "06:00 AM – 06:00 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "A monumental Garuda shrine sculpted like a battle chariot with modular granite wheels that historically rotated on stone axles.",
         mechanics: "Carved from dense chlorite granite slabs joined with hidden tongue-and-groove mortise masonry joints.",
         secret: "The wheels had functional stone axles until the British colonial administration cemented them to prevent structural wear."
@@ -2794,7 +2814,7 @@
         fee: "₹25 (Indians) / ₹300 (Foreigners)",
         timings: "09:00 AM – 05:30 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "A diamond-trading citadel engineered with acoustic chambers that served as an early warning communication network.",
         mechanics: "A handclap under the entry dome can be heard clearly at the Bala Hissar pavilion located 1 kilometer away at the highest crest.",
         secret: "The vault of Fateh Darwaza contains corner masonry sound channels calibrated to amplify the acoustic pitch of a drawn sword."
@@ -2824,7 +2844,7 @@
         fee: "Free Entry",
         timings: "06:00 AM – 08:30 PM",
         duration: "2.5 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "A 66-meter high temple tower crowned by an 80-ton monolithic granite cupola capstone assembled without mortar.",
         mechanics: "Constructed using an earth incline ramp spanning 6 km up which elephants hauled the monolithic 80-ton apex stone.",
         secret: "The entire complex uses interlocking granite blocks in a region devoid of granite quarries for 60 km around."
@@ -2888,7 +2908,7 @@
         fee: "₹40 (Indians) / ₹600 (Foreigners)",
         timings: "06:00 AM – 06:00 PM (Closed Tuesdays)",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "The largest monolithic rock-cut monument in the world, carved vertically downward from a single basalt cliffside.",
         mechanics: "Over 200,000 tons of volcanic rock were chiseled away from the top down without scaffolding, leaving zero margin for error.",
         secret: "The master architect Krishna I etched an inscription on the plinth stating: 'How was this made? Even I am astonished!'"
@@ -2918,7 +2938,7 @@
         fee: "Free (Special Darshan ₹100)",
         timings: "05:00 AM – 12:30 PM, 04:00 PM – 10:00 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "The spiritual heart of Madurai, famous for its 14 rainbow gopuram towers housing over 33,000 painted mythological sculptures.",
         mechanics: "The Hall of Thousand Pillars contains 985 carved granite columns aligned in perfect symmetry from any viewing angle.",
         secret: "Near the exit of the thousand-pillar hall, five musical pillars carved from single stones ring with different notes when tapped."
@@ -2963,7 +2983,7 @@
         fee: "₹25 Entry",
         timings: "06:00 AM – 08:00 PM",
         duration: "2 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "A temple dedicated to Lord Shiva with continuous worship spanning over 1,300 unbroken years.",
         mechanics: "A pinhole slit in the dark stone rear hall projects an inverted camera obscura image of the 160-foot entrance tower onto the wall.",
         secret: "The pinhole optical inversion is sharpest between 11:00 AM and 1:00 PM when the sun shines directly on the eastern facade."
@@ -3132,7 +3152,7 @@
         fee: "Free Community Visit",
         timings: "09:00 AM – 05:00 PM",
         duration: "2 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "Nomadic Lambani women combining 14 distinct cross-stitch patterns with cowrie shells, lead coins, and mirror-work.",
         mechanics: "Heirloom fabrics take up to three months to hand-sew without stamped patterns, planned purely from memory.",
         secret: "Every geometric band of stitching corresponds to a specific clan lineage and pastoral migration map."
@@ -3196,7 +3216,7 @@
         fee: "Free Public Trail",
         timings: "Climb by 05:15 AM",
         duration: "2 Hours",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "A steep granite scramble up the highest geographic crest in Hampi, offering 360-degree views of the Vijayanagara ruins.",
         mechanics: "Granite boulders weathered for 2.5 billion years offer high-friction foot traction on steep ridgelines.",
         secret: "Climb via the eastern temple staircase with a headlamp; the dawn sunlight warms the granite boulders from violet to gold."
@@ -3301,7 +3321,7 @@
         fee: "₹100–₹200 per ride",
         timings: "07:00 AM – 05:30 PM",
         duration: "1 Hour",
-        image: "https://images.unsplash.com/photo-1600100397608-f010f443b782?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
         desc: "Navigating boiling river rapids in round woven bamboo coracles coated in bitumen, cruising past half-submerged rock temples.",
         mechanics: "Circular hull geometry dissipates violent water shear from granite boulders without tilting or capsizing.",
         secret: "Boatmen can row directly inside narrow river caves carved by whirlpool erosion over millions of years."
