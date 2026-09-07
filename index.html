@@ -5837,6 +5837,44 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
       }
     });
   
+    async function updateSpatialSummary(cleanName, lat, lon) {
+      const summaryEl = document.querySelector('#spatial-summary-text, .spatial-summary');
+      if (!summaryEl) return;
+
+      summaryEl.textContent = 'Deciphering spatial coordinates...';
+
+      try {
+        const data = await fetchWikiJSONP('https://en.wikipedia.org/w/api.php', {
+          action: 'query',
+          titles: cleanName,
+          prop: 'extracts',
+          exintro: '1',
+          explaintext: '1',
+          exsentences: '2'
+        });
+
+        const pages = data?.query?.pages ? Object.values(data.query.pages) : [];
+        const page = pages[0];
+
+        if (page && page.extract && page.missing === undefined) {
+          const cleanSummary = page.extract
+            .replace(/\(.*?\)/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          summaryEl.textContent = cleanSummary.length > 170 
+            ? cleanSummary.slice(0, 170).trim() + '...' 
+            : cleanSummary;
+          return;
+        }
+      } catch (err) {
+        console.warn("Spatial summary live query failed:", err);
+      }
+
+      summaryEl.textContent = `${cleanName} is a vernacular settlement node at ${Number(lat || 0).toFixed(4)}° N, ${Number(lon || 0).toFixed(4)}° E, anchored in the regional cultural and agricultural terrain.`;
+    }
+    window.updateSpatialSummary = updateSpatialSummary;
+
     function updateAllCulturalPanels(placeName, lat, lon) {
       if (!placeName) return;
       const cleanName = placeName.split(',')[0].trim();
@@ -5847,10 +5885,7 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
 
       currentCityKey = cleanName.toLowerCase();
 
-      const summaryEl = document.querySelector('#spatial-summary-text, .spatial-summary');
-      if (summaryEl) {
-        summaryEl.textContent = `${cleanName} is catalogued as a primary cultural coordinates node within the National Heritage Matrix.`;
-      }
+      updateSpatialSummary(cleanName, parsedLat, parsedLon);
 
       // 1. Resolve Codex Data (from CITY_CODEX_DATABASE or dynamic generator)
       const codexData = typeof getCityData === "function" ? getCityData(cleanName, parsedLat, parsedLon) : null;
@@ -5921,6 +5956,9 @@ window.renderRuralPoiFallback = renderRuralPoiFallback;
           }
           if (typeof updatePhotographicSpectrum === "function") {
             updatePhotographicSpectrum(lat, lon, name);
+          }
+          if (typeof updateSpatialSummary === "function") {
+            updateSpatialSummary(name, lat, lon);
           }
           if (typeof updateLocalIntelligence === "function") {
             updateLocalIntelligence(lat, lon, name);
