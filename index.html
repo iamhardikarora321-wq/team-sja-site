@@ -1940,30 +1940,69 @@
     }
     window.generateCulturalInquiries = generateCulturalInquiries;
 
-    function renderInquiryCards(container, placeName, lat, lon) {
+    function toTitleCase(str) {
+      if (!str) return '';
+      return str.replace(/\b\w/g, c => c.toUpperCase());
+    }
+    window.toTitleCase = toTitleCase;
+
+    function renderCulturalInquiries(container, rawPlaceName) {
       if (!container) return;
-      const cards = generateCulturalInquiries(placeName, lat, lon);
+      const cleanName = toTitleCase(
+        (rawPlaceName || 'This Region')
+          .replace(/\b(Central Vector|North Perimeter|East Watershed|South Ridge|Spatial Node)\b/gi, '')
+          .split(',')[0]
+          .trim()
+      );
+
+      const inquiries = [
+        {
+          pill: "• WHY THIS EXISTS",
+          tag: "SPATIAL LORE",
+          question: `Why did ancient builders establish foundations at ${cleanName}?`,
+          answer: `Strategic terrain geometry offered natural flood runoff channels, vantage elevations over regional trade axes, and direct access to subsurface alluvial aquifers.`,
+          secret: `INSIDER SECRET: Ground archaeology reveals pre-colonial bedrock alignments calibrated to winter solstice sun angles.`
+        },
+        {
+          pill: "• SEASONAL PULSE",
+          tag: "MICROCLIMATE",
+          question: `How does the seasonal climate govern living masonry in ${cleanName}?`,
+          answer: `Vernacular stone thicknesses and internal courtyards create passive convective airflow, cooling interior chambers during peak heat and buffering nocturnal drops.`,
+          secret: `INSIDER SECRET: Traditional lime-surkhi plaster absorbs diurnal humidity, naturally stabilizing indoor microclimates.`
+        },
+        {
+          pill: "• SECRET ARCHITECTURE",
+          tag: "ANCIENT AXIS",
+          question: `What structural secrets remain hidden within ${cleanName}?`,
+          answer: `Subterranean conduits and interlocking stone joints provide seismic dampening while circulating subterranean reservoir water beneath the palace chambers.`,
+          secret: `INSIDER SECRET: Resonance chambers within the domes amplify human bass tones while suppressing high-frequency outside echoes.`
+        }
+      ];
 
       container.className = "inquiry-grid";
-      container.innerHTML = cards.map(c => `
+      container.innerHTML = inquiries.map(item => `
         <div class="inquiry-card" onclick="this.classList.toggle('active-tap')">
           <div class="inquiry-card-front">
             <div class="inquiry-card-header">
-              <span class="pill">• ${c.pill}</span>
-              <span class="tag">${c.tag}</span>
+              <span class="pill">${item.pill}</span>
+              <span class="tag">${item.tag}</span>
             </div>
-            <h4 class="inquiry-card-title">${c.question}</h4>
+            <h4 class="inquiry-card-title">${item.question}</h4>
             <div class="inquiry-hint">
-              <span>HOVER / TAP TO DECRYPT</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 11V7a5 5 0 0 1 10 0v4"/><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/></svg>
+              <span>TAP / HOVER TO DECRYPT</span> <span>→</span>
             </div>
           </div>
           <div class="inquiry-drawer">
-            <p class="inquiry-drawer-answer">${c.answer}</p>
-            <div class="inquiry-drawer-secret">${c.secret}</div>
+            <p class="inquiry-drawer-answer">${item.answer}</p>
+            <div class="inquiry-drawer-secret">${item.secret}</div>
           </div>
         </div>
       `).join('');
+    }
+    window.renderCulturalInquiries = renderCulturalInquiries;
+
+    function renderInquiryCards(container, placeName, lat, lon) {
+      return renderCulturalInquiries(container, placeName);
     }
     window.renderInquiryCards = renderInquiryCards;
 
