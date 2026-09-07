@@ -60,7 +60,8 @@
       grid-template-columns: repeat(4, 1fr) !important;
       gap: 8px !important;
       width: 100% !important;
-      height: 60px !important; /* Fixed compact strip height */
+      height: 60px !important;
+      margin-top: 10px !important;
     }
 
     .spectrum-photo-tile {
@@ -68,8 +69,8 @@
       height: 60px;
       border-radius: 6px;
       overflow: hidden;
-      background: #090d14;
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      background: #080c12;
+      border: 1px solid rgba(16, 185, 129, 0.3);
       position: relative;
     }
 
@@ -5044,80 +5045,61 @@
                         document.querySelector('.photographic-spectrum-grid, .photographic-spectrum');
       if (!container) return;
 
-      // 1. Immediately wipe all previous children to prevent stacking
+      // 1. Clear previous content immediately
       container.innerHTML = '';
 
       const cleanName = (placeName || '').split(',')[0].trim();
-      const radius = 25000; // 25 km radius around coordinates
+      let photoList = [];
 
-      // 2. Fetch up to 12 nearby POIs to collect 4 distinct, valid image URLs
-      const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=${radius}&ggslimit=12&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
-
-      let photos = [];
-
+      // 2. Fetch nearby photos within 25km
       try {
+        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}%7C${lon}&ggsradius=25000&ggslimit=12&prop=pageimages&piprop=thumbnail&pithumbsize=400&format=json&origin=*`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           const pages = data.query?.pages ? Object.values(data.query.pages) : [];
-
-          // Filter for unique, non-empty image URLs
-          const seenUrls = new Set();
-          for (const page of pages) {
-            const src = page.thumbnail?.source;
-            if (src && !seenUrls.has(src)) {
-              seenUrls.add(src);
-              photos.push({ title: page.title, src });
+          const seen = new Set();
+          for (const p of pages) {
+            const src = p.thumbnail?.source;
+            if (src && !seen.has(src)) {
+              seen.add(src);
+              photoList.push({ title: p.title, url: src });
             }
-            if (photos.length >= 4) break;
+            if (photoList.length >= 4) break;
           }
         }
       } catch (err) {
         console.warn("Spectrum GeoSearch failed:", err);
       }
 
-      // Fallback: If Wikipedia GeoSearch returned fewer than 4 photos, fetch the main place photo
-      if (photos.length < 4 && cleanName) {
+      // 3. Fallback: If fewer than 4 images, pull the place's main summary image
+      if (photoList.length < 4 && cleanName) {
         try {
-          const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
-          if (summaryRes.ok) {
-            const summary = await summaryRes.json();
-            const mainImg = summary.thumbnail?.source || summary.originalimage?.source;
-            if (mainImg && !photos.some(p => p.src === mainImg)) {
-              photos.unshift({ title: summary.title, src: mainImg });
+          const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanName)}`);
+          if (res.ok) {
+            const data = await res.json();
+            const mainImg = data.thumbnail?.source || data.originalimage?.source;
+            if (mainImg && !photoList.some(p => p.url === mainImg)) {
+              photoList.unshift({ title: data.title, url: mainImg });
             }
           }
         } catch (e) {}
       }
 
-      // 3. Render EXACTLY 4 tiles horizontally
+      // 4. Render EXACTLY 4 slots horizontally
       for (let i = 0; i < 4; i++) {
-        const tile = document.createElement('div');
-        tile.className = 'spectrum-photo-tile';
+        const slot = document.createElement('div');
+        slot.className = 'spectrum-photo-tile';
 
-        const item = photos[i];
-        if (item) {
+        const item = photoList[i];
+        if (item && item.url) {
           const safeTitle = (item.title || '').replace(/"/g, '&quot;');
           const safeClick = (item.title || '').replace(/'/g, "\\'");
-          tile.innerHTML = `
-            <img 
-              src="${item.src}" 
-              alt="${safeTitle}" 
-              title="${safeTitle}" 
-              loading="lazy" 
-              onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.src}', '${safeClick}');}" 
-              onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#10b981;font-size:9px;font-family:monospace;\\'>SPATIAL</div>'" 
-            />
-          `;
+          slot.innerHTML = `<img src="${item.url}" alt="${safeTitle}" title="${safeTitle}" onclick="if(typeof openGalleryLightbox==='function'){openGalleryLightbox('${item.url}', '${safeClick}');}" onerror="this.remove()" />`;
         } else {
-          // Subtle architectural blueprint slot when no 4th image exists
-          tile.innerHTML = `
-            <div style="display:flex; align-items:center; justify-content:center; height:100%; background:rgba(10,14,20,0.6); color:#334155; font-size:10px; font-family:monospace;">
-              VECTOR
-            </div>
-          `;
+          slot.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#334155;font-size:9px;font-family:monospace;">NODE 0${i+1}</div>`;
         }
-        container.appendChild(tile);
+        container.appendChild(slot);
       }
     }
     window.updatePhotographicSpectrum = updatePhotographicSpectrum;
