@@ -513,7 +513,40 @@
       margin-top: 8px;
     }
 
-        /* Filter Pill Component & Two-Tier Category Ribbon */
+    /* Explore Places & Heritage Coordinates Container & Two-Tier Layout */
+    .heritage-section-container, #explore-places-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+    }
+
+    /* Tier 1: Primary monuments grid (Humayun's Tomb, etc.) */
+    .heritage-primary-sights-grid, #heritage-coordinates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+
+    /* Tier 2: Directly below Humayun's Tomb and the primary sights */
+    .specialized-guild-adventure-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+      margin-top: 8px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(16, 185, 129, 0.2); /* Subtle divider below the monuments */
+    }
+
+    @media (max-width: 768px) {
+      .specialized-guild-adventure-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Filter Pill Component & Two-Tier Category Ribbon */
     .category-filter-container {
       display: flex;
       flex-direction: column;
@@ -522,11 +555,18 @@
       width: 100%;
     }
     .category-row-primary,
-    .category-row-secondary {
+    .category-row-secondary,
+    .primary-sights-row,
+    .secondary-options-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 8px;
+    }
+    .secondary-options-row {
+      flex-basis: 100%;
+      width: 100%;
+      margin-top: 4px;
     }
     .filter-pill {
       background: rgba(18, 24, 34, 0.6);
@@ -547,11 +587,14 @@
       color: #ffffff;
       box-shadow: 0 0 14px rgba(16, 185, 129, 0.18);
     }
-    .category-row-secondary .filter-pill {
+    .category-row-secondary .filter-pill,
+    .secondary-options-row .filter-pill {
       border-color: rgba(56, 189, 248, 0.35);
     }
     .category-row-secondary .filter-pill:hover,
-    .category-row-secondary .filter-pill.active {
+    .category-row-secondary .filter-pill.active,
+    .secondary-options-row .filter-pill:hover,
+    .secondary-options-row .filter-pill.active {
       background: rgba(56, 189, 248, 0.14);
       border-color: rgba(56, 189, 248, 0.6);
       color: #ffffff;
@@ -1299,7 +1342,7 @@
     <!-- =======================================================
        EXPLORE PLACES & HERITAGE COORDINATES (50 VERIFIED SIGHTS)
     ======================================================= -->
-    <section id="explore-places-section" style="margin-top: 50px;">
+    <section id="explore-places-section" class="heritage-section-container" style="margin-top: 50px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 18px; margin-bottom: 24px;">
         <div>
           <span class="telemetry"><span class="telemetry-dot"></span> SECTOR RECONNAISSANCE // ALL INDIA REGISTRY</span>
@@ -1310,27 +1353,25 @@
 
       <!-- Filter Pills (Two-Tier Structured Category Ribbon) -->
       <div class="places-category-bar category-filter-container">
-        <div class="category-row-primary">
+        <div class="category-row-primary primary-sights-row">
           <button class="filter-pill active" onclick="filterPlaces('all', this)">ALL SIGHTS (50)</button>
           <button class="filter-pill" onclick="filterPlaces('nature', this)">🏔️ NATURE & GEOLOGY (10)</button>
           <button class="filter-pill" onclick="filterPlaces('historical', this)">🏛️ HISTORICAL & FORTS (10)</button>
           <button class="filter-pill" onclick="filterPlaces('spiritual', this)">🪔 SPIRITUAL & CAVE SANCTUMS (10)</button>
         </div>
-        <div class="category-row-secondary">
+        <div class="category-row-secondary secondary-options-row">
           <button class="filter-pill" onclick="filterPlaces('craft', this)">🏺 CRAFT & GUILD BAZAARS (10)</button>
           <button class="filter-pill" onclick="filterPlaces('adventure', this)">🧗 ADVENTURE & HIGH PASSES (10)</button>
         </div>
       </div>
 
-      <!-- Dynamic Card Grid -->
-      <div class="places-bento-grid" id="places-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+      <!-- TIER 1: Primary Monument Cards Grid (Humayun's Tomb, Qutb Minar, Shaniwar Wada, etc.) -->
+      <div class="places-bento-grid heritage-primary-sights-grid" id="places-grid">
         <!-- Rendered via JS -->
       </div>
-    </section>
 
-    <!-- CRAFT & GUILD BAZAARS & ADVENTURE HIGH PASSES SECTION -->
-    <section id="crafts-adventure-section" style="margin-top: 50px;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px;">
+      <!-- TIER 2: Directly Below Humayun's Tomb and Primary Monument Cards -->
+      <div id="crafts-adventure-section" class="specialized-guild-adventure-row">
         <!-- Craft & Guild Bazaars Panel -->
         <div id="crafts-panel" style="background: rgba(3, 7, 12, 0.75); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; padding: 24px;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
