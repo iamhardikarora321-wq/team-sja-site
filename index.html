@@ -1300,6 +1300,39 @@
       </div>
     </section>
 
+    <!-- CRAFT & GUILD BAZAARS & ADVENTURE HIGH PASSES SECTION -->
+    <section id="crafts-adventure-section" style="margin-top: 50px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px;">
+        <!-- Craft & Guild Bazaars Panel -->
+        <div id="crafts-panel" style="background: rgba(3, 7, 12, 0.75); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; padding: 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #10b981; letter-spacing: 1px;">HERITAGE TRADE GUILDS</span>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px;">CRAFT & GUILD BAZAARS</h3>
+            </div>
+            <span style="font-size: 1.4rem;">🏺</span>
+          </div>
+          <div id="craft-bazaars-grid" class="craft-bazaars-list">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Adventure & High Passes Panel -->
+        <div id="adventure-panel" style="background: rgba(3, 7, 12, 0.75); border: 1px solid rgba(56,189,248,0.25); border-radius: 12px; padding: 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #38bdf8; letter-spacing: 1px;">TOPOGRAPHIC TRAILS & RIDGES</span>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-top: 4px;">ADVENTURE & HIGH PASSES</h3>
+            </div>
+            <span style="font-size: 1.4rem;">🧗</span>
+          </div>
+          <div id="adventure-passes-grid" class="adventure-passes-list">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
   </section>
 
   <!-- Full-Screen Deep-Intel Drawer / Modal -->
@@ -1365,7 +1398,7 @@
           const categoryPool = ["nature", "historical", "spiritual", "craft"];
           const galleryPhotos = categoryPool.map((cat, idx) => getValidImageUrl(getThematicFallbackPhoto(cat, idx), cat));
           gallery.innerHTML = galleryPhotos.map((url, i) => `
-            <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" style="width:100%; height:55px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';" />
+            <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" style="width:100%; height:55px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.style.display='none';" />
           `).join("");
         }
       }
@@ -1482,7 +1515,7 @@
             if (summary.thumbnail && summary.thumbnail.source) {
               const safeSource = getValidImageUrl(summary.thumbnail.source, 'nature');
               const wikiContainer = document.getElementById("wiki-poi-content");
-              const fallbackUrl = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';
+              const fallbackUrl = '';
               if (wikiContainer && !document.getElementById("wiki-poi-thumb")) {
                 const thumbImg = document.createElement("img");
                 thumbImg.id = "wiki-poi-thumb";
@@ -2117,7 +2150,7 @@
 
       if (gallery) {
         gallery.innerHTML = galleryPhotos.map((url, i) => `
-          <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';" />
+          <img src="${url}" alt="Gallery ${i+1}" class="gallery-img-thumb" onclick="openGalleryLightbox('${url}', '${name}')" onerror="this.style.display='none';" />
         `).join("");
       }
 
@@ -3266,7 +3299,7 @@
         fee: "₹25 (Indians) / ₹500 (Foreigners)",
         timings: "07:00 AM – 06:00 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "Dense sandstone cliffs showcasing continuous human cave habitation from the Upper Paleolithic to medieval eras.",
         mechanics: "Paintings made with manganese, hematite, and animal fat have bonded directly into the porous quartzite rock.",
         secret: "Auditorium Cave has a massive central bell-rock that emits a deep resonant ringing chime heard a kilometer away."
@@ -3360,7 +3393,7 @@
         fee: "₹40 (Indians) / ₹600 (Foreigners)",
         timings: "06:00 AM – 06:00 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "A monumental Garuda shrine sculpted like a battle chariot with modular granite wheels that historically rotated on stone axles.",
         mechanics: "Carved from dense chlorite granite slabs joined with hidden tongue-and-groove mortise masonry joints.",
         secret: "The wheels had functional stone axles until the British colonial administration cemented them to prevent structural wear."
@@ -3435,7 +3468,7 @@
         fee: "₹25 (Indians) / ₹300 (Foreigners)",
         timings: "09:00 AM – 05:30 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "A diamond-trading citadel engineered with acoustic chambers that served as an early warning communication network.",
         mechanics: "A handclap under the entry dome can be heard clearly at the Bala Hissar pavilion located 1 kilometer away at the highest crest.",
         secret: "The vault of Fateh Darwaza contains corner masonry sound channels calibrated to amplify the acoustic pitch of a drawn sword."
@@ -3465,7 +3498,7 @@
         fee: "Free Entry",
         timings: "06:00 AM – 08:30 PM",
         duration: "2.5 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "A 66-meter high temple tower crowned by an 80-ton monolithic granite cupola capstone assembled without mortar.",
         mechanics: "Constructed using an earth incline ramp spanning 6 km up which elephants hauled the monolithic 80-ton apex stone.",
         secret: "The entire complex uses interlocking granite blocks in a region devoid of granite quarries for 60 km around."
@@ -3529,7 +3562,7 @@
         fee: "₹40 (Indians) / ₹600 (Foreigners)",
         timings: "06:00 AM – 06:00 PM (Closed Tuesdays)",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "The largest monolithic rock-cut monument in the world, carved vertically downward from a single basalt cliffside.",
         mechanics: "Over 200,000 tons of volcanic rock were chiseled away from the top down without scaffolding, leaving zero margin for error.",
         secret: "The master architect Krishna I etched an inscription on the plinth stating: 'How was this made? Even I am astonished!'"
@@ -3559,7 +3592,7 @@
         fee: "Free (Special Darshan ₹100)",
         timings: "05:00 AM – 12:30 PM, 04:00 PM – 10:00 PM",
         duration: "3 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "The spiritual heart of Madurai, famous for its 14 rainbow gopuram towers housing over 33,000 painted mythological sculptures.",
         mechanics: "The Hall of Thousand Pillars contains 985 carved granite columns aligned in perfect symmetry from any viewing angle.",
         secret: "Near the exit of the thousand-pillar hall, five musical pillars carved from single stones ring with different notes when tapped."
@@ -3604,7 +3637,7 @@
         fee: "₹25 Entry",
         timings: "06:00 AM – 08:00 PM",
         duration: "2 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "A temple dedicated to Lord Shiva with continuous worship spanning over 1,300 unbroken years.",
         mechanics: "A pinhole slit in the dark stone rear hall projects an inverted camera obscura image of the 160-foot entrance tower onto the wall.",
         secret: "The pinhole optical inversion is sharpest between 11:00 AM and 1:00 PM when the sun shines directly on the eastern facade."
@@ -3773,7 +3806,7 @@
         fee: "Free Community Visit",
         timings: "09:00 AM – 05:00 PM",
         duration: "2 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "Nomadic Lambani women combining 14 distinct cross-stitch patterns with cowrie shells, lead coins, and mirror-work.",
         mechanics: "Heirloom fabrics take up to three months to hand-sew without stamped patterns, planned purely from memory.",
         secret: "Every geometric band of stitching corresponds to a specific clan lineage and pastoral migration map."
@@ -3837,7 +3870,7 @@
         fee: "Free Public Trail",
         timings: "Climb by 05:15 AM",
         duration: "2 Hours",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "A steep granite scramble up the highest geographic crest in Hampi, offering 360-degree views of the Vijayanagara ruins.",
         mechanics: "Granite boulders weathered for 2.5 billion years offer high-friction foot traction on steep ridgelines.",
         secret: "Climb via the eastern temple staircase with a headlamp; the dawn sunlight warms the granite boulders from violet to gold."
@@ -3942,7 +3975,7 @@
         fee: "₹100–₹200 per ride",
         timings: "07:00 AM – 05:30 PM",
         duration: "1 Hour",
-        image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+        image: null,
         desc: "Navigating boiling river rapids in round woven bamboo coracles coated in bitumen, cruising past half-submerged rock temples.",
         mechanics: "Circular hull geometry dissipates violent water shear from granite boulders without tilting or capsizing.",
         secret: "Boatmen can row directly inside narrow river caves carved by whirlpool erosion over millions of years."
@@ -3972,7 +4005,7 @@
       if (typeof getThematicFallbackPhoto === 'function') {
         return getThematicFallbackPhoto(fallbackQuery, 0);
       }
-      return 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';
+      return null;
     }
     window.getValidImageUrl = getValidImageUrl;
 
@@ -3982,7 +4015,7 @@
       if (!modal || !content) return;
       const safeUrl = getValidImageUrl(url, 'nature');
       content.innerHTML = `
-        <img src="${safeUrl}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80';" style="width:100%; height:320px; object-fit:cover; border-bottom:1px solid rgba(255,255,255,0.08);" />
+        ${safeUrl ? `<img src="${safeUrl}" style="width:100%; height:320px; object-fit:cover; border-bottom:1px solid rgba(255,255,255,0.08);" />` : `<div class="monument-vector-placeholder" style="background:#090d14; border-bottom:1px solid rgba(16,185,129,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; height:200px;"><span style="color:#10b981; font-family:monospace; font-size:12px; letter-spacing:1px;">SPATIAL COORD LOCKED</span></div>`}
         <div style="padding: 24px;">
           <span class="telemetry" style="color:var(--accent-emerald);">SPATIAL RECONNAISSANCE GALLERY</span>
           <h2 style="font-size:1.4rem; font-weight:800; color:#fff; margin-top:8px; margin-bottom:12px;">${title || 'Heritage View'}</h2>
@@ -4024,16 +4057,23 @@
       const counter = document.getElementById("places-counter");
       if (counter) counter.innerText = `${filtered.length} VERIFIED SIGHTS DISPLAYED`;
 
-      const safeStaticFallback = "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80";
-
       container.innerHTML = filtered.map(place => {
-        const imageUrl = getValidImageUrl(place.image || place.thumbnail, place.category || 'nature');
+        let pLat = place.lat || 28.6139;
+        let pLon = place.lon || 77.2090;
+        if (place.coords && typeof place.coords === 'string') {
+          const match = place.coords.match(/([\d.]+).*?([\d.]+)/);
+          if (match) {
+            pLat = parseFloat(match[1]);
+            pLon = parseFloat(match[2]);
+          }
+        }
+        const mediaHtml = renderMonumentMedia(place.image || place.thumbnail, place.name, pLat, pLon);
         const safeName = (place.name || '').replace(/'/g, "\\'");
         return `
         <article class="place-card" style="cursor:pointer;" onclick="if(typeof syncLocationData==='function'){syncLocationData('${safeName}');}">
-          <div style="position:relative;">
-            <img src="${imageUrl}" onerror="this.onerror=null; this.src='${safeStaticFallback}';" alt="${(place.name || '').replace(/"/g, '&quot;')}" class="place-card-img" loading="lazy" />
-            <span style="position:absolute; top:12px; left:12px; background:rgba(3,5,7,0.85); border:1px solid rgba(16,185,129,0.4); color:#10b981; font-family:'JetBrains Mono'; font-size:0.65rem; padding:4px 10px; border-radius:6px; font-weight:600;">${(place.category || 'heritage').toUpperCase()}</span>
+          <div style="position:relative; overflow:hidden; border-radius:8px 8px 0 0;">
+            ${mediaHtml}
+            <span style="position:absolute; top:12px; left:12px; background:rgba(3,5,7,0.85); border:1px solid rgba(16,185,129,0.4); color:#10b981; font-family:'JetBrains Mono'; font-size:0.65rem; padding:4px 10px; border-radius:6px; font-weight:600; z-index:2;">${(place.category || 'heritage').toUpperCase()}</span>
           </div>
           <div class="place-card-body">
             <div>
@@ -4049,7 +4089,7 @@
               <div class="place-telemetry-row">
                 <div><span style="color:#64748b;">ENTRY:</span> ${place.fee ? place.fee.split('/')[0] : 'Public'}</div>
                 <div><span style="color:#64748b;">DURATION:</span> ${place.duration ? place.duration.split(' ')[0] : '1'} hr</div>
-                <div style="grid-column: span 2;"><span style="color:#64748b;">COORDS:</span> ${place.coords}</div>
+                <div style="grid-column: span 2;"><span style="color:#64748b;">COORDS:</span> ${place.coords || (pLat.toFixed(4) + '° N, ' + pLon.toFixed(4) + '° E')}</div>
               </div>
 
               <div class="card-actions">
@@ -4080,10 +4120,10 @@
       const content = document.getElementById("modal-content-inject");
 
       const imageUrl = getValidImageUrl(item.image || item.thumbnail, item.category || 'nature');
-      const safeStaticFallback = "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=600&q=80";
+      const mediaHtml = imageUrl ? `<img src="${imageUrl}" style="width:100%; height:260px; object-fit:cover; border-bottom:1px solid rgba(255,255,255,0.08);" />` : `<div class="monument-vector-placeholder" style="background:#090d14; border-bottom:1px solid rgba(16,185,129,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; height:200px;"><span style="color:#10b981; font-family:monospace; font-size:12px; letter-spacing:1px;">SPATIAL COORD LOCKED</span></div>`;
 
       content.innerHTML = `
-        <img src="${imageUrl}" onerror="this.onerror=null; this.src='${safeStaticFallback}';" style="width:100%; height:260px; object-fit:cover; border-bottom:1px solid rgba(255,255,255,0.08);" />
+        ${mediaHtml}
         <div style="padding: 24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <span class="telemetry" style="color:var(--accent-emerald);">${item.tag}</span>
@@ -4384,6 +4424,108 @@
     window.renderStateDossier = renderStateDossier;
 
     /* ====================================================================
+       OFFICIAL WIKIPEDIA REST API MONUMENT PHOTO & VECTOR PLACEHOLDER ENGINE
+    ==================================================================== */
+    async function fetchMonumentPhoto(title) {
+      try {
+        const cleanTitle = (title || '').trim();
+        if (!cleanTitle) return null;
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanTitle)}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.thumbnail?.source || data.originalimage?.source || null;
+      } catch {
+        return null;
+      }
+    }
+    window.fetchMonumentPhoto = fetchMonumentPhoto;
+
+    function renderMonumentMedia(url, title, lat, lon) {
+      const safeLat = Number(lat || 0).toFixed(4);
+      const safeLon = Number(lon || 0).toFixed(4);
+      const placeholder = `<div class="monument-vector-placeholder" style="background:#090d14; border-bottom:1px solid rgba(16,185,129,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; height:150px;"><span style="color:#10b981; font-family:monospace; font-size:12px; letter-spacing:1px;">SPATIAL COORD LOCKED</span><span style="color:#64748b; font-size:10px; font-family:monospace; margin-top:4px;">${safeLat}°N //${safeLon}°E</span></div>`;
+
+      if (!url) return placeholder;
+
+      const safePlaceholder = placeholder.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      return `<img src="${url}" alt="${(title || '').replace(/"/g, '&quot;')}" class="heritage-thumb" style="width:100%; height:150px; object-fit:cover;" onerror="this.outerHTML='${safePlaceholder}';" />`;
+    }
+    window.renderMonumentMedia = renderMonumentMedia;
+
+    /* ====================================================================
+       CRAFT & GUILD BAZAARS DYNAMIC RENDERER
+    ==================================================================== */
+    const CRAFT_BAZAAR_CATALOG = {
+      delhi: [
+        { name: "Dariba Kalan & Kinari Bazaar", guild: "17th-Century Master Silversmiths & Zari Guilds", focus: "Pure silver filigree, gold leaf foil (Varq), and bridal embellishments", zone: "Chandni Chowk" },
+        { name: "Khari Baoli Guild", guild: "Asia's Largest Wholesale Spice Merchant Matrix", focus: "Medicinal herbs, saffron valuation, sun-dried chilies, and spice trading", zone: "Old Delhi" },
+        { name: "Chawri Bazar Paper Guild", guild: "Brass Engravers & Ceremonial Calligraphers", focus: "Copper plates, antique brass hardware, and specialized parchment works", zone: "Jama Masjid Perimeter" }
+      ],
+      pune: [
+        { name: "Tambat Ali (Coppersmiths' Alley)", guild: "Tambat Coppersmith Guild (17th c. Peshwa Artillerymen)", focus: "Hand-beaten Matharpat work, conductive copper drinkware & sacred vessels", zone: "Kasba Peth" },
+        { name: "Laxmi Road & Raviwar Peth", guild: "Traditional Textiles & Gold Bullion Guilds", focus: "Paithani silk drapes, handcrafted silver amulets, and ceremonial fabrics", zone: "Old City Peths" },
+        { name: "Bohri Ali Hardware Quarter", guild: "Artisan Leather, Hardware & Pigment Guilds", focus: "Raw earth minerals, paint pigments, hand-tools, and brass fittings", zone: "Raviwar Peth" }
+      ]
+    };
+
+    function renderCraftBazaars(placeName) {
+      const container = document.getElementById('craft-bazaars-grid') || document.querySelector('.craft-bazaars-list, #crafts-panel');
+      if (!container) return;
+
+      const key = (placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi';
+      const items = CRAFT_BAZAAR_CATALOG[key] || [
+        { name: `${placeName || 'Regional'} Artisan Guild Bazaars`, guild: "Indigenous Handloom & Metalcraft Guild", focus: "Native vernacular artefacts, regional hand-embroidery, and marketplace traders", zone: "Central Old Quarter" }
+      ];
+
+      container.innerHTML = items.map(b => `
+        <div class="craft-card" style="background:rgba(10,14,20,0.85); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:16px; margin-bottom:12px;">
+          <span style="font-size:10px; font-family:monospace; color:#10b981; text-transform:uppercase;">${b.zone} // CRAFT GUILD</span>
+          <h4 style="color:#f8fafc; margin:6px 0; font-size:15px;">${b.name}</h4>
+          <p style="color:#38bdf8; font-size:12px; margin:0 0 6px 0;">${b.guild}</p>
+          <p style="color:#94a3b8; font-size:12px; margin:0;">${b.focus}</p>
+        </div>
+      `).join('');
+    }
+    window.renderCraftBazaars = renderCraftBazaars;
+
+    /* ====================================================================
+       ADVENTURE & HIGH PASSES DYNAMIC RENDERER
+    ==================================================================== */
+    const ADVENTURE_PASS_CATALOG = {
+      delhi: [
+        { name: "Aravalli Biodiversity & Asola Ridge", type: "Ancient Pre-Cambrian Quartzite Escarpment", elevation: "290 m MSL", trail: "Rocky scrub bike trails, relict lake quarries & leopard corridor traverses" },
+        { name: "Northern Ridge Trail (Kamla Nehru Forest)", type: "Historic Forest Ridge Bastion", elevation: "260 m MSL", trail: "Colonial mutiny outpost trails, flagstaff tower hike & gravel paths" }
+      ],
+      pune: [
+        { name: "Sinhagad Ridge & Katraj-to-Sinhagad (K2S)", type: "Sahyadri Basalt Mountain Ridge Pass", elevation: "1,312 m MSL", trail: "16 km nocturnal cliffline trek across 14 consecutive volcanic hills" },
+        { name: "Bhor Ghat / Khandala Mountain Pass", type: "Historic Continental Fault Scarp", elevation: "548 m MSL", trail: "Steep monsoon waterfall ascents, Duke's Nose vertical rock rappelling" },
+        { name: "Torna Fort (Prachandagad) Scramble", type: "High-Altitude Maratha Stronghold Escarpment", elevation: "1,403 m MSL", trail: "Exposed knife-edge ridge traverse, steep stone-cut steps and high Sahyadri wind gales" }
+      ]
+    };
+
+    function renderAdventurePasses(placeName) {
+      const container = document.getElementById('adventure-passes-grid') || document.querySelector('.adventure-passes-list, #adventure-panel');
+      if (!container) return;
+
+      const key = (placeName || '').toLowerCase().includes('pune') ? 'pune' : 'delhi';
+      const items = ADVENTURE_PASS_CATALOG[key] || [
+        { name: `${placeName || 'Regional'} High Topo Vector`, type: "Regional Ridge & Trail Corridor", elevation: "Topographic Apex", trail: "Vernacular terrain traverses, gradient trails, and exploration vantage points" }
+      ];
+
+      container.innerHTML = items.map(a => `
+        <div class="adventure-card" style="background:rgba(10,14,20,0.85); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:16px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:10px; font-family:monospace; color:#38bdf8; text-transform:uppercase;">${a.type}</span>
+            <span style="font-size:11px; font-family:monospace; color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px;">${a.elevation}</span>
+          </div>
+          <h4 style="color:#f8fafc; margin:8px 0 6px 0; font-size:15px;">${a.name}</h4>
+          <p style="color:#94a3b8; font-size:12px; margin:0;">${a.trail}</p>
+        </div>
+      `).join('');
+    }
+    window.renderAdventurePasses = renderAdventurePasses;
+
+    /* ====================================================================
        AUTHENTIC WIKIPEDIA REAL PHOTO & HERITAGE BACKDROP ENGINE
     ==================================================================== */
     let lastHeritageCoords = { lat: null, lon: null };
@@ -4463,18 +4605,24 @@
           }
 
           heritageContainer.innerHTML = '';
-          pages.forEach((item) => {
+          for (const item of pages) {
             const card = document.createElement('div');
             card.className = 'heritage-coordinate-card';
 
             const itemLat = item.coordinates?.[0]?.lat ?? lat;
             const itemLon = item.coordinates?.[0]?.lon ?? lon;
-            const thumb = item.thumbnail?.source;
+            let thumbUrl = item.thumbnail?.source || null;
+
+            if (!thumbUrl && item.title) {
+              thumbUrl = await fetchMonumentPhoto(item.title);
+            }
+
+            const mediaHtml = renderMonumentMedia(thumbUrl, item.title, itemLat, itemLon);
 
             card.innerHTML = `
-              <div class="heritage-card-media" style="position: relative; overflow: hidden; height: 160px; background: #0c1015; border-radius: 8px 8px 0 0;">
-                ${thumb ? `<img src="${thumb}" alt="${(item.title || '').replace(/"/g, '&quot;')}" style="width:100%; height:100%; object-fit:cover;" onerror="this.remove()" />` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:#10b981;font-family:monospace;">VECTOR LOCKED</div>'}
-                <span style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.75); padding:2px 8px; border-radius:4px; font-size:10px; color:#10b981; font-family:monospace;">
+              <div class="heritage-card-media" style="position: relative; overflow: hidden; height: 150px; background: #0c1015; border-radius: 8px 8px 0 0;">
+                ${mediaHtml}
+                <span style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.75); padding:2px 8px; border-radius:4px; font-size:10px; color:#10b981; font-family:monospace; z-index:2;">
                   ${Number(itemLat).toFixed(4)}° N, ${Number(itemLon).toFixed(4)}° E
                 </span>
               </div>
@@ -4503,7 +4651,7 @@
             });
 
             heritageContainer.appendChild(card);
-          });
+          }
 
           const counter = document.getElementById("places-counter");
           if (counter) counter.innerText = `${pages.length} VERIFIED HERITAGE SIGHTS DISPLAYED`;
@@ -4519,6 +4667,12 @@
     document.addEventListener("DOMContentLoaded", () => {
       loadLocation("Delhi");
       renderPlaces("all");
+      if (typeof renderCraftBazaars === "function") {
+        renderCraftBazaars("Delhi");
+      }
+      if (typeof renderAdventurePasses === "function") {
+        renderAdventurePasses("Delhi");
+      }
       if (typeof renderStateDossier === "function") {
         renderStateDossier("Delhi", 28.6139, 77.2090);
       }
@@ -4555,7 +4709,15 @@
         renderStateDossier(cleanName, parsedLat, parsedLon);
       }
 
-      // 5. Update Ambient Faded Backdrop & Fetch Real Photos from Wikipedia GeoSearch
+      // 5. Synchronize Craft & Guild Bazaars & Adventure Passes
+      if (typeof renderCraftBazaars === "function") {
+        renderCraftBazaars(cleanName);
+      }
+      if (typeof renderAdventurePasses === "function") {
+        renderAdventurePasses(cleanName);
+      }
+
+      // 6. Update Ambient Faded Backdrop & Fetch Real Photos from Wikipedia GeoSearch
       if (typeof updateHeritageAndBackdrop === "function") {
         updateHeritageAndBackdrop(cleanName, parsedLat, parsedLon);
       }
@@ -4573,6 +4735,12 @@
         if (typeof updateHeritageAndBackdrop === "function") {
           updateHeritageAndBackdrop(placeName, lat, lon);
         }
+      }
+      if (typeof renderCraftBazaars === "function") {
+        renderCraftBazaars(placeName);
+      }
+      if (typeof renderAdventurePasses === "function") {
+        renderAdventurePasses(placeName);
       }
     });
 
