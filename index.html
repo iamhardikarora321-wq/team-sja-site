@@ -92,17 +92,19 @@
       transform: scale(1.08);
     }
 
-    /* Local Intelligence Panel POI Media */
-    .local-intelligence-panel .poi-media, #wiki-poi-image {
+    /* Local Intelligence Panel POI Media Container */
+    .local-intelligence-panel .poi-media-container, .local-intelligence-panel .poi-media, #wiki-poi-image {
       width: 100%;
       height: 140px;
+      max-height: 140px;
       border-radius: 8px;
       overflow: hidden;
       margin-top: 12px;
+      background: #080c12;
       border: 1px solid rgba(16, 185, 129, 0.25);
     }
 
-    .local-intelligence-panel .poi-media img, #wiki-poi-image img {
+    .local-intelligence-panel .poi-media-container img, .local-intelligence-panel .poi-media img, #wiki-poi-image img {
       width: 100%;
       height: 140px;
       object-fit: cover;
