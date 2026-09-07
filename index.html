@@ -1169,14 +1169,60 @@
       return true;
     }
 
-        // Panel 2: Environmental & Weather Metrics via Open-Meteo (Clean GET, NO headers)
+    let lastWeatherCoords = { lat: null, lon: null };
+
+    function setWeatherFallback() {
+      const tempEls = document.querySelectorAll('#feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
+      const windEls = document.querySelectorAll('#feature-weather-wind, .env-wind, #amenity-wind, [data-weather-wind]');
+      const humEls = document.querySelectorAll('#feature-weather-humidity, .env-humidity, #amenity-humidity, [data-weather-humidity]');
+
+      tempEls.forEach(el => {
+        if (!el.textContent || el.textContent.includes('Loading') || el.textContent.includes('--')) el.textContent = '--°C';
+      });
+      windEls.forEach(el => {
+        if (!el.textContent || el.textContent.includes('Loading') || el.textContent.includes('--')) el.textContent = '-- km/h';
+      });
+      humEls.forEach(el => {
+        if (!el.textContent || el.textContent.includes('Loading') || el.textContent.includes('--')) el.textContent = '--%';
+      });
+    }
+
+    // Panel 2: Environmental & Weather Metrics via Open-Meteo (Resilient & Cached)
     async function updatePanel2_OpenMeteoWeather(lat, lon) {
+      const parsedLat = parseFloat(lat);
+      const parsedLon = parseFloat(lon);
+
+      if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLon)) return false;
+
+      // Prevent duplicate requests if coordinates have not changed significantly
+      if (
+        lastWeatherCoords.lat !== null &&
+        Math.abs(lastWeatherCoords.lat - parsedLat) < 0.001 &&
+        Math.abs(lastWeatherCoords.lon - parsedLon) < 0.001
+      ) {
+        return true;
+      }
+
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${parsedLat}&longitude=${parsedLon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`;
+
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`;
-        const res = await fetch(url); // Clean GET with NO custom headers
-        if (!res.ok) throw new Error(`Weather error: ${res.status}`);
+        const res = await fetch(url);
+        
+        // Gracefully handle 503 Service Unavailable / rate limits
+        if (!res.ok) {
+          console.warn(`Weather service returned HTTP ${res.status}. Falling back to idle display.`);
+          setWeatherFallback();
+          return false;
+        }
+
         const data = await res.json();
-        const current = data.current || {};
+        if (!data || !data.current) {
+          setWeatherFallback();
+          return false;
+        }
+
+        lastWeatherCoords = { lat: parsedLat, lon: parsedLon };
+        const current = data.current;
 
         const temp = Math.round(current.temperature_2m !== undefined ? current.temperature_2m : 24);
         const wind = Math.round(current.wind_speed_10m !== undefined ? current.wind_speed_10m : 12);
@@ -1185,14 +1231,13 @@
 
         const weatherInfo = (typeof WEATHER_CODE_MAP !== "undefined" && WEATHER_CODE_MAP[code]) ? WEATHER_CODE_MAP[code] : { icon: "🌤️", desc: "Partly Cloudy & Pleasant" };
 
-        const tempEls = document.querySelectorAll("#live-temp-display, .env-temp, #feature-weather-temp");
-        tempEls.forEach(el => { el.innerText = `${temp}°C`; });
+        const tempEls = document.querySelectorAll('#feature-weather-temp, .env-temp, #live-temp-display, [data-weather-temp]');
+        const windEls = document.querySelectorAll('#feature-weather-wind, .env-wind, #amenity-wind, [data-weather-wind]');
+        const humEls = document.querySelectorAll('#feature-weather-humidity, .env-humidity, #amenity-humidity, [data-weather-humidity]');
 
-        const windEls = document.querySelectorAll("#amenity-wind, .env-wind, #feature-weather-wind");
-        windEls.forEach(el => { el.innerText = `${wind} km/h`; });
-
-        const humEls = document.querySelectorAll("#amenity-humidity, .env-humidity, #feature-weather-humidity");
-        humEls.forEach(el => { el.innerText = `${humidity}%`; });
+        tempEls.forEach(el => { el.textContent = `${temp}°C`; });
+        windEls.forEach(el => { el.textContent = `${wind} km/h`; });
+        humEls.forEach(el => { el.textContent = `${humidity}%`; });
 
         const descEl = document.getElementById("live-weather-desc");
         if (descEl) descEl.innerText = weatherInfo.desc;
@@ -1202,7 +1247,8 @@
 
         return true;
       } catch (err) {
-        console.warn("Panel 2 (Weather) fetch failed:", err);
+        console.warn("Weather fetch bypassed due to network error:", err.message);
+        setWeatherFallback();
         return false;
       }
     }
