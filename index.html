@@ -1868,45 +1868,84 @@
     window.formatWikiTitle = formatWikiTitle;
 
     /* ====================================================================
-       UNIVERSAL CORS-SAFE WIKI FETCHER (MEDIAWIKI ACTION API)
+       UNIVERSAL CORS-SAFE WIKI FETCHER (MEDIAWIKI ACTION API & IN-FLIGHT DEDUP)
        ==================================================================== */
-    async function fetchWikiDataSafe(title) {
-      if (!title) return null;
-      const cleanTitle = title.replace(/\(.*?\)/g, '').replace(/–|-/g, ' ').trim();
+    const wikiInFlightRequests = new Map();
+    const wikiResponseCache = new Map();
 
-      const params = new URLSearchParams({
-        action: 'query',
-        titles: cleanTitle,
-        prop: 'pageimages|extracts',
-        pithumbsize: '600',
-        exintro: '1',
-        explaintext: '1',
-        format: 'json',
-        origin: '*' // Mandatory for browser CORS
-      });
+    async function fetchWikiDataSafe(rawTitle) {
+      if (!rawTitle) return null;
 
-      try {
-        // Zero custom headers to prevent browser preflight OPTIONS rejection
-        const res = await fetch(`https://en.wikipedia.org/w/api.php?${params.toString()}`);
-        if (!res.ok) return null;
-        const data = await res.json();
-        const pages = data.query?.pages;
-        if (!pages) return null;
+      // 1. Strict lowercase normalization to prevent "Delhi" vs "delhi" duplicate floods
+      const normalizedKey = rawTitle
+        .replace(/\b(Central Vector|North Perimeter|East Watershed|South Ridge|Spatial Node)\b/gi, '')
+        .replace(/\(.*?\)/g, '')
+        .replace(/–|-/g, ' ')
+        .trim()
+        .toLowerCase();
 
-        const page = Object.values(pages)[0];
-        if (!page || page.missing !== undefined) return null;
+      if (!normalizedKey) return null;
 
-        return {
-          title: page.title,
-          imageUrl: page.thumbnail?.source || null,
-          extract: page.extract || ''
-        };
-      } catch (err) {
-        console.warn(`Wiki fetch bypassed for "${title}":`, err.message);
-        return null;
+      // Return cached result if available
+      if (wikiResponseCache.has(normalizedKey)) {
+        return wikiResponseCache.get(normalizedKey);
       }
+
+      // Prevent duplicate concurrent network fetches for the exact same entity
+      if (wikiInFlightRequests.has(normalizedKey)) {
+        return await wikiInFlightRequests.get(normalizedKey);
+      }
+
+      const queryPromise = (async () => {
+        const params = new URLSearchParams({
+          action: 'query',
+          titles: normalizedKey,
+          prop: 'pageimages|extracts',
+          pithumbsize: '600',
+          exintro: '1',
+          explaintext: '1',
+          format: 'json',
+          origin: '*' // Required for anonymous browser CORS
+        });
+
+        try {
+          // Clean fetch: strictly no custom headers to avoid CORS preflight rejection
+          const res = await fetch(`https://en.wikipedia.org/w/api.php?${params.toString()}`, {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'omit'
+          });
+
+          if (!res.ok) return null;
+          const data = await res.json();
+          const pages = data.query?.pages;
+          if (!pages) return null;
+
+          const page = Object.values(pages)[0];
+          if (!page || page.missing !== undefined) return null;
+
+          const result = {
+            title: page.title,
+            imageUrl: page.thumbnail?.source || null,
+            extract: page.extract || ''
+          };
+
+          wikiResponseCache.set(normalizedKey, result);
+          return result;
+        } catch (err) {
+          // Return null cleanly without crashing or throwing
+          return null;
+        } finally {
+          wikiInFlightRequests.delete(normalizedKey);
+        }
+      })();
+
+      wikiInFlightRequests.set(normalizedKey, queryPromise);
+      return await queryPromise;
     }
     window.fetchWikiDataSafe = fetchWikiDataSafe;
+    window.wikiInFlightRequests = wikiInFlightRequests;
+    window.wikiResponseCache = wikiResponseCache;
 
     /* ====================================================================
        CULTURAL INQUIRIES GENERATOR & RENDERER
