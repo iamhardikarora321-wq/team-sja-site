@@ -5231,10 +5231,17 @@
     }
     window.updateHeritageAndBackdrop = updateHeritageAndBackdrop;
 
-    /* ====================================================================
-       DYNAMIC PHOTOGRAPHIC SPECTRUM ENGINE (DEDUPLICATED 4-TILE STRIP)
-    ==================================================================== */
+    let activeSpectrumTarget = '';
+
     async function updatePhotographicSpectrum(lat, lon, rawName) {
+      const pLat = parseFloat(lat);
+      const pLon = parseFloat(lon);
+      if (!Number.isFinite(pLat) || !Number.isFinite(pLon)) return;
+
+      const targetId = `${pLat.toFixed(3)}_${pLon.toFixed(3)}_${rawName}`;
+      if (activeSpectrumTarget === targetId) return;
+      activeSpectrumTarget = targetId;
+
       const container = document.getElementById('photographic-spectrum') || 
                         document.querySelector('.photographic-spectrum-grid, .photographic-spectrum');
       if (!container) return;
