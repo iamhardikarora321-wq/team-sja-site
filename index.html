@@ -2058,9 +2058,9 @@
        - Stage 2: Leaflet Map Viewport & Marker Reposition with invalidateSize()
        - Stage 3: Card Population (Panel 1 Telemetry, Panel 2 Open-Meteo, Panel 3 Wikipedia)
     ==================================================================== */
-    function getOrCreateMap(containerId = 'arvora-spatial-map') {
+    function initMap(containerId = 'arvora-spatial-map') {
       if (typeof L === 'undefined') return null;
-      const container = document.getElementById(containerId) || document.querySelector('.leaflet-container') || document.getElementById('map');
+      const container = document.getElementById('map') || document.querySelector('.map-container') || document.getElementById(containerId) || document.querySelector('.leaflet-container');
       if (!container) return null;
 
       // If a Leaflet instance already exists on window, arvoraMap, or the DOM element, reuse it
@@ -2080,13 +2080,15 @@
       const defaultLng = window.ArvoraState && Number.isFinite(Number(window.ArvoraState.lon ?? window.ArvoraState.lng)) ? Number(window.ArvoraState.lon ?? window.ArvoraState.lng) : 77.2090;
 
       const map = L.map(container, {
+        center: [defaultLat, defaultLng],
+        zoom: 12,
         zoomControl: true,
         scrollWheelZoom: false
-      }).setView([defaultLat, defaultLng], 12);
-      
+      });
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
       }).addTo(map);
 
       const customIcon = L.divIcon({
@@ -2105,15 +2107,19 @@
       window.activeLocationMarker = marker;
       if (window.ArvoraState) window.ArvoraState.mapInstance = map;
 
-      setTimeout(() => { if (map && typeof map.invalidateSize === 'function') map.invalidateSize(); }, 400);
+      // Ensure tiles render completely once DOM settles
+      setTimeout(() => {
+        if (map && typeof map.invalidateSize === 'function') {
+          map.invalidateSize();
+        }
+      }, 200);
 
       return map;
     }
-    window.getOrCreateMap = getOrCreateMap;
 
-    function initArvoraMap() {
-      return getOrCreateMap('arvora-spatial-map');
-    }
+    window.initMap = initMap;
+    window.getOrCreateMap = initMap;
+    window.initArvoraMap = initMap;
 
         async function syncLocationData(query) {
       if (!query) return;
