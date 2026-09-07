@@ -1318,22 +1318,45 @@
       syncURL() {
         if (window.history && window.history.replaceState) {
           const url = new URL(window.location);
-          if (this.currentLocation && this.currentLocation.name) {
-            url.searchParams.set("q", this.currentLocation.name.toLowerCase());
+          const name = this.displayName || (this.currentLocation ? this.currentLocation.osmDisplayName || this.currentLocation.name : '');
+          if (name) {
+            url.searchParams.set("q", name);
           }
-          if (this.lat && this.lon) {
+          if (Number.isFinite(this.lat) && Number.isFinite(this.lon)) {
             url.searchParams.set("lat", this.lat);
             url.searchParams.set("lng", this.lon);
           }
-          window.history.replaceState({}, "", url);
+          window.history.replaceState(null, "", url);
         }
       },
 
       initFromURL() {
         const params = new URLSearchParams(window.location.search);
-        const query = params.get("q") || params.get("place") || params.get("location");
-        if (query) {
-          this.selectPlace(query);
+        const query = params.get('q') || params.get('place') || params.get('location');
+        const rawLat = params.get('lat');
+        const rawLon = params.get('lng') ?? params.get('lon');
+        const lat = parseFloat(rawLat);
+        const lon = parseFloat(rawLon);
+
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          const name = query ? decodeURIComponent(query) : `${lat}, ${lon}`;
+          
+          const searchInput = document.querySelector('input[type="search"], #search-input, .search-input, #query-input');
+          if (searchInput && query) searchInput.value = decodeURIComponent(query);
+
+          this.setPlace(lat, lon, name);
+        } else if (query) {
+          const decodedQuery = decodeURIComponent(query);
+          const searchInput = document.querySelector('input[type="search"], #search-input, .search-input, #query-input');
+          if (searchInput) searchInput.value = decodedQuery;
+
+          if (typeof syncLocationData === 'function') {
+            syncLocationData(decodedQuery);
+          } else if (typeof handleLocationSearch === 'function') {
+            handleLocationSearch(decodedQuery);
+          } else {
+            this.selectPlace(decodedQuery);
+          }
         } else {
           this.selectPlace("Delhi");
         }
@@ -1470,7 +1493,7 @@
     }
 
     /* ==================================================================== */
-        // Subscribe Leaflet Map with safe validation and flyTo
+        // Subscribe Leaflet Map with safe validation, ready check, and flyTo
     ArvoraState.subscribe((state) => {
       const lat = Number(state.lat);
       const lon = Number(state.lon ?? state.lng);
@@ -1480,31 +1503,43 @@
         return; // Silently skip Leaflet update if coordinates are not yet numbers
       }
 
-      const targetMap = window.map || window.arvoraMap || state.mapInstance;
+      let targetMap = window.map || window.arvoraMap || state.mapInstance;
+      if (!targetMap && typeof initArvoraMap === 'function') {
+        targetMap = initArvoraMap();
+      }
 
       if (targetMap) {
         if (!window.map) window.map = targetMap;
-        window.map.flyTo([lat, lon], zoom, { duration: 1.2 });
 
-        let marker = window.activeMarker || window.activeLocationMarker || state.activeMarker;
-        if (marker) {
-          marker.setLatLng([lat, lon]);
-        } else if (typeof L !== 'undefined') {
-          const customIcon = L.divIcon({
-            className: 'custom-arvora-marker',
-            html: '<div style="width:22px; height:22px; background:#10b981; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 20px #10b981, 0 0 40px #10b981; transform:translate(-50%, -50%);"></div>',
-            iconSize: [22, 22],
-            iconAnchor: [11, 11]
-          });
-          marker = L.marker([lat, lon], { icon: customIcon }).addTo(window.map);
-          window.activeMarker = marker;
-          window.activeLocationMarker = marker;
-          state.activeMarker = marker;
-        }
-        
-        const displayName = state.displayName || (state.currentLocation ? state.currentLocation.osmDisplayName || state.currentLocation.name : "");
-        if (window.activeMarker && displayName) {
-          window.activeMarker.bindPopup(`<b>${displayName}</b>`).openPopup();
+        const updateMap = () => {
+          window.map.flyTo([lat, lon], zoom, { duration: 1.2 });
+
+          let marker = window.activeMarker || window.activeLocationMarker || state.activeMarker;
+          if (marker) {
+            marker.setLatLng([lat, lon]);
+          } else if (typeof L !== 'undefined') {
+            const customIcon = L.divIcon({
+              className: 'custom-arvora-marker',
+              html: '<div style="width:22px; height:22px; background:#10b981; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 20px #10b981, 0 0 40px #10b981; transform:translate(-50%, -50%);"></div>',
+              iconSize: [22, 22],
+              iconAnchor: [11, 11]
+            });
+            marker = L.marker([lat, lon], { icon: customIcon }).addTo(window.map);
+            window.activeMarker = marker;
+            window.activeLocationMarker = marker;
+            state.activeMarker = marker;
+          }
+          
+          const displayName = state.displayName || (state.currentLocation ? state.currentLocation.osmDisplayName || state.currentLocation.name : "");
+          if (window.activeMarker && displayName) {
+            window.activeMarker.bindPopup(`<b>${displayName}</b>`).openPopup();
+          }
+        };
+
+        if (typeof targetMap.whenReady === 'function') {
+          targetMap.whenReady(updateMap);
+        } else {
+          updateMap();
         }
       }
     });
@@ -1788,7 +1823,7 @@
     }
 
     /* REFACTORED LEAFLET MAP CONTROLLER */
-        function updateMapToLocation(location) {
+    function updateMapToLocation(location) {
       if (typeof L === "undefined") return;
       if (!arvoraMap) initArvoraMap();
       if (!arvoraMap || !location || !location.coordinates) return;
@@ -1804,53 +1839,62 @@
       const placeName = location.name || "Target Location";
       const popupText = location.osmDisplayName || `${placeName} (${location.coordsFormatted || ''})`;
 
-      if (location.leafletBounds && Array.isArray(location.leafletBounds) && location.leafletBounds.length === 2 && Array.isArray(location.leafletBounds[0]) && Array.isArray(location.leafletBounds[1])) {
-        const s = parseFloat(location.leafletBounds[0][0]);
-        const w = parseFloat(location.leafletBounds[0][1]);
-        const n = parseFloat(location.leafletBounds[1][0]);
-        const e = parseFloat(location.leafletBounds[1][1]);
-        if ([s, w, n, e].every(Number.isFinite)) {
-          try {
-            arvoraMap.fitBounds([[s, w], [n, e]], { padding: [50, 50], duration: 1.5 });
-          } catch(e) {
+      const updateMap = () => {
+        if (location.leafletBounds && Array.isArray(location.leafletBounds) && location.leafletBounds.length === 2 && Array.isArray(location.leafletBounds[0]) && Array.isArray(location.leafletBounds[1])) {
+          const s = parseFloat(location.leafletBounds[0][0]);
+          const w = parseFloat(location.leafletBounds[0][1]);
+          const n = parseFloat(location.leafletBounds[1][0]);
+          const e = parseFloat(location.leafletBounds[1][1]);
+          if ([s, w, n, e].every(Number.isFinite)) {
+            try {
+              arvoraMap.fitBounds([[s, w], [n, e]], { padding: [50, 50], duration: 1.5 });
+            } catch(e) {
+              arvoraMap.flyTo([lat, lng], 13, { duration: 1.5, easeLinearity: 0.25 });
+            }
+          } else {
             arvoraMap.flyTo([lat, lng], 13, { duration: 1.5, easeLinearity: 0.25 });
           }
         } else {
           arvoraMap.flyTo([lat, lng], 13, { duration: 1.5, easeLinearity: 0.25 });
         }
+        if (activeLocationMarker) {
+          activeLocationMarker.setLatLng([lat, lng]);
+        } else {
+          const customIcon = L.divIcon({
+            className: 'custom-arvora-marker',
+            html: '<div style="width:22px; height:22px; background:#10b981; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 20px #10b981, 0 0 40px #10b981; transform:translate(-50%, -50%);"></div>',
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
+
+          activeLocationMarker = L.marker([lat, lng], { icon: customIcon }).addTo(arvoraMap);
+          window.activeLocationMarker = activeLocationMarker;
+          window.activeMarker = activeLocationMarker;
+        }
+
+        const popupContent = `
+          <div style="padding: 6px 4px; max-width: 260px;">
+            <span style="font-family:'JetBrains Mono', monospace; font-size:0.62rem; color:#10b981; text-transform:uppercase;">● ${location.categoryType || 'VERIFIED NODE'}</span>
+            <h4 style="color:#ffffff; font-size:1.05rem; font-weight:700; margin:4px 0 6px 0;">${placeName}</h4>
+            <div style="font-size:0.75rem; color:#cbd5e1; line-height:1.4;">${popupText}</div>
+          </div>
+        `;
+
+        if (activeLocationMarker) {
+          activeLocationMarker.bindPopup(popupContent).openPopup();
+        }
+
+        const statusEl = document.getElementById("map-target-status");
+        if (statusEl) statusEl.innerText = `VECTOR LOCKED // ${placeName.toUpperCase()}`;
+
+        setTimeout(() => { if (arvoraMap) arvoraMap.invalidateSize(); }, 300);
+      };
+
+      if (typeof arvoraMap.whenReady === "function") {
+        arvoraMap.whenReady(updateMap);
       } else {
-        arvoraMap.flyTo([lat, lng], 13, { duration: 1.5, easeLinearity: 0.25 });
+        updateMap();
       }
-
-      if (activeLocationMarker) {
-        activeLocationMarker.setLatLng([lat, lng]);
-      } else {
-        const customIcon = L.divIcon({
-          className: 'custom-arvora-marker',
-          html: '<div style="width:22px; height:22px; background:#10b981; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 20px #10b981, 0 0 40px #10b981; transform:translate(-50%, -50%);"></div>',
-          iconSize: [22, 22],
-          iconAnchor: [11, 11]
-        });
-
-        activeLocationMarker = L.marker([lat, lng], { icon: customIcon }).addTo(arvoraMap);
-        window.activeLocationMarker = activeLocationMarker;
-        window.activeMarker = activeLocationMarker;
-      }
-
-      const popupContent = `
-        <div style="padding: 6px 4px; max-width: 260px;">
-          <span style="font-family:'JetBrains Mono', monospace; font-size:0.62rem; color:#10b981; text-transform:uppercase;">● ${location.categoryType || 'VERIFIED NODE'}</span>
-          <h4 style="color:#ffffff; font-size:1.05rem; font-weight:700; margin:4px 0 6px 0;">${placeName}</h4>
-          <div style="font-size:0.75rem; color:#cbd5e1; line-height:1.4;">${popupText}</div>
-        </div>
-      `;
-
-      activeLocationMarker.bindPopup(popupContent).openPopup();
-
-      const statusEl = document.getElementById("map-target-status");
-      if (statusEl) statusEl.innerText = `VECTOR LOCKED // ${placeName.toUpperCase()}`;
-
-      setTimeout(() => { if (arvoraMap) arvoraMap.invalidateSize(); }, 300);
     }
 
 
