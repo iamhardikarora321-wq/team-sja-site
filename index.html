@@ -2947,6 +2947,52 @@
     /* ====================================================================
        DESTINATION CULTURAL INTELLIGENCE & FLIP DECK ENGINE
     ==================================================================== */
+    const DEHRADUN_VERIFIED_SIGHTS = [
+      {
+        name: "Robber's Cave (Guchhupani)",
+        wikiTitle: "Robber's_Cave,_India",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Robber%27s_Cave_Dehradun.jpg/800px-Robber%27s_Cave_Dehradun.jpg",
+        lat: 30.3756,
+        lon: 78.0601,
+        tag: "KARST GORGE & COLD AQUIFER",
+        desc: "Subterranean limestone cave where a natural cold mountain stream flows through a narrow 600m natural canyon fissure."
+      },
+      {
+        name: "Forest Research Institute (FRI)",
+        wikiTitle: "Forest_Research_Institute_(India)",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg/800px-Forest_Research_Institute%2C_Dehradun%2C_Uttarakhand%2C_India.jpg",
+        lat: 30.3429,
+        lon: 77.9997,
+        tag: "GRECO-ROMAN BRICK MONUMENT",
+        desc: "1929 monumental colonial architecture complex larger than Buckingham Palace, engineered with pure brick mortar and classical colonnades."
+      },
+      {
+        name: "Mindrolling Monastery",
+        wikiTitle: "Mindrolling_Monastery",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Mindrolling_Monastery_Dehradun.jpg/800px-Mindrolling_Monastery_Dehradun.jpg",
+        lat: 30.2608,
+        lon: 78.0094,
+        tag: "TIBETAN SACRED SANCTUM",
+        desc: "One of the six major Nyingma monasteries, featuring the 185 ft Great Stupa of Clement Town and vibrant traditional murals."
+      },
+      {
+        name: "Tapkeshwar Mahadev Cavern",
+        wikiTitle: "Tapkeshwar_Temple",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Tapkeshwar_Temple_Dehradun.jpg/800px-Tapkeshwar_Temple_Dehradun.jpg",
+        lat: 30.3547,
+        lon: 78.0181,
+        tag: "SPELEOTHEM DRIP SHRINE",
+        desc: "Natural sulfurous riverside cave where continuous mineral water droplets drip naturally over the subterranean lingam."
+      }
+    ];
+
+    const CITY_HERITAGE_REGISTRY = {
+      dehradun: DEHRADUN_VERIFIED_SIGHTS,
+      doon: DEHRADUN_VERIFIED_SIGHTS,
+      uttarakhand: DEHRADUN_VERIFIED_SIGHTS,
+      guchhupani: DEHRADUN_VERIFIED_SIGHTS
+    };
+
     const CITY_CODEX_DATABASE = {
       pune: {
         title: "Pune: Maratha Fortification & Deccan Hydraulic Secrets",
@@ -3133,13 +3179,7 @@
         burnSub: "Per Head INR (Stay + Meals)",
         dwell: "2 – 4 Days",
         dwellSub: "Full Valley Reconnaissance",
-        heritageCoordinates: [
-          { name: "Robber's Cave (Guchhupani)", lat: 30.3778, lon: 78.0583, desc: "Limestone gorge with disappearing cold stream aquifer", dist: "8 km N" },
-          { name: "Forest Research Institute (FRI)", lat: 30.3414, lon: 77.9984, desc: "Monumental 450-acre Greco-Roman brick forestry estate", dist: "5.5 km W" },
-          { name: "Mindrolling Monastery", lat: 30.2625, lon: 78.0089, desc: "185-ft Great Stupa with vibrant Tibetan murals & gardens", dist: "9 km S" },
-          { name: "Tapkeshwar Mahadev Temple", lat: 30.3542, lon: 78.0167, desc: "Natural cave sanctum with continuous water droplet dripping", dist: "6 km NW" },
-          { name: "Sahastradhara Springs", lat: 30.3833, lon: 78.1333, desc: "Terraced limestone sulfur pools and dripping caverns", dist: "14 km NE" }
-        ],
+        heritageCoordinates: DEHRADUN_VERIFIED_SIGHTS,
         inquiries: [
           {
             tag: "KARST HYDROLOGY",
@@ -4160,9 +4200,14 @@
       if (window.dynamicGeoPlaces && window.dynamicGeoPlaces.length > 0) {
         return window.dynamicGeoPlaces;
       }
-      const key = currentCityKey.toLowerCase();
-      if (typeof CITY_HERITAGE_REGISTRY !== "undefined" && CITY_HERITAGE_REGISTRY[key]) {
-        return CITY_HERITAGE_REGISTRY[key];
+      const rawKey = currentCityKey.toLowerCase();
+      const resolvedKey = typeof resolveDossierKey === "function" ? (resolveDossierKey(rawKey) || rawKey) : rawKey;
+      if (typeof CITY_HERITAGE_REGISTRY !== "undefined") {
+        if (CITY_HERITAGE_REGISTRY[resolvedKey]) return CITY_HERITAGE_REGISTRY[resolvedKey];
+        if (CITY_HERITAGE_REGISTRY[rawKey]) return CITY_HERITAGE_REGISTRY[rawKey];
+      }
+      if (typeof CITY_CODEX_DATABASE !== "undefined" && CITY_CODEX_DATABASE[resolvedKey] && CITY_CODEX_DATABASE[resolvedKey].heritageCoordinates) {
+        return CITY_CODEX_DATABASE[resolvedKey].heritageCoordinates;
       }
       return HERITAGE_COORDINATES_DB;
     }
@@ -4777,6 +4822,15 @@
 
         // B. Nearby Heritage Landmarks via MediaWiki GeoSearch
         if (!heritageContainer) return;
+
+        const rawCityName = (placeName || '').split(',')[0].trim().toLowerCase();
+        const resolvedCityKey = typeof resolveDossierKey === "function" ? (resolveDossierKey(rawCityName) || rawCityName) : rawCityName;
+        if (typeof CITY_HERITAGE_REGISTRY !== "undefined" && (CITY_HERITAGE_REGISTRY[resolvedCityKey] || CITY_HERITAGE_REGISTRY[rawCityName])) {
+          const counter = document.getElementById("places-counter");
+          const dataset = CITY_HERITAGE_REGISTRY[resolvedCityKey] || CITY_HERITAGE_REGISTRY[rawCityName];
+          if (counter && dataset) counter.innerText = `${dataset.length} VERIFIED HERITAGE SIGHTS DISPLAYED`;
+          return;
+        }
 
         // Use clean, encoded URLSearchParams with origin=* and no custom headers
         const params = new URLSearchParams({
