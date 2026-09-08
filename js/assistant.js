@@ -186,11 +186,11 @@ async function fetchGeminiAIResponse(query, contextData) {
   const apiKey = RAAHI_GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
   
   const systemPrompt = `You are RAAHI AI, an eloquent, expert, and culturally authentic AI Travel Intelligence Assistant for the RAAHI National Tourism Platform (covering 28 States, 8 Union Territories, and 111+ Curated Destinations across India).
 Current User Page Context: ${contextData ? JSON.stringify({ type: contextData.type, name: contextData.name, stateName: contextData.stateName || contextData.stateId }) : 'Exploring National Tourism Archive'}.
-Provide structured, inspiring, highly factual travel intelligence with duration, best photography spots, authentic regional food, and approximate budgets in INR (₹). Keep formatting clean with bold headers and clear bullet points.`;
+Provide concise, structured, highly factual travel intelligence with duration, best photography spots, authentic regional food, and approximate budgets in INR (₹). Keep formatting clean with bold headers and clear bullet points.`;
 
   try {
     const response = await fetch(endpoint, {
@@ -206,7 +206,11 @@ Provide structured, inspiring, highly factual travel intelligence with duration,
               { text: `${systemPrompt}\n\nUser Question: ${query}` }
             ]
           }
-        ]
+        ],
+        generationConfig: {
+          maxOutputTokens: 600,
+          temperature: 0.7
+        }
       })
     });
 

@@ -15,7 +15,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The crown jewel of Jaipur's royal fortifications, Amber Fort perches atop the rugged Aravalli hills overlooking the shimmering waters of Maota Lake. Constructed in 1592 by Raja Man Singh I, the fort blends Rajput and Mughal architectural genius across four palatial courtyards, subterranean escape tunnels, and the world-renowned Hall of Mirrors (Sheesh Mahal).",
     "shortDescription": "Majestic hilltop sandstone fortress with mirror mosaic palaces overlooking Maota Lake.",
-    "image": "assets/images/destinations/amber-fort.jpg",
+    "image": "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg",
       "assets/images/destinations/amber-fort-detail.jpg",
@@ -113,7 +113,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Jaipur, the UNESCO World Heritage Pink City, was founded in 1727 by Maharaja Sawai Jai Singh II as India's first planned city. Renowned for its terracotta-pink facade, geometric grid street plan, celestial Jantar Mantar observatory, and honeycomb Hawa Mahal.",
     "shortDescription": "The Pink City of grand palaces, astronomical observatories, and gemstone bazaars.",
-    "image": "assets/images/destinations/amber-fort.jpg",
+    "image": "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hawa-mahal.jpg",
       "assets/images/destinations/city-palace-jaipur.jpg",
@@ -193,7 +193,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The City of Lakes and Venice of the East, Udaipur is set against the backdrop of the emerald Aravalli hills. Built around interconnected freshwater lakes, it features the monumental City Palace and the Lake Palace on Lake Pichola.",
     "shortDescription": "Romantic city of shimmering lakes, marble palaces, and royal courtyards.",
-    "image": "assets/images/destinations/city-palace-udaipur.jpg",
+    "image": "https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-udaipur.jpg",
       "assets/images/destinations/lake-pichola.jpg"
@@ -504,7 +504,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "A high-altitude trans-Himalayan desert wonderland situated between India and Tibet. Featuring thousand-year-old cliffside Buddhist monasteries like Key and Tabo, fossil villages in Langza, and cobalt Chandratal Lake.",
     "shortDescription": "High-altitude desert wonderland of thousand-year-old Buddhist monasteries and fossil villages.",
-    "image": "assets/images/destinations/key-monastery.jpg",
+    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg",
       "assets/images/destinations/hadimba-temple.jpg"
@@ -582,7 +582,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Nestled at the northern end of the Kullu Valley by the rushing Beas River, Manali is home to the 1553 wooden Hadimba Temple surrounded by ancient deodar cedar forests, Solang Valley, and Atal Tunnel.",
     "shortDescription": "Cedar forests, rushing Beas river, ancient pagoda temples, and snowy alpine passes.",
-    "image": "assets/images/destinations/hadimba-temple.jpg",
+    "image": "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -659,7 +659,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The erstwhile summer capital of British India, Shimla sprawls along a mountain ridge lined with colonial architecture, the Mall Road, Viceregal Lodge, and the UNESCO Kalka-Shimla Mountain Railway.",
     "shortDescription": "Colonial summer capital, heritage toy train, Mall Road, and cedar forests.",
-    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -887,7 +887,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "One of the oldest continuously inhabited cities in the world, Varanasi is the spiritual capital of India on the holy River Ganga with 84 stone ghats, Kashi Vishwanath Temple, and evening Ganga Aarti.",
     "shortDescription": "The sacred eternal city of stone ghats, dawn boat rituals, and transcendent spirituality.",
-    "image": "assets/images/destinations/dashashwamedh-ghat.jpg",
+    "image": "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/dashashwamedh-ghat.jpg",
       "assets/images/destinations/assi-ghat.jpg"
@@ -965,7 +965,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The capital of the Mughal Empire at its peak, Agra is home to three UNESCO World Heritage Sites: the Taj Mahal, the red sandstone Agra Fort, and the deserted royal city of Fatehpur Sikri.",
     "shortDescription": "Home of the Taj Mahal, Agra Fort, and masterpieces of Mughal architecture.",
-    "image": "assets/images/destinations/taj-mahal.jpg",
+    "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/taj-mahal.jpg",
       "assets/images/destinations/agra-fort.jpg",
@@ -1044,7 +1044,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The city of Nawabs, tehzeeb, and culinary sophistication. Celebrated for Bara Imambara, Rumi Darwaza, delicate Chikankari hand-embroidery, and Galouti kebabs.",
     "shortDescription": "City of Nawabs, architectural wonders, Chikankari embroidery, and Awadhi cuisine.",
-    "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1627894483216-2138af692e32?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/taj-mahal.jpg"
     ],
@@ -1121,7 +1121,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The sacred birthplace of Lord Rama on the banks of the holy Saryu River, home to the monumental Shri Ram Janmabhoomi Mandir, Hanuman Garhi, and illuminated evening Saryu Aarti ghats.",
     "shortDescription": "Sacred holy city on the Saryu River, birthplace of Lord Rama.",
-    "image": "https://images.unsplash.com/photo-1627894483216-2138af692e32?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1625834807406-b72bf88439f0?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/taj-mahal.jpg"
     ],
@@ -1197,7 +1197,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The sacred land of Braj Bhoomi on the Yamuna River, birthplace of Lord Krishna, famous for Shri Krishna Janmasthan, Banke Bihari Temple, Prem Mandir, and world-renowned Lathmar Holi.",
     "shortDescription": "Sacred birthplace of Lord Krishna with ancient temple courtyards and vibrant Holi.",
-    "image": "https://images.unsplash.com/photo-1625834807406-b72bf88439f0?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/taj-mahal.jpg"
     ],
@@ -1273,7 +1273,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "The hub of Kerala's backwaters, Alleppey is famous for its vast network of tranquil lagoons, canals, and Vembanad Lake. Experience overnight cruising in traditional thatched kettuvallam houseboats.",
     "shortDescription": "Serene emerald backwaters and traditional kettuvallam houseboats.",
-    "image": "assets/images/destinations/alleppey-backwaters.jpg",
+    "image": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/alleppey-backwaters.jpg"
     ],
@@ -1350,7 +1350,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Perched at 5,200 feet in the Western Ghats, Munnar is blanketed in emerald green tea carpet hills, mist-shrouded valleys, cascading waterfalls, and home to the endangered Nilgiri Tahr.",
     "shortDescription": "Rolling emerald tea estates, mountain mist, and endangered Nilgiri Tahr.",
-    "image": "assets/images/destinations/munnar-tea.jpg",
+    "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/munnar-tea.jpg"
     ],
@@ -1427,7 +1427,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "The Queen of the Arabian Sea, Kochi showcases iconic Chinese fishing nets, 16th-century Portuguese churches, Dutch palaces in Mattancherry, and the Kochi-Muziris Biennale.",
     "shortDescription": "Historic spice port with Chinese fishing nets, colonial streets, and modern art.",
-    "image": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/alleppey-backwaters.jpg"
     ],
@@ -1581,7 +1581,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Home to the Periyar National Park around Periyar Lake, known for wild elephant herds, tigers, spice plantation walks, and traditional Kalaripayattu martial art demonstrations.",
     "shortDescription": "Periyar tiger reserve, wild elephant boat safaris, and cardamom plantations.",
-    "image": "assets/images/destinations/eravikulam-national-park.jpg",
+    "image": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/eravikulam-national-park.jpg"
     ],
@@ -1735,7 +1735,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "North Goa is celebrated for dynamic golden beaches, coastal cliff viewpoints, 17th-century Fort Aguada, buzzing flea markets, watersports, and seaside dining.",
     "shortDescription": "Vibrant beach belt with clifftop fortresses, flea markets, and sunset beaches.",
-    "image": "assets/images/destinations/fort-aguada.jpg",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/fort-aguada.jpg"
     ],
@@ -1812,7 +1812,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "South Goa represents the tranquil soul of the coastline with serene crescent bays like Palolem and Agonda, silent headphone beach parties, and dolphin sightings.",
     "shortDescription": "Tranquil crescent bays, pristine white sand beaches, and peaceful coastal living.",
-    "image": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/fort-aguada.jpg"
     ],
@@ -1966,7 +1966,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Perched at 14,270 feet, Pangong Tso is an endorheic high-altitude saline lake extending 134 km across the border, renowned for surreal blue waters shifting colors under mountain skies.",
     "shortDescription": "Cobalt high-altitude saline lake shifting colors under the trans-Himalayan sky.",
-    "image": "https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -2043,7 +2043,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The valley of flowers accessed across the world-famous Khardung La pass (17,982 ft), known for white sand dunes, double-humped Bactrian camels, and Diskit Monastery.",
     "shortDescription": "Desert sand dunes with double-humped camels surrounded by snow peaks.",
-    "image": "https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1572445271230-a78b5944a659?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -2273,7 +2273,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The Meadow of Flowers at 8,690 feet in the Pir Panjal range, featuring Asia's highest cable car (Gulmarg Gondola to Mt. Apharwat) and premier snow skiing slopes.",
     "shortDescription": "Asia's premier ski resort, high-altitude cable car, and wildflower meadows.",
-    "image": "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -2350,7 +2350,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The Valley of Shepherds on the Lidder River, surrounded by pine forests, snow-clad peaks, and serving as the starting base for the annual holy Amarnath Cave pilgrimage.",
     "shortDescription": "Lidder river valley, pine forests, and alpine trekking meadows.",
-    "image": "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -2503,7 +2503,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Set around the emerald eye-shaped Naini Lake in the Kumaon foothills at 6,837 feet, offering yacht boating, the Naina Devi Temple, and panoramic snow views from Snow View Point.",
     "shortDescription": "Emerald lake hill town with sailboat rides and Himalayan viewpoints.",
-    "image": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-jaipur.jpg"
     ],
@@ -2579,7 +2579,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "India's premier skiing destination in the Garhwal Himalayas at 9,500–10,500 feet, surrounded by coniferous forests and 360-degree views of Nanda Devi (7,816m).",
     "shortDescription": "Snow ski slopes and cable cars with panoramic views of Mount Nanda Devi.",
-    "image": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -2808,7 +2808,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "The sacred battleground of the epic Mahabharata and birthplace of the Bhagavad Gita, featuring Brahma Sarovar water tank, Jyotisar, and the Sheikh Chilli Tomb.",
     "shortDescription": "Sacred land of the Bhagavad Gita and monumental Brahma Sarovar lake.",
-    "image": "https://images.unsplash.com/photo-1627894483216-2138af692e32?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1572445271230-a78b5944a659?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-jaipur.jpg"
     ],
@@ -2961,7 +2961,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "The sole remaining natural wild sanctuary of the endangered Asiatic Lion (Panthera leo persica), spanning dry deciduous teak forests and rocky scrublands.",
     "shortDescription": "The world's only natural home of the wild Asiatic Lion.",
-    "image": "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/eravikulam-national-park.jpg"
     ],
@@ -3037,7 +3037,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "India's first UNESCO World Heritage City, famous for Sabarmati Ashram, intricate stepwells like Adalaj, Sidi Saiyyed Mosque stone lattice screens, and street food.",
     "shortDescription": "UNESCO World Heritage city with historic pols, stepwells, and Sabarmati Ashram.",
-    "image": "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-jaipur.jpg"
     ],
@@ -3191,7 +3191,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "UNESCO World Heritage rock-cut cave monuments dating from 2nd century BCE to 10th century CE, including the monolithic Kailash Temple carved top-down from a single basalt cliff.",
     "shortDescription": "Ancient rock-cut cave temples and the world's largest monolithic sculpture.",
-    "image": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg"
     ],
@@ -3268,7 +3268,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "The cultural capital of Maharashtra and Oxford of the East, surrounded by historic Maratha hill forts like Sinhagad, Shaniwar Wada, and Aga Khan Palace.",
     "shortDescription": "Cultural hub with historic Maratha forts, trekking ridges, and heritage palaces.",
-    "image": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-jaipur.jpg"
     ],
@@ -3498,7 +3498,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "The Queen of Hill Stations in the Nilgiri Mountains at 7,350 feet, famous for tea gardens, botanical gardens, Doddabetta Peak, and the UNESCO Nilgiri Mountain Railway.",
     "shortDescription": "Nilgiri mountain hill station, tea plantations, and steam heritage toy train.",
-    "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/munnar-tea.jpg"
     ],
@@ -3806,7 +3806,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Known as the Scotland of India on the eastern slopes of the Western Ghats, blanketed in coffee estates, spice plantations, Abbey Falls, and Tibetan settlement in Bylakuppe.",
     "shortDescription": "Coffee plantation hills, cascading waterfalls, and Kodava martial heritage.",
-    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/eravikulam-national-park.jpg"
     ],
@@ -3959,7 +3959,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "The City of Destiny along the Bay of Bengal, featuring Rishikonda Blue Flag Beach, submarine museum, and scenic Vistadome train through tunnels to Araku Valley coffee hills.",
     "shortDescription": "Coastal port city with submarine museum, Blue Flag beach, and Araku coffee hills.",
-    "image": "https://images.unsplash.com/photo-1627894483216-2138af692e32?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/fort-aguada.jpg"
     ],
@@ -4421,7 +4421,7 @@ export const DESTINATIONS_DATA = {
     "region": "East",
     "description": "The Queen of the Hills overlooking Mount Kanchenjunga (8,586m), world-famous for Champagne of Teas estate plantations and the 1881 UNESCO Himalayan Toy Train.",
     "shortDescription": "Himalayan tea estates, views of Mount Kanchenjunga, and UNESCO steam toy train.",
-    "image": "https://images.unsplash.com/photo-1558431382-27e303142255?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -4498,7 +4498,7 @@ export const DESTINATIONS_DATA = {
     "region": "East",
     "description": "The world's largest coastal mangrove forest and UNESCO delta, home to swimming Royal Bengal Tigers, saltwater crocodiles, and Gangetic river dolphins.",
     "shortDescription": "UNESCO mangrove delta and premier sanctuary of the wild Royal Bengal Tiger.",
-    "image": "https://images.unsplash.com/photo-1558431382-27e303142255?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/eravikulam-national-park.jpg"
     ],
@@ -4805,7 +4805,7 @@ export const DESTINATIONS_DATA = {
     "region": "Central",
     "description": "UNESCO World Heritage temple complex built between 950 and 1050 CE by the Chandela dynasty, renowned for exquisite sandstone sculptures depicting medieval life and celestial beauty.",
     "shortDescription": "UNESCO medieval temple complex with exquisite sandstone master sculptures.",
-    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg"
     ],
@@ -4881,7 +4881,7 @@ export const DESTINATIONS_DATA = {
     "region": "Central",
     "description": "One of India's premier tiger reserves with the highest density of Royal Bengal Tigers in the world, surrounding an ancient 2,000-year-old hilltop fort.",
     "shortDescription": "World's highest tiger-density sanctuary with ancient hilltop fortress ruins.",
-    "image": "https://images.unsplash.com/photo-1616432655073-f1165a25b16c?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/eravikulam-national-park.jpg"
     ],
@@ -5033,7 +5033,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "UNESCO World Heritage sanctuary harboring two-thirds of the world's great one-horned rhinoceroses in elephant-grass marshes on the Brahmaputra floodplain.",
     "shortDescription": "UNESCO world refuge of the magnificent Great Indian One-Horned Rhinoceros.",
-    "image": "https://images.unsplash.com/photo-1616432655073-f1165a25b16c?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -5340,7 +5340,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "The hillside capital of Nagaland, home to the World War II War Cemetery, the annual Hornbill Festival at Kisama, and the pristine wilderness of Dzukou Valley.",
     "shortDescription": "Home of the great Hornbill Festival and the emerald meadows of Dzukou Valley.",
-    "image": "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -5416,7 +5416,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "Famous for Loktak Lake with circular floating islands (phumdis), Keibul Lamjao floating national park with Sangai deer, and the all-women Ima Keithel market.",
     "shortDescription": "Floating islands on Loktak Lake, Sangai deer sanctuary, and Ima Keithel market.",
-    "image": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/alleppey-backwaters.jpg"
     ],
@@ -5492,7 +5492,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "The high-ridge capital overlooking cloud-filled valleys, vibrant Puan handloom textiles, Solomon's Temple, and scenic hikes on Reiek Mountain.",
     "shortDescription": "High-ridge capital overlooking cloud valleys with Cheraw bamboo dance traditions.",
-    "image": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -5644,7 +5644,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Bikaner is one of the premier destinations in Rajasthan, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Desert city of Junagarh Fort, Karni Mata temple, and Bikaneri bhujia.",
-    "image": "assets/images/destinations/amber-fort.jpg",
+    "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/patwon-ki-haveli.jpg"
     ],
@@ -5720,7 +5720,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Mount Abu is one of the premier destinations in Rajasthan, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Rajasthan's only hill station featuring the intricately carved Dilwara Jain Temples.",
-    "image": "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/lake-pichola.jpg"
     ],
@@ -5872,7 +5872,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Dalhousie & Khajjiar is one of the premier destinations in Himachal Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Colonial hill retreat and the saucer-shaped meadow of Khajjiar (Mini Switzerland).",
-    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -5948,7 +5948,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Bir Billing is one of the premier destinations in Himachal Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "The paragliding capital of India with world-class take-off sites and Tibetan monasteries.",
-    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -6024,7 +6024,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Prayagraj (Triveni Sangam) is one of the premier destinations in Uttar Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "The sacred confluence of the Ganga, Yamuna, and mythical Saraswati, host of Kumbh Mela.",
-    "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/dashashwamedh-ghat.jpg"
     ],
@@ -6100,7 +6100,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Sarnath is one of the premier destinations in Uttar Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Sacred site where Gautama Buddha delivered his first sermon, with the monumental Dhamek Stupa.",
-    "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/taj-mahal.jpg"
     ],
@@ -6176,7 +6176,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Haridwar is one of the premier destinations in Uttarakhand, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Gateway to the Gods where the holy Ganga enters the plains at Har Ki Pauri.",
-    "image": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/dashashwamedh-ghat.jpg"
     ],
@@ -6252,7 +6252,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Jim Corbett National Park is one of the premier destinations in Uttarakhand, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "India's oldest national park known for Royal Bengal Tigers, wild elephants, and river valleys.",
-    "image": "https://images.unsplash.com/photo-1616432655073-f1165a25b16c?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/eravikulam-national-park.jpg"
     ],
@@ -6328,7 +6328,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Mussoorie is one of the premier destinations in Uttarakhand, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "The Queen of the Hills with Kempty Falls, Gun Hill cable car, and Mall Road promenade.",
-    "image": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -6404,7 +6404,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Kedarnath & Badrinath is one of the premier destinations in Uttarakhand, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Ancient 8th-century stone temple dedicated to Lord Shiva set before the colossal Kedarnath peak.",
-    "image": "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/hadimba-temple.jpg"
     ],
@@ -6480,7 +6480,7 @@ export const DESTINATIONS_DATA = {
     "region": "North",
     "description": "Patiala is one of the premier destinations in Punjab, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Royal city of the Patiala Gharana, Qila Mubarak fortress palace, and Sheesh Mahal.",
-    "image": "https://images.unsplash.com/photo-1514222134-b57cbb8ce073?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1589793463357-5fb813435467?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-jaipur.jpg"
     ],
@@ -6632,7 +6632,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "Dwarka & Somnath is one of the premier destinations in Gujarat, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Sacred coastal pilgrimage sites featuring the first Jyotirlinga and Lord Krishna's ancient kingdom.",
-    "image": "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg"
     ],
@@ -6708,7 +6708,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "Statue of Unity (Kevadia) is one of the premier destinations in Gujarat, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "World's tallest statue (182 meters) dedicated to Sardar Vallabhbhai Patel on the Narmada River.",
-    "image": "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg"
     ],
@@ -6784,7 +6784,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "Lonavala & Khandala is one of the premier destinations in Maharashtra, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Western Ghats monsoon retreat famous for Karla & Bhaja Buddhist caves and waterfalls.",
-    "image": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-udaipur.jpg"
     ],
@@ -6860,7 +6860,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "Nashik & Trimbakeshwar is one of the premier destinations in Maharashtra, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Wine Capital of India and sacred Godavari pilgrimage home to Trimbakeshwar Jyotirlinga.",
-    "image": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-jaipur.jpg"
     ],
@@ -6936,7 +6936,7 @@ export const DESTINATIONS_DATA = {
     "region": "West",
     "description": "Mahabaleshwar & Panchgani is one of the premier destinations in Maharashtra, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "High-plateau strawberry hill station with panoramic Sahyadri cliff viewpoints.",
-    "image": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/munnar-tea.jpg"
     ],
@@ -7012,7 +7012,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Kanyakumari is one of the premier destinations in Tamil Nadu, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "The southernmost tip of mainland India where the Arabian Sea, Bay of Bengal, and Indian Ocean meet.",
-    "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/fort-aguada.jpg"
     ],
@@ -7088,7 +7088,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Thanjavur & Great Living Chola Temples is one of the premier destinations in Tamil Nadu, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "UNESCO 11th-century Brihadisvara Temple with an 80-tonne single granite block cupola.",
-    "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/city-palace-jaipur.jpg"
     ],
@@ -7164,7 +7164,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Rameswaram & Dhanushkodi is one of the premier destinations in Tamil Nadu, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Sacred island temple with world's longest pillared corridor, Pamban bridge, and ghost town Dhanushkodi.",
-    "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/fort-aguada.jpg"
     ],
@@ -7240,7 +7240,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Kodaikanal is one of the premier destinations in Tamil Nadu, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Princess of Hill Stations set around a star-shaped lake in the Palani Hills.",
-    "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/munnar-tea.jpg"
     ],
@@ -7316,7 +7316,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Gokarna & Om Beach is one of the premier destinations in Karnataka, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Sacred coastal temple town with natural Om-shaped beaches and cliffside hiking trails.",
-    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/fort-aguada.jpg"
     ],
@@ -7393,7 +7393,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Chikmagalur & Mullayanagiri is one of the premier destinations in Karnataka, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "The birthplace of coffee in India and home to Karnataka's highest peak Mullayanagiri.",
-    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/munnar-tea.jpg"
     ],
@@ -7545,7 +7545,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Gandikota & Belum Caves is one of the premier destinations in Andhra Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "The Grand Canyon of India carved by the Pennar River alongside underground Belum Caves.",
-    "image": "https://images.unsplash.com/photo-1627894483216-2138af692e32?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg"
     ],
@@ -7621,7 +7621,7 @@ export const DESTINATIONS_DATA = {
     "region": "South",
     "description": "Warangal & Ramappa Temple is one of the premier destinations in Telangana, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "UNESCO World Heritage Ramappa Temple crafted with floating bricks and Kakatiya stone arches.",
-    "image": "https://images.unsplash.com/photo-1616432655073-f1165a25b16c?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1600100395162-43b9d620584b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg"
     ],
@@ -7849,7 +7849,7 @@ export const DESTINATIONS_DATA = {
     "region": "East",
     "description": "Chilika Lake & Satapada is one of the premier destinations in Odisha, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Asia's largest brackish water lagoon, home to rare Irrawaddy dolphins and millions of winter birds.",
-    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/alleppey-backwaters.jpg"
     ],
@@ -7925,7 +7925,7 @@ export const DESTINATIONS_DATA = {
     "region": "Central",
     "description": "Sanchi Buddhist Monuments is one of the premier destinations in Madhya Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "UNESCO World Heritage 3rd-century BCE Great Stupa commissioned by Emperor Ashoka.",
-    "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1625834807406-b72bf88439f0?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/amber-fort.jpg"
     ],
@@ -8077,7 +8077,7 @@ export const DESTINATIONS_DATA = {
     "region": "Central",
     "description": "Ujjain (Mahakaleshwar) is one of the premier destinations in Madhya Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Ancient temple city on the Shipra River, home to Mahakaleshwar Jyotirlinga and Bhasma Aarti.",
-    "image": "https://images.unsplash.com/photo-1564507592333-c60657eea523?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/dashashwamedh-ghat.jpg"
     ],
@@ -8229,7 +8229,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "Majuli Island is one of the premier destinations in Assam, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "World's largest inhabited river island preserving 500-year-old Vaishnavite monastery traditions.",
-    "image": "https://images.unsplash.com/photo-1616432655073-f1165a25b16c?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -8305,7 +8305,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "Dawki & Mawlynnong is one of the premier destinations in Meghalaya, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Transparent glass-waters of Umngot River and Asia's Cleanest Village in the Khasi Hills.",
-    "image": "https://images.unsplash.com/photo-1589793463357-5fb813435467?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -8381,7 +8381,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "Pelling & Kanchenjunga Vistas is one of the premier destinations in Sikkim, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "Panoramic viewpoints looking directly at Mount Kanchenjunga and ancient Pemayangtse Monastery.",
-    "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
@@ -8457,7 +8457,7 @@ export const DESTINATIONS_DATA = {
     "region": "Northeast",
     "description": "Ziro Valley is one of the premier destinations in Arunachal Pradesh, renowned for its authentic cultural traditions, historical monuments, and captivating natural settings.",
     "shortDescription": "UNESCO cultural landscape of the Apatani tribe and the annual outdoor Ziro Festival of Music.",
-    "image": "https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?q=80&w=1200",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200",
     "gallery": [
       "assets/images/destinations/key-monastery.jpg"
     ],
