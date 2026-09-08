@@ -39,12 +39,15 @@
 
     <nav class="navlinks">
       <a href="#/home" class="active">Explore</a>
-      <a href="#/fair">Fair Prices</a>
       <a href="#interactive-map">Map</a>
       <a href="#all-destinations">Destinations</a>
       <a href="#journey-discovery">Journeys</a>
       <a href="#/journey">Build Route</a>
       <a href="#stays">Stays</a>
+      <button class="raahi-fair-nav-pill" id="raahi-fair-nav-btn" onclick="window.raahiOpenFairModal();" aria-label="Open Raahi Fair Price Intelligence" title="Know the price before you pay">
+        <span class="pill-icon">⚖</span>
+        <span class="pill-text">RAAHI FAIR</span>
+      </button>
       <a href="#about">About</a>
     </nav>
 
@@ -83,22 +86,19 @@
     </button>
 
     <nav class="mobile-nav-links">
-      <a href="#/home" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Explore Home</a>
-      <a href="#/fair" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">⚖️ Fair Prices & Rates</a>
-      <a href="#interactive-map" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Interactive India Map</a>
-      <a href="#states" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">28 States & 8 UTs</a>
-      <a href="#all-destinations" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">111+ Destinations</a>
-      <a href="#journey-discovery" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Curated Journeys</a>
-      <a href="javascript:void(0)" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll'); window.raahiOpenJourneyDrawer();">♡ My Journey (<span class="journey-count-badge">0</span>)</a>
+      <a href="#/home" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Explore</a>
+      <a href="#interactive-map" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Map</a>
+      <a href="#all-destinations" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Destinations</a>
+      <a href="#journey-discovery" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Journeys</a>
       <a href="#/journey" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Build Route</a>
-      <a href="#stays" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Heritage Stays</a>
-      <a href="#/login" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');" style="color: var(--gold); font-weight: 700;">🔑 Sign In / My Account</a>
-      <a href="#about" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">About RAAHI</a>
+      <a href="#stays" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">Stays</a>
+      <a href="javascript:void(0)" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll'); window.raahiOpenFairModal();" style="color: var(--gold); display: flex; align-items: center; gap: 10px; font-weight: 700;">
+        <span>⚖</span> Raahi Fair
+      </a>
+      <a href="javascript:void(0)" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll'); window.raahiOpenJourneyDrawer();">♡ My Journey (<span class="journey-count-badge">0</span>)</a>
+      <a href="#about" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');">About</a>
+      <a href="#/login" onclick="document.getElementById('mobile-menu-drawer').classList.remove('active'); document.body.classList.remove('lock-scroll');" style="color: var(--gold); font-weight: 700; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 8px;">🔑 Sign In / My Account</a>
     </nav>
-    <div style="font-family: var(--font-display); font-size: 0.75rem; color: var(--muted-dim); letter-spacing: 0.1em; margin-top: 30px;">
-      RAAHI PAN-INDIA TOURISM PLATFORM © 2026
-    </div>
-  </div>
     <div style="font-family: var(--font-display); font-size: 0.75rem; color: var(--muted-dim); letter-spacing: 0.1em; margin-top: 30px;">
       RAAHI PAN-INDIA TOURISM PLATFORM © 2026
     </div>
@@ -108,27 +108,33 @@
   <main>
     <!-- 1. Master Home View -->
     <div id="view-home">
-      <!-- Master Hero Section -->
+      <!-- Master Hero Section (Editorial Art Direction) -->
       <section class="hero">
         <div class="hero-bg"></div>
-        <div class="hero-ambient-glow"></div>
-        <div class="hero-grid-pattern"></div>
+        <div class="hero-canvas-mist"></div>
+        <div class="hero-film-grain"></div>
+
         <div class="hero-wrap">
+          <!-- Left Column: Editorial Narrative & Action Buttons -->
           <div class="hero-content">
-            <div class="hero-eyebrow-badge">
-              <span class="pulse-dot"></span>
-              <span>✦ NATIONAL TOURISM PLATFORM // 28 STATES & 8 UNION TERRITORIES</span>
+            <div class="hero-editorial-badge">
+              <span class="badge-accent">№ 01</span>
+              <span class="badge-separator">|</span>
+              <span class="badge-text">AN EDITORIAL COMPENDIUM OF THE INDIAN SUBCONTINENT</span>
             </div>
+
             <h1 class="hero-title">
               DON'T JUST VISIT.<br>
-              <span class="gold-gradient-text">EXPERIENCE INDIA.</span>
+              <span class="gold-editorial-text">EXPERIENCE INDIA.</span>
             </h1>
+
             <p class="hero-subtitle">
               Discover 111+ curated destinations across all 36 Indian states and union territories. Explore royal citadels, high-altitude passes, sacred ghats, and living artisan quarters.
             </p>
+
             <div class="hero-actions">
               <button onclick="window.raahiOpenSearchModal()" class="btn gold hero-btn-primary" title="Search all 36 States & Destinations">
-                <span class="btn-shine"></span>
+                <span class="btn-glow-pulse"></span>
                 <span>🔍 SEARCH ALL 36 STATES & DESTINATIONS</span>
               </button>
               <a href="#interactive-map" class="btn light hero-btn-secondary">
@@ -142,45 +148,56 @@
             </div>
           </div>
 
-          <!-- Creative Floating Heritage Showcase Widget -->
-          <div class="hero-floating-card">
-            <div class="card-glass-body">
-              <div class="card-header-badge">
-                <span class="star-icon">✦</span>
-                <span>NATIONAL ARCHIVE HUB</span>
-              </div>
-              <div class="card-stat-grid">
-                <div class="stat-box">
-                  <span class="stat-val">36</span>
-                  <span class="stat-lbl">States & UTs</span>
-                </div>
-                <div class="stat-box">
-                  <span class="stat-val">111+</span>
-                  <span class="stat-lbl">Curated Places</span>
-                </div>
-                <div class="stat-box">
-                  <span class="stat-val">100%</span>
-                  <span class="stat-lbl">Verified Data</span>
+          <!-- Right Column: Tactile Editorial Destination Showcase Card -->
+          <div class="hero-showcase-deck">
+            <div class="showcase-card main-card">
+              <div class="card-image-wrap">
+                <img src="assets/images/destinations/amber-fort.jpg" alt="Amber Fort, Jaipur" class="card-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=800';" />
+                <div class="card-overlay-gradient"></div>
+                <div class="card-location-tag">
+                  <span class="pin-icon">📍</span>
+                  <span>JAIPUR, RAJASTHAN</span>
                 </div>
               </div>
-              <div class="card-live-ticker">
-                <span class="ticker-pulse"></span>
-                <span class="ticker-text">Amber Fort • Alleppey Backwaters • Taj Mahal • Munnar Tea Hills</span>
+              <div class="card-content-wrap">
+                <div class="card-eyebrow">FEATURED HERITAGE CITADEL</div>
+                <h3 class="card-title">Amber Citadel & Sheesh Mahal</h3>
+                <div class="card-meta-row">
+                  <span class="meta-item">⏱️ 3-4 Hours</span>
+                  <span class="meta-item">🏛️ ASI Heritage</span>
+                  <span class="meta-item">📍 26.9855° N</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Micro Accent Card -->
+            <div class="showcase-card mini-card">
+              <div class="mini-card-badge">✦ LIVE NATIONAL ARCHIVE</div>
+              <div class="mini-card-stats">
+                <div class="m-stat">
+                  <span class="m-num">36</span>
+                  <span class="m-lbl">Divisions</span>
+                </div>
+                <div class="m-stat">
+                  <span class="m-num">111+</span>
+                  <span class="m-lbl">Places</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="hero-meta">
-          <span class="meta-line"></span>
-          <span>NATIONAL ARCHIVE // 2026 // 36 DIVISIONS</span>
+        <div class="hero-meta-sidebar">
+          <span class="sidebar-coord">28.6139° N, 77.2090° E</span>
+          <span class="sidebar-divider"></span>
+          <span class="sidebar-text">RAAHI ARCHIVE // 2026 EDITION</span>
         </div>
 
-        <div class="hero-scroll-indicator" onclick="document.getElementById('interactive-map')?.scrollIntoView({behavior: 'smooth'})" title="Scroll down to explore">
+        <div class="hero-scroll-indicator" onclick="document.getElementById('interactive-map')?.scrollIntoView({behavior: 'smooth'})" title="Scroll to explore archive">
+          <span class="scroll-dot"></span>
           <span class="scroll-label">EXPLORE ARCHIVE</span>
-          <span class="scroll-arrow">↓</span>
         </div>
-        <div class="hero-line"></div>
+        <div class="hero-bottom-hairline"></div>
       </section>
 
       <!-- Interactive India Map Section -->
@@ -590,7 +607,6 @@
   <div class="raahi-fair-modal" id="raahi-fair-modal" role="dialog" aria-modal="true" aria-label="Raahi Fair Price Intelligence">
     <!-- Rendered dynamically by RaahiFair.renderModal() -->
   </div>
-
   <!-- Master Application Scripts -->
   <script type="module" src="js/app.js"></script>
 </body>
